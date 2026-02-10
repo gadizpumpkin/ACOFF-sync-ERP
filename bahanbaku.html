@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Bahan Baku</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/bahanbaku.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Kelola Bahan Baku</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Master Data Bahan Baku</h1>
+      <p>Manajer dapat menambah, mengubah, dan menghapus bahan baku.</p>
+
+      <div class="card-form">
+        <h3>Form Bahan Baku</h3>
+
+        <form id="bahanBakuForm">
+          <input type="hidden" id="idBahan">
+
+          <div class="form-group">
+            <label>Nama Bahan Baku</label>
+            <input type="text" id="namaBahan" placeholder="Contoh: Kopi Arabika" required>
+          </div>
+
+          <div class="form-group">
+            <label>Stok Saat Ini (gram)</label>
+            <input type="number" id="stokBahan" placeholder="Contoh: 5000" required>
+          </div>
+
+          <div class="form-group">
+            <label>Stok Minimum (gram)</label>
+            <input type="number" id="stokMin" placeholder="Contoh: 1000" required>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnSubmit">Simpan</button>
+          <button type="button" class="btn-secondary" id="btnReset">Reset</button>
+        </form>
+      </div>
+
+      <div class="card-table">
+        <h3>Daftar Bahan Baku</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>Stok (gram)</th>
+              <th>Stok Minimum</th>
+              <th>Status</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="bahanBakuTable"></tbody>
+        </table>
+      </div>
+
+      <div class="card-warning">
+        <h3>Notifikasi Stok Rendah</h3>
+        <ul id="stokWarningList"></ul>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/bahanbaku.js"></script>
+</body>
+</html>
