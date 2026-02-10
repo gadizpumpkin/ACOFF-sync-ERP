@@ -36,18 +36,18 @@ function getMenuByRole(role) {
   }
 
   if (role === "Manajer") {
-    return [
-      "Transaksi Penjualan",
-      "Kelola Menu",
-      "Kelola Resep",
-      "Kelola Bahan Baku",
-      "Kelola Supplier",
-      "Pembelian Bahan Baku",
-      "Absensi",
-      "Payroll",
-      "Generate Laporan"
-    ];
-  }
+  return [
+    "Transaksi Penjualan",
+    "Kelola Menu",
+    "Kelola Resep",
+    "Kelola Bahan Baku",
+    "Kelola Supplier",
+    "Pembelian Bahan Baku",
+    "Absensi",
+    "Payroll",
+    "Generate Laporan"
+  ];
+}
 
   if (role === "Karyawan") {
     return [
