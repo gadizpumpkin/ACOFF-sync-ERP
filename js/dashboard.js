@@ -18,6 +18,10 @@ menus.forEach(menu => {
   li.addEventListener("click", function() {
     alert("Anda membuka menu: " + menu);
     // nanti diarahkan ke halaman modul masing-masing
+    if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
+    if (menu === "Kelola Menu") window.location.href = "menu.html";
+    if (menu === "Kelola Resep") window.location.href = "resep.html";
+
   });
 
   menuList.appendChild(li);
