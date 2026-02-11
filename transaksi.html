@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Transaksi</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/transaksi.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Transaksi Penjualan</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Transaksi Penjualan</h1>
+      <p>Karyawan melakukan input transaksi. Stok otomatis berkurang saat transaksi PAID.</p>
+
+      <div class="card-form">
+        <h3>Input Item Transaksi</h3>
+
+        <form id="transaksiForm">
+          <div class="form-group">
+            <label>Pilih Menu</label>
+            <select id="selectMenu" required></select>
+          </div>
+
+          <div class="form-group">
+            <label>Qty</label>
+            <input type="number" id="qtyMenu" value="1" min="1" required>
+          </div>
+
+          <button type="submit" class="btn-primary">Tambah Item</button>
+        </form>
+      </div>
+
+      <div class="card-table">
+        <h3>Keranjang Transaksi</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Menu</th>
+              <th>Harga</th>
+              <th>Qty</th>
+              <th>Subtotal</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="cartTable"></tbody>
+        </table>
+
+        <h3 class="total-text">Total: <span id="totalHarga">Rp 0</span></h3>
+
+        <div class="action-row">
+          <button id="btnSaveDraft" class="btn-secondary">Simpan Draft</button>
+          <button id="btnPaid" class="btn-success">Bayar (Paid)</button>
+          <button id="btnCancel" class="btn-danger">Cancel Transaksi</button>
+        </div>
+      </div>
+
+      <div class="card-table">
+        <h3>Riwayat Transaksi</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Tanggal</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+
+      <div class="card-receipt" id="receiptBox" style="display:none;">
+        <h3>Struk Transaksi</h3>
+        <div id="receiptContent"></div>
+        <button class="btn-primary" onclick="window.print()">Cetak</button>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/transaksi.js"></script>
+</body>
+</html>
