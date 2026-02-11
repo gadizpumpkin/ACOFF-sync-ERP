@@ -398,7 +398,11 @@ document.getElementById("btnPaid").addEventListener("click", function() {
   createTransaction("Paid");
 });
 
-
+document.getElementById("btnCancel").addEventListener("click", function() {
+  cart = [];
+  renderCart();
+  alert("Keranjang transaksi dibatalkan.");
+});
 
 
 // ==========================
