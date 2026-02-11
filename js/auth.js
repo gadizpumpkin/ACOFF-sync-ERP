@@ -52,6 +52,7 @@ function getMenuByRole(role) {
   if (role === "Karyawan") {
     return [
       "Input Transaksi",
+      "Transaksi Penjualan",
       "Cetak Struk",
       "Absensi",
       "Paycheck"
