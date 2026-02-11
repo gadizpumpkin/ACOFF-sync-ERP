@@ -1,0 +1,68 @@
+.card-table {
+  margin-top: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+table th, table td {
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  font-size: 14px;
+}
+
+.btn-approve {
+  padding: 6px 10px;
+  border: none;
+  background: green;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.btn-reject {
+  padding: 6px 10px;
+  border: none;
+  background: red;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-right: 5px;
+}
+
+.btn-receive {
+  padding: 6px 10px;
+  border: none;
+  background: blue;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.status-pending {
+  color: orange;
+  font-weight: bold;
+}
+
+.status-approved {
+  color: green;
+  font-weight: bold;
+}
+
+.status-rejected {
+  color: red;
+  font-weight: bold;
+}
+
+.status-received {
+  color: blue;
+  font-weight: bold;
+}
