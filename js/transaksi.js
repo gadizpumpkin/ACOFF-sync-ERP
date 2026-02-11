@@ -390,6 +390,13 @@ document.getElementById("btnSaveDraft").addEventListener("click", function() {
   createTransaction("Draft");
 });
 
+document.getElementById("btnPaid").addEventListener("click", function() {
+  if (sessionUser.role !== "Karyawan") {
+    alert("Akses ditolak.");
+    return;
+  }
+  createTransaction("Paid");
+});
 
 
 
