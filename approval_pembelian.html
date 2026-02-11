@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Approval Pembelian</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/approval_pembelian.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Approval Pembelian</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Approval Pembelian Bahan Baku</h1>
+      <p>Owner dapat approve atau reject pembelian. Stok hanya bertambah saat Received.</p>
+
+      <div class="card-table">
+        <h3>Daftar Pembelian</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Supplier</th>
+              <th>Tanggal</th>
+              <th>Status</th>
+              <th>Total</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="approvalTable"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/approval_pembelian.js"></script>
+</body>
+</html>
