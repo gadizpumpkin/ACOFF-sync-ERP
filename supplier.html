@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Kelola Supplier</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/supplier.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Kelola Supplier</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Kelola Supplier</h1>
+      <p>Manajer dapat menambahkan supplier internal untuk kebutuhan pembelian bahan baku.</p>
+
+      <div class="card-form">
+        <h3>Form Supplier</h3>
+
+        <form id="supplierForm">
+          <input type="hidden" id="supplierId">
+
+          <div class="form-group">
+            <label>Nama Supplier</label>
+            <input type="text" id="supplierNama" placeholder="Contoh: Toko Kopi Jogja" required>
+          </div>
+
+          <div class="form-group">
+            <label>No HP</label>
+            <input type="text" id="supplierHp" placeholder="Contoh: 081234567890" required>
+          </div>
+
+          <div class="form-group">
+            <label>Alamat</label>
+            <textarea id="supplierAlamat" placeholder="Alamat supplier..." required></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" id="btnSubmit">Simpan Supplier</button>
+          <button type="button" class="btn-secondary" id="btnReset">Reset</button>
+        </form>
+      </div>
+
+      <div class="card-table">
+        <h3>Daftar Supplier</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Nama</th>
+              <th>No HP</th>
+              <th>Alamat</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="supplierTable"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/supplier.js"></script>
+</body>
+</html>

@@ -24,16 +24,15 @@ function authenticate(username, password) {
 }
 
 // RBAC menu mapping
-function getMenuByRole(role) {
-  if (role === "Owner") {
-    return [
-      "Lihat Laporan",
-      "Audit Keuangan",
-      "Approval Payroll",
-      "Approval Pembelian",
-      "Approval Laporan"
-    ];
-  }
+if (role === "Owner") {
+  return [
+    "Lihat Laporan",
+    "Audit Keuangan",
+    "Approval Pembelian",
+    "Approval Payroll",
+    "Approval Laporan"
+  ];
+
 
   if (role === "Manajer") {
   return [
