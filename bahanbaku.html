@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Coffee Street - Bahan Baku</title>
+  <title>Coffee Street - Kelola Bahan Baku</title>
 
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
@@ -26,28 +26,28 @@
     </aside>
 
     <main class="content">
-      <h1>Master Data Bahan Baku</h1>
-      <p>Manajer dapat menambah, mengubah, dan menghapus bahan baku.</p>
+      <h1>Kelola Bahan Baku</h1>
+      <p>Manajer mengelola bahan baku. Stok dihitung dalam gram.</p>
 
       <div class="card-form">
         <h3>Form Bahan Baku</h3>
 
-        <form id="bahanBakuForm">
-          <input type="hidden" id="idBahan">
+        <form id="bahanForm">
+          <input type="hidden" id="bahanId">
 
           <div class="form-group">
-            <label>Nama Bahan Baku</label>
-            <input type="text" id="namaBahan" placeholder="Contoh: Kopi Arabika" required>
+            <label>Nama Bahan</label>
+            <input type="text" id="bahanNama" placeholder="Contoh: Kopi Arabika" required>
           </div>
 
           <div class="form-group">
-            <label>Stok Saat Ini (gram)</label>
-            <input type="number" id="stokBahan" placeholder="Contoh: 5000" required>
+            <label>Stok Awal (gram)</label>
+            <input type="number" id="bahanStok" placeholder="Contoh: 5000" required>
           </div>
 
           <div class="form-group">
             <label>Stok Minimum (gram)</label>
-            <input type="number" id="stokMin" placeholder="Contoh: 1000" required>
+            <input type="number" id="bahanMin" placeholder="Contoh: 1000" required>
           </div>
 
           <button type="submit" class="btn-primary" id="btnSubmit">Simpan</button>
@@ -62,18 +62,18 @@
             <tr>
               <th>Nama</th>
               <th>Stok (gram)</th>
-              <th>Stok Minimum</th>
+              <th>Minimum (gram)</th>
               <th>Status</th>
               <th>Aksi</th>
             </tr>
           </thead>
-          <tbody id="bahanBakuTable"></tbody>
+          <tbody id="bahanTable"></tbody>
         </table>
       </div>
 
-      <div class="card-warning">
-        <h3>Notifikasi Stok Rendah</h3>
-        <ul id="stokWarningList"></ul>
+      <div class="card-warning" id="notifBox" style="display:none;">
+        <h3>⚠️ Notifikasi Stok Minimum</h3>
+        <ul id="notifList"></ul>
       </div>
 
     </main>

@@ -6,6 +6,10 @@
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
+.card-warning {
+  border-left: 6px solid red;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
@@ -18,7 +22,7 @@ table th, table td {
   font-size: 14px;
 }
 
-.status-ok {
+.status-safe {
   color: green;
   font-weight: bold;
 }
@@ -28,20 +32,9 @@ table th, table td {
   font-weight: bold;
 }
 
-.btn-secondary {
-  width: 100%;
-  padding: 12px;
-  border: none;
-  background: gray;
-  color: white;
-  font-size: 14px;
-  border-radius: 10px;
-  cursor: pointer;
-  margin-top: 10px;
-}
-
-.btn-secondary:hover {
-  background: #555;
+.action-btn {
+  display: flex;
+  gap: 6px;
 }
 
 .btn-edit {
@@ -51,7 +44,6 @@ table th, table td {
   color: white;
   border-radius: 8px;
   cursor: pointer;
-  margin-right: 5px;
 }
 
 .btn-delete {
@@ -64,19 +56,16 @@ table th, table td {
 }
 
 .btn-edit:hover {
-  background: #d68600;
+  background: #cc8400;
 }
 
 .btn-delete:hover {
   background: #b40000;
 }
 
-#stokWarningList {
-  margin-top: 10px;
-  padding-left: 20px;
-}
-
-#stokWarningList li {
-  margin-bottom: 5px;
+#notifList li {
+  margin-bottom: 8px;
+  font-size: 14px;
+  font-weight: bold;
   color: red;
 }
