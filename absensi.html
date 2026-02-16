@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Absensi</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/absensi.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Absensi</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Absensi Karyawan</h1>
+      <p>Shift kerja Coffee Street: <b>19:00 - 00:00</b></p>
+
+      <div class="card-absen">
+        <h3>Status Absensi Hari Ini</h3>
+        <p><b>Tanggal:</b> <span id="tanggalHariIni"></span></p>
+        <p><b>Jam Sekarang:</b> <span id="jamSekarang"></span></p>
+
+        <p><b>Status:</b> <span id="statusHariIni" class="status-waiting">Belum Absen</span></p>
+
+        <div class="action-row">
+          <button id="btnMasuk" class="btn-success">Absen Masuk</button>
+          <button id="btnKeluar" class="btn-primary">Absen Keluar</button>
+        </div>
+      </div>
+
+      <div class="card-table">
+        <h3>Riwayat Absensi Saya</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Jam Masuk</th>
+              <th>Jam Keluar</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="historyTable"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/absensi.js"></script>
+</body>
+</html>
