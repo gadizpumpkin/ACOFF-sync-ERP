@@ -81,6 +81,7 @@ function renderLaporanView() {
   html += `</div>`;
 
   document.getElementById("laporanContent").innerHTML = html;
+  return laporan;
 }
 
 function exportLaporanExcel(laporan) {
