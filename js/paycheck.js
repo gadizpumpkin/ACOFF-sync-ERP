@@ -61,5 +61,21 @@ function renderPaycheckTable() {
   });
 }
 
+function exportPaycheckExcel() {
+  const paycheck = getPaycheckData().filter(p => p.user === sessionUser.username);
+
+  let rows = [];
+  rows.push(["Slip Gaji Coffee Street"]);
+  rows.push(["Karyawan", sessionUser.username]);
+  rows.push([]);
+  rows.push(["Tanggal", "Gaji", "Status"]);
+
+  paycheck.forEach(p => {
+    rows.push([p.tanggal, p.gaji, p.status]);
+  });
+
+  exportToCSV(`paycheck_${sessionUser.username}.csv`, rows);
+}
+
 // INIT
 renderPaycheckTable();
