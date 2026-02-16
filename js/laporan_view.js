@@ -83,5 +83,44 @@ function renderLaporanView() {
   document.getElementById("laporanContent").innerHTML = html;
 }
 
+function exportLaporanExcel(laporan) {
+  let rows = [];
+
+  // Header laporan
+  rows.push(["Jenis", laporan.type]);
+  rows.push(["Periode Mulai", laporan.periodeMulai]);
+  rows.push(["Periode Selesai", laporan.periodeSelesai]);
+  rows.push(["Status", laporan.status]);
+  rows.push(["Total Omzet", laporan.totalOmzet]);
+  rows.push(["Total Transaksi", laporan.totalTransaksi]);
+  rows.push([]);
+
+  // Top Menu
+  rows.push(["TOP MENU"]);
+  rows.push(["Menu", "Qty"]);
+  laporan.topMenu.forEach(t => {
+    rows.push([t.menu, t.qty]);
+  });
+  rows.push([]);
+
+  // Bahan Terpakai
+  rows.push(["BAHAN TERPAKAI"]);
+  rows.push(["Bahan", "Gram"]);
+  laporan.bahanTerpakai.forEach(b => {
+    rows.push([b.bahan, b.gram]);
+  });
+  rows.push([]);
+
+  // Detail Transaksi
+  rows.push(["DETAIL TRANSAKSI"]);
+  rows.push(["ID", "Tanggal", "Total Bayar", "Status"]);
+
+  laporan.transaksiDetail.forEach(t => {
+    rows.push([t.id, t.tanggal, t.totalBayar, t.status]);
+  });
+
+  exportToCSV(`laporan_${laporan.type}_${laporan.periodeMulai}_${laporan.periodeSelesai}.csv`, rows);
+}
+
 // INIT
 renderLaporanView();
