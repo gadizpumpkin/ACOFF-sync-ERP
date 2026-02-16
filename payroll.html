@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Payroll</title>
+
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="stylesheet" href="css/payroll.css">
+</head>
+<body>
+
+  <header class="navbar">
+    <h2>Coffee Street - Payroll (Manajer)</h2>
+    <div class="nav-right">
+      <span id="userRole"></span>
+      <button id="logoutBtn" class="btn-danger">Logout</button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar">
+      <h3>Menu</h3>
+      <ul id="menuList"></ul>
+    </aside>
+
+    <main class="content">
+      <h1>Payroll Harian</h1>
+
+      <div class="card-form">
+        <h3>Aturan Payroll (Dynamic Formula)</h3>
+
+        <div class="form-group">
+          <label>Persentase Profit untuk Payroll (%)</label>
+          <input type="number" id="payrollPercent" min="0" max="100" />
+        </div>
+
+        <div class="form-group">
+          <label>Metode Pembagian</label>
+          <select id="payrollMethod">
+            <option value="equal">Equal (dibagi rata)</option>
+          </select>
+        </div>
+
+        <button id="btnSaveRule" class="btn-primary">Simpan Aturan</button>
+      </div>
+
+      <div class="card-form">
+        <h3>Generate Payroll Hari Ini</h3>
+        <p><b>Tanggal:</b> <span id="tanggalHariIni"></span></p>
+
+        <button id="btnGeneratePayroll" class="btn-success">Generate Payroll</button>
+      </div>
+
+      <div class="card-table">
+        <h3>Riwayat Payroll</h3>
+        <table>
+          <thead>
+            <tr>
+              <th>Tanggal</th>
+              <th>Total Profit</th>
+              <th>Payroll Pool</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="payrollTable"></tbody>
+        </table>
+      </div>
+
+    </main>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/payroll.js"></script>
+</body>
+</html>
