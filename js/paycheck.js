@@ -78,4 +78,10 @@ function exportPaycheckExcel() {
 }
 
 // INIT
+document.getElementById("btnExportPaycheckPDF").addEventListener("click", function() {
+  exportToPDF();
+});
+
+document.getElementById("btnExportPaycheckExcel").addEventListener("click", exportPaycheckExcel);
+
 renderPaycheckTable();
