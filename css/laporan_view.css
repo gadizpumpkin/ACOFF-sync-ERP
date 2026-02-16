@@ -1,0 +1,29 @@
+.view-container {
+  padding: 20px;
+}
+
+.card-report {
+  margin-top: 20px;
+  background: white;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+}
+
+.report-box {
+  margin-top: 15px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+}
+
+ul {
+  padding-left: 20px;
+}
+
+.transaksi-item {
+  margin-top: 10px;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 12px;
+}
