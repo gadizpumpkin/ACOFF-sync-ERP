@@ -124,4 +124,14 @@ function exportLaporanExcel(laporan) {
 }
 
 // INIT
+const laporanObj = renderLaporanView();
+
+document.getElementById("btnExportPDF").addEventListener("click", function() {
+  exportToPDF();
+});
+
+document.getElementById("btnExportExcel").addEventListener("click", function() {
+  exportLaporanExcel(laporanObj);
+});
+
 renderLaporanView();
