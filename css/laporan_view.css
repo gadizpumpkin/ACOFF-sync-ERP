@@ -1,3 +1,9 @@
+@media print {
+  button {
+    display: none;
+  }
+}
+
 .view-container {
   padding: 20px;
 }
