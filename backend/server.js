@@ -16,7 +16,7 @@ app.use("/api/payroll", require("./routes/payrollRoutes"));
 app.use("/api/laporan", require("./routes/laporanRoutes"));
 app.use("/api/audit", require("./routes/auditRoutes"));
 
-const PORT = 3000;
+const PORT = 8080;
 app.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

@@ -1,35 +1,39 @@
 const db = require("../config/db");
-const stockService = require("../utils/stockService");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcryptjs");
 
-exports.createTransaksi = async (req, res) => {
-  const { items, status } = req.body;
+exports.login = async (req, res) => {
+  const { username, password } = req.body;
 
   try {
-    if (status === "Paid") {
-      const validStock = await stockService.checkStock(items);
-      if (!validStock.ok)
-        return res.status(400).json({ message: validStock.message });
-    }
-
-    const [result] = await db.query(
-      "INSERT INTO transaksi (tanggal, status) VALUES (NOW(), ?)",
-      [status]
+    const [rows] = await db.query(
+      "SELECT * FROM users WHERE username = ?",
+      [username]
     );
 
-    const transaksiId = result.insertId;
-
-    for (let item of items) {
-      await db.query(
-        "INSERT INTO transaksi_detail (transaksi_id, menu_id, qty) VALUES (?, ?, ?)",
-        [transaksiId, item.menu_id, item.qty]
-      );
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "User tidak ditemukan" });
     }
 
-    if (status === "Paid") {
-      await stockService.reduceStock(items);
+    const user = rows[0];
+
+    const validPassword = await bcrypt.compare(password, user.password);
+
+    if (!validPassword) {
+      return res.status(400).json({ message: "Password salah" });
     }
 
-    res.json({ message: "Transaksi berhasil" });
+    const token = jwt.sign(
+      { id: user.id, role: user.role },
+      "SECRET_KEY",
+      { expiresIn: "8h" }
+    );
+
+    res.json({
+      token,
+      role: user.role,
+      username: user.username
+    });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
