@@ -32,8 +32,7 @@ if (role === "Owner") {
     "Approval Payroll",
     "Approval Laporan"
   ];
-
-
+}
   if (role === "Manajer") {
   return [
     "Transaksi Penjualan",
@@ -59,4 +58,3 @@ if (role === "Owner") {
   }
 
   return [];
-}
