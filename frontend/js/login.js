@@ -1,17 +1,25 @@
 document.getElementById("loginForm").addEventListener("submit", function(e) {
   e.preventDefault();
 
-  const username = document.getElementById("username").value.trim();
-  const password = document.getElementById("password").value.trim();
-  const errorMsg = document.getElementById("errorMsg");
+  const username = document.getElementById("username").value;
+  const password = document.getElementById("password").value;
 
-  const user = authenticate(username, password);
+  fetch("http://localhost:8080/api/auth/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ username, password })
+  })
+  .then(res => res.json())
+  .then(data => {
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("role", data.role);
+      localStorage.setItem("username", data.username);
 
-  if (!user) {
-    errorMsg.textContent = "Login gagal. Username atau password salah.";
-    return;
-  }
-
-  setSession(user);
-  window.location.href = "dashboard.html";
+      window.location.href = "dashboard.html";
+    } else {
+      alert(data.message);
+    }
+  })
+  .catch(err => console.error(err));
 });
