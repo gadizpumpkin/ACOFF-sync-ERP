@@ -1,8 +1,12 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/authMiddleware");
-const { createTransaksi } = require("../controllers/transaksiController");
+const { verifyToken } = require("../middleware/authMiddleware");
 
-router.post("/", auth, createTransaksi);
+router.get("/test", verifyToken, (req, res) => {
+  res.json({
+    message: "Akses berhasil",
+    user: req.user
+  });
+});
 
 module.exports = router;

@@ -4,9 +4,11 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
   const username = document.getElementById("username").value;
   const password = document.getElementById("password").value;
 
-  fetch("http://localhost:8080/api/auth/login", {
+  fetch("http://localhost:5000/api/auth/login", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json"
+    },
     body: JSON.stringify({ username, password })
   })
   .then(res => res.json())
@@ -21,5 +23,8 @@ document.getElementById("loginForm").addEventListener("submit", function(e) {
       alert(data.message);
     }
   })
-  .catch(err => console.error(err));
+  .catch(err => {
+    console.error("LOGIN ERROR:", err);
+    alert("Server error");
+  });
 });

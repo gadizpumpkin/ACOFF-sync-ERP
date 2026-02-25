@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 exports.login = async (req, res) => {
+  console.log("BODY:", req.body);
   const { username, password } = req.body;
 
   try {
@@ -36,6 +37,7 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
+  console.log("LOGIN ERROR:", err);
+  res.status(500).json({ error: err.message });
+}
 };
