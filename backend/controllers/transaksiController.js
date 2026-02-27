@@ -75,3 +75,49 @@ exports.createTransaksi = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.updateStatus = async (req, res) => {
+
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // Ambil status lama
+    const [rows] = await connection.query(
+      "SELECT status FROM transaksi WHERE id = ?",
+      [id]
+    );
+
+    if (rows.length === 0) {
+      throw new Error("Transaksi tidak ditemukan");
+    }
+
+    const oldStatus = rows[0].status;
+
+    // Jika dari Paid ke Canceled → rollback
+    if (oldStatus === "Paid" && status === "Canceled") {
+      await stockService.rollbackStock(id, connection);
+    }
+
+    // Update status
+    await connection.query(
+      "UPDATE transaksi SET status = ? WHERE id = ?",
+      [status, id]
+    );
+
+    await connection.commit();
+    connection.release();
+
+    res.json({ message: "Status berhasil diupdate" });
+
+  } catch (err) {
+
+    await connection.rollback();
+    connection.release();
+
+    res.status(400).json({ error: err.message });
+  }
+};
