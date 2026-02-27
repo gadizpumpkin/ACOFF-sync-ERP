@@ -46,3 +46,34 @@ exports.processStockDeduction = async (items, connection) => {
     }
   }
 };
+exports.rollbackStock = async (transaksiId, connection) => {
+
+  const [details] = await connection.query(
+    `SELECT menu_id, qty 
+     FROM transaksi_detail 
+     WHERE transaksi_id = ?`,
+    [transaksiId]
+  );
+
+  for (let item of details) {
+
+    const [resepRows] = await connection.query(
+      `SELECT bahan_id, qty 
+       FROM resep 
+       WHERE menu_id = ?`,
+      [item.menu_id]
+    );
+
+    for (let resep of resepRows) {
+
+      const totalReturn = resep.qty * item.qty;
+
+      await connection.query(
+        `UPDATE bahan_baku 
+         SET stok = stok + ? 
+         WHERE id = ?`,
+        [totalReturn, resep.bahan_id]
+      );
+    }
+  }
+};
