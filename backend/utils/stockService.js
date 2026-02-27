@@ -1,45 +1,47 @@
 const db = require("../config/db");
 
-exports.checkStock = async (items) => {
+exports.processStockDeduction = async (items, connection) => {
+
   for (let item of items) {
-    const [resep] = await db.query(
-      "SELECT bahan_id, gram FROM resep WHERE menu_id = ?",
+
+    // Ambil resep menu
+    const [resepRows] = await connection.query(
+      `SELECT bahan_id, qty 
+       FROM resep 
+       WHERE menu_id = ?`,
       [item.menu_id]
     );
 
-    for (let r of resep) {
-      const needed = r.gram * item.qty;
+    if (resepRows.length === 0) {
+      throw new Error("Resep tidak ditemukan untuk menu ID " + item.menu_id);
+    }
 
-      const [bahan] = await db.query(
-        "SELECT stok_gram FROM bahan_baku WHERE id = ?",
-        [r.bahan_id]
+    for (let resep of resepRows) {
+
+      const totalKebutuhan = resep.qty * item.qty;
+
+      // Cek stok bahan
+      const [bahanRows] = await connection.query(
+        `SELECT stok FROM bahan_baku WHERE id = ? FOR UPDATE`,
+        [resep.bahan_id]
       );
 
-      if (bahan[0].stok_gram < needed) {
-        return {
-          ok: false,
-          message: "Stok tidak cukup"
-        };
+      if (bahanRows.length === 0) {
+        throw new Error("Bahan tidak ditemukan");
       }
-    }
-  }
 
-  return { ok: true };
-};
+      const stokSekarang = bahanRows[0].stok;
 
-exports.reduceStock = async (items) => {
-  for (let item of items) {
-    const [resep] = await db.query(
-      "SELECT bahan_id, gram FROM resep WHERE menu_id = ?",
-      [item.menu_id]
-    );
+      if (stokSekarang < totalKebutuhan) {
+        throw new Error("Stok tidak cukup untuk bahan ID " + resep.bahan_id);
+      }
 
-    for (let r of resep) {
-      const needed = r.gram * item.qty;
-
-      await db.query(
-        "UPDATE bahan_baku SET stok_gram = stok_gram - ? WHERE id = ?",
-        [needed, r.bahan_id]
+      // Kurangi stok
+      await connection.query(
+        `UPDATE bahan_baku 
+         SET stok = stok - ? 
+         WHERE id = ?`,
+        [totalKebutuhan, resep.bahan_id]
       );
     }
   }
