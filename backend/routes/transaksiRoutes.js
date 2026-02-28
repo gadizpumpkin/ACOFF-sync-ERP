@@ -1,24 +1,51 @@
 const express = require("express");
 const router = express.Router();
+
 const { verifyToken } = require("../middleware/authMiddleware");
+const { allowRoles } = require("../middleware/roleMiddleware");
 
 const { 
   createTransaksi, 
   updateStatus 
 } = require("../controllers/transaksiController");
 
-// Test route
-router.get("/test", verifyToken, (req, res) => {
-  res.json({
-    message: "Akses berhasil",
-    user: req.user
-  });
-});
+// ==========================
+// TEST ROUTE
+// ==========================
+router.get(
+  "/test",
+  verifyToken,
+  (req, res) => {
+    res.json({
+      message: "Akses berhasil",
+      user: req.user
+    });
+  }
+);
 
+
+// ==========================
 // CREATE TRANSAKSI
-router.post("/", verifyToken, createTransaksi);
+// Manajer & Karyawan boleh
+// ==========================
+router.post(
+  "/",
+  verifyToken,
+  allowRoles("Manajer", "Karyawan"),
+  createTransaksi
+);
 
-// UPDATE STATUS (Paid → Canceled)
-router.put("/:id/status", verifyToken, updateStatus);
+// ==========================
+// UPDATE STATUS
+// (Paid → Canceled)
+// Owner & Manajer boleh
+// ==========================
+router.put(
+  "/:id/status",
+  verifyToken,
+  allowRoles("Owner", "Manajer"),
+  updateStatus
+);
+
 
 module.exports = router;
