@@ -1,6 +1,7 @@
 const db = require("../config/db");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
+const payrollService = require("../utils/payrollService");
 
 exports.login = async (req, res) => {
   console.log("BODY:", req.body);
@@ -40,4 +41,23 @@ exports.login = async (req, res) => {
   console.log("LOGIN ERROR:", err);
   res.status(500).json({ error: err.message });
 }
+};
+exports.generatePayroll = async (req, res) => {
+
+  const { tanggal } = req.body;
+
+  try {
+    const payrollId = await payrollService.generatePayrollHarian(
+      tanggal,
+      req.user.id
+    );
+
+    res.json({
+      message: "Payroll dibuat, menunggu approval",
+      payrollId
+    });
+
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
