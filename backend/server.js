@@ -10,6 +10,7 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/transaksi", require("./routes/transaksiRoutes"));
 app.use("/api/laporan", require("./routes/laporanRoutes"));
+app.use("/api/payroll", require("./routes/payrollRoutes"));
 
 app.listen(process.env.PORT, () => {
   console.log(`Server running on http://localhost:${process.env.PORT}`);
