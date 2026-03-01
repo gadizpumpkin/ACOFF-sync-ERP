@@ -61,3 +61,22 @@ exports.generatePayroll = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.approvePayroll = async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+    await db.query(
+      `UPDATE payroll
+       SET status = 'Published',
+           approved_by = ?
+       WHERE id = ?`,
+      [req.user.id, id]
+    );
+
+    res.json({ message: "Payroll dipublish" });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
