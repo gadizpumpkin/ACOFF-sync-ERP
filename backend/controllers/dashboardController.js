@@ -66,3 +66,23 @@ exports.getLowStockAlert = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getLowStock = async (req, res) => {
+
+  try {
+
+    const [rows] = await db.query(`
+      SELECT id, nama, stok, minimal_stok
+      FROM bahan_baku
+      WHERE stok <= minimal_stok
+      ORDER BY stok ASC
+    `);
+
+    res.json({
+      total_low_stock: rows.length,
+      data: rows
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

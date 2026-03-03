@@ -31,3 +31,4 @@ document.getElementById("logoutBtn").addEventListener("click", function() {
   clearSession();
   window.location.href = "index.html";
 });
+
