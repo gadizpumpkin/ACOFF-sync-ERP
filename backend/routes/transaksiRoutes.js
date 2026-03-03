@@ -3,6 +3,7 @@ const router = express.Router();
 
 const { verifyToken } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/roleMiddleware");
+const { checkClosing } = require("../middleware/closingMiddleware");
 
 const { 
   createTransaksi, 
