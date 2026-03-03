@@ -25,10 +25,10 @@ exports.getOwnerSummary = async (req, res) => {
 
     // PAYROLL HARI INI
     const [payrollRows] = await db.query(`
-      SELECT IFNULL(SUM(total_gaji),0) AS payroll
-      FROM payroll
-      WHERE status='Approved'
-      AND DATE(tanggal)=CURDATE()
+    SELECT IFNULL(SUM(total_gaji),0) AS payroll
+    FROM payroll
+    WHERE status='Approved'
+    AND DATE(tanggal)=CURDATE()
     `);
 
     const omzet = omzetRows[0].omzet;

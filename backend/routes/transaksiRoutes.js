@@ -31,7 +31,7 @@ router.get(
 router.post(
   "/",
   verifyToken,
-  allowRoles("Manajer", "Karyawan"),
+  allowRoles("Manajer", "Owner", "Karyawan"),
   createTransaksi
 );
 
