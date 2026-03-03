@@ -1,72 +1,3 @@
-// backend/controllers/transaksiController.js
-
-const db = require("../config/db");
-const stockService = require("../utils/stockService");
-const auditService = require("../utils/auditService");
-
-exports.updateStatus = async (req, res) => {
-
-  const { id } = req.params;
-  const { status } = req.body;
-
-  const connection = await db.getConnection();
-
-  try {
-
-    await connection.beginTransaction();
-
-    // Ambil status lama
-    const [rows] = await connection.query(
-      "SELECT status FROM transaksi WHERE id = ?",
-      [id]
-    );
-
-    if (rows.length === 0) {
-      throw new Error("Transaksi tidak ditemukan");
-    }
-
-    const oldStatus = rows[0].status;
-
-    
-    if (oldStatus === "Paid" && status === "Canceled") {
-
-      await stockService.rollbackStock(id, connection);
-
-      await auditService.log(
-        connection,
-        req.user.id,
-        "ROLLBACK_STOK",
-        `Rollback stok untuk transaksi ID ${id}`
-      );
-    }
-
-    // Update status
-    await connection.query(
-      "UPDATE transaksi SET status = ? WHERE id = ?",
-      [status, id]
-    );
-
-    // Audit perubahan status
-    await auditService.log(
-      connection,
-      req.user.id,
-      "UPDATE_STATUS_TRANSAKSI",
-      `Transaksi ID ${id} berubah dari ${oldStatus} ke ${status}`
-    );
-
-    await connection.commit();
-    connection.release();
-
-    res.json({ message: "Status berhasil diupdate" });
-
-  } catch (err) {
-
-    await connection.rollback();
-    connection.release();
-
-    res.status(400).json({ error: err.message });
-  }
-};
 exports.createTransaksi = async (req, res) => {
 
   const { items } = req.body;
@@ -75,6 +6,8 @@ exports.createTransaksi = async (req, res) => {
   try {
 
     await connection.beginTransaction();
+
+    let lowStockWarnings = [];
 
     // Insert transaksi awal
     const [result] = await connection.query(`
@@ -85,12 +18,11 @@ exports.createTransaksi = async (req, res) => {
     const transaksiId = result.insertId;
     let totalTransaksi = 0;
 
-    // Loop setiap menu yang dibeli
+    // Loop setiap menu
     for (let item of items) {
 
-      // Ambil resep + harga bahan
       const [resep] = await connection.query(`
-        SELECT rd.bahan_id, rd.qty, bb.harga, bb.stok
+        SELECT rd.bahan_id, rd.qty, bb.harga, bb.stok, bb.minimal_stok, bb.nama
         FROM resep_detail rd
         JOIN bahan_baku bb ON bb.id = rd.bahan_id
         WHERE rd.menu_id = ?
@@ -110,14 +42,14 @@ exports.createTransaksi = async (req, res) => {
 
         if (bahan.stok < totalKebutuhan) {
           throw new Error(
-            `Stok tidak cukup untuk bahan ID ${bahan.bahan_id}`
+            `Stok ${bahan.nama} tidak cukup`
           );
         }
 
         modalPerMenu += bahan.qty * bahan.harga;
       }
 
-      // Jika semua aman → kurangi stok
+      // Kurangi stok + cek threshold
       for (let bahan of resep) {
 
         const totalKebutuhan = bahan.qty * item.qty;
@@ -127,6 +59,31 @@ exports.createTransaksi = async (req, res) => {
           SET stok = stok - ?
           WHERE id = ?
         `, [totalKebutuhan, bahan.bahan_id]);
+
+        // Ambil stok terbaru
+        const [stokBaru] = await connection.query(`
+          SELECT stok, minimal_stok, nama
+          FROM bahan_baku
+          WHERE id = ?
+        `, [bahan.bahan_id]);
+
+        const dataBahan = stokBaru[0];
+
+        if (dataBahan.stok <= dataBahan.minimal_stok) {
+
+          lowStockWarnings.push({
+            bahan: dataBahan.nama,
+            stok: dataBahan.stok,
+            minimal: dataBahan.minimal_stok
+          });
+
+          await auditService.log(
+            connection,
+            req.user?.id || null,
+            "LOW_STOCK_WARNING",
+            `Stok bahan ${dataBahan.nama} rendah (${dataBahan.stok})`
+          );
+        }
       }
 
       const subtotalJual = item.qty * item.harga;
@@ -134,7 +91,7 @@ exports.createTransaksi = async (req, res) => {
 
       totalTransaksi += subtotalJual;
 
-      // Simpan snapshot COGS
+      // Snapshot COGS
       await connection.query(`
         INSERT INTO transaksi_detail
         (transaksi_id, menu_id, qty, harga_jual, subtotal, harga_modal, subtotal_modal)
@@ -162,7 +119,8 @@ exports.createTransaksi = async (req, res) => {
 
     res.json({
       message: "Transaksi berhasil",
-      transaksi_id: transaksiId
+      transaksi_id: transaksiId,
+      warning_stok: lowStockWarnings
     });
 
   } catch (err) {
