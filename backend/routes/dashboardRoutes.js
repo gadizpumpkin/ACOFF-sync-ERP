@@ -10,5 +10,10 @@ router.get(
   allowRoles("Owner"),
   getOwnerSummary
 );
-
+router.get(
+  "/low-stock",
+  verifyToken,
+  allowRoles("Owner", "Manajer"),
+  getLowStockAlert
+);
 module.exports = router;
