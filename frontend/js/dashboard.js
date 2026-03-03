@@ -37,7 +37,7 @@ document.getElementById("logoutBtn").addEventListener("click", function() {
 
 
 // ============================
-// 🔴 LOW STOCK BADGE (OWNER ONLY)
+// LOW STOCK BADGE (OWNER ONLY)
 // ============================
 
 async function loadLowStock() {
@@ -79,6 +79,30 @@ async function loadLowStock() {
   }
 }
 
+const badge = document.getElementById("lowStockBadge");
+
+if (badge) {
+  badge.addEventListener("click", async () => {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:5000/api/dashboard/low-stock", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    let detail = "LOW STOCK:\n\n";
+
+    data.data.forEach(item => {
+      detail += `${item.nama} → Stok: ${item.stok} (Min: ${item.minimal_stok})\n`;
+    });
+
+    alert(detail);
+  });
+}
 // Jalankan pertama kali
 loadLowStock();
 
