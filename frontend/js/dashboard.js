@@ -4,10 +4,12 @@ if (!sessionUser) {
   window.location.href = "index.html";
 }
 
+// Header info
 document.getElementById("userRole").textContent = sessionUser.role;
 document.getElementById("welcomeTitle").textContent =
   "Selamat datang, " + sessionUser.username + " (" + sessionUser.role + ")";
 
+// Menu rendering
 const menuList = document.getElementById("menuList");
 const menus = getMenuByRole(sessionUser.role);
 
@@ -16,8 +18,7 @@ menus.forEach(menu => {
   li.textContent = menu;
 
   li.addEventListener("click", function() {
-    alert("Anda membuka menu: " + menu);
-    // nanti diarahkan ke halaman modul masing-masing
+
     if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
     if (menu === "Kelola Menu") window.location.href = "menu.html";
     if (menu === "Kelola Resep") window.location.href = "resep.html";
@@ -27,34 +28,59 @@ menus.forEach(menu => {
   menuList.appendChild(li);
 });
 
+// Logout
 document.getElementById("logoutBtn").addEventListener("click", function() {
   clearSession();
+  localStorage.removeItem("token");
   window.location.href = "index.html";
 });
+
+
+// ============================
+// 🔴 LOW STOCK BADGE (OWNER ONLY)
+// ============================
+
 async function loadLowStock() {
 
-  const token = localStorage.getItem("token");
+  // Hanya Owner yang perlu badge ini
+  if (sessionUser.role !== "Owner") return;
 
-  const res = await fetch("http://localhost:5000/api/dashboard/low-stock", {
-    headers: {
-      "Authorization": "Bearer " + token
+  try {
+
+    const token = localStorage.getItem("token");
+
+    const res = await fetch("http://localhost:5000/api/dashboard/low-stock", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    if (res.status === 401) {
+      clearSession();
+      localStorage.removeItem("token");
+      window.location.href = "index.html";
+      return;
     }
-  });
 
-  const data = await res.json();
+    const data = await res.json();
+    const badge = document.getElementById("lowStockBadge");
 
-  const badge = document.getElementById("lowStockBadge");
+    if (!badge) return;
 
-  if (data.total_low_stock > 0) {
-    badge.style.display = "inline-block";
-    badge.innerText = data.total_low_stock + " Low Stock";
-  } else {
-    badge.style.display = "none";
+    if (data.total_low_stock > 0) {
+      badge.style.display = "inline-block";
+      badge.innerText = data.total_low_stock + " Low Stock";
+    } else {
+      badge.style.display = "none";
+    }
+
+  } catch (err) {
+    console.error("Low stock fetch error:", err);
   }
 }
-setInterval(() => {
-  loadLowStock();
-}, 30000);
 
+// Jalankan pertama kali
 loadLowStock();
 
+// Auto refresh setiap 30 detik
+setInterval(loadLowStock, 30000);
