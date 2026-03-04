@@ -23,4 +23,10 @@ router.get(
   allowRoles("Owner"),
   getLowStock
 );
+router.get(
+  "/pnl",
+  verifyToken,
+  allowRoles("Owner"),
+  getPnlByDate
+);
 module.exports = router;
