@@ -122,12 +122,25 @@ exports.getMonthlyPnl = async (req, res) => {
 
     const data = rows[0];
 
+    // HITUNG MARGIN
+    const grossMargin = 
+      data.total_omzet > 0
+        ? ((data.total_omzet - data.total_cogs) / data.total_omzet) * 100
+        : 0;
+
+    const netMargin =
+      data.total_omzet > 0
+        ? (data.total_net_profit / data.total_omzet) * 100
+        : 0;
+
     res.json({
       periode: `${year}-${month}`,
       total_omzet: data.total_omzet || 0,
       total_cogs: data.total_cogs || 0,
       total_payroll: data.total_payroll || 0,
-      total_net_profit: data.total_net_profit || 0
+      total_net_profit: data.total_net_profit || 0,
+      gross_margin_percent: grossMargin,
+      net_margin_percent: netMargin
     });
 
   } catch (err) {
