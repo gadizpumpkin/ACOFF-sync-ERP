@@ -97,3 +97,40 @@ exports.getPnlByDate = async (req, res) => {
 
   res.json(rows[0] || {});
 };
+exports.getMonthlyPnl = async (req, res) => {
+
+  const { year, month } = req.query;
+
+  if (!year || !month) {
+    return res.status(400).json({
+      error: "Parameter year dan month wajib"
+    });
+  }
+
+  try {
+
+    const [rows] = await db.query(`
+      SELECT 
+        SUM(omzet) AS total_omzet,
+        SUM(cogs) AS total_cogs,
+        SUM(payroll) AS total_payroll,
+        SUM(net_profit) AS total_net_profit
+      FROM laporan_pnl
+      WHERE YEAR(tanggal) = ?
+      AND MONTH(tanggal) = ?
+    `, [year, month]);
+
+    const data = rows[0];
+
+    res.json({
+      periode: `${year}-${month}`,
+      total_omzet: data.total_omzet || 0,
+      total_cogs: data.total_cogs || 0,
+      total_payroll: data.total_payroll || 0,
+      total_net_profit: data.total_net_profit || 0
+    });
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
