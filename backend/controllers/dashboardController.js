@@ -86,3 +86,14 @@ exports.getLowStock = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+exports.getPnlByDate = async (req, res) => {
+
+  const { tanggal } = req.query;
+
+  const [rows] = await db.query(
+    "SELECT * FROM laporan_pnl WHERE tanggal = ?",
+    [tanggal]
+  );
+
+  res.json(rows[0] || {});
+};
