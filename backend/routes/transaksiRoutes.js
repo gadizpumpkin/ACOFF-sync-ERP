@@ -35,7 +35,13 @@ router.post(
   allowRoles("Manajer", "Owner", "Karyawan"),
   createTransaksi
 );
-
+router.post(
+  "/",
+  verifyToken,
+  allowRoles("Owner", "Karyawan"),
+  checkClosing,
+  createTransaksi
+);
 // ==========================
 // UPDATE STATUS
 // (Paid → Canceled)
@@ -47,6 +53,12 @@ router.put(
   allowRoles("Owner", "Manajer"),
   updateStatus
 );
-
+router.put(
+  "/:id/status",
+  verifyToken,
+  allowRoles("Owner"),
+  checkClosing,
+  updateStatus
+);
 
 module.exports = router;
