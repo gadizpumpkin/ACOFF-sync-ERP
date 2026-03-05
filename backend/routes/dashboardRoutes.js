@@ -6,6 +6,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 const { getLowStock } = require("../controllers/dashboardController");
 const { getMonthlyPnl } = require("../controllers/dashboardController");
 const {getLowStockAlert } = require("../controllers/dashboardController");
+const { getPnlByDate } = require("../controllers/dashboardController");
 
 router.get(
   "/owner-summary",
