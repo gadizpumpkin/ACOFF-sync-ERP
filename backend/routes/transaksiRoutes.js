@@ -60,5 +60,12 @@ router.put(
   checkClosing,
   updateStatus
 );
+router.put(
+  "/:id/status",
+  verifyToken,
+  allowRoles("Owner", "Manajer"),
+checkClosing,
+updateStatus
+);
 
 module.exports = router;
