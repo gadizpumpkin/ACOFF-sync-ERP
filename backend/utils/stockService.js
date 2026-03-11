@@ -1,11 +1,15 @@
 const db = require("../config/db");
 const ledgerService = require("./inventoryLedgerService");
 
-exports.processStockDeduction = async (items, connection) => {
+exports.processStockDeduction = async (
+  transaksiId,
+  userId,
+  items,
+  connection
+) => {
 
   for (let item of items) {
 
-    // Ambil resep menu
     const [resepRows] = await connection.query(
       `SELECT bahan_id, qty 
        FROM resep 
@@ -21,9 +25,11 @@ exports.processStockDeduction = async (items, connection) => {
 
       const totalKebutuhan = resep.qty * item.qty;
 
-      // Cek stok bahan
       const [bahanRows] = await connection.query(
-        `SELECT stok FROM bahan_baku WHERE id = ? FOR UPDATE`,
+        `SELECT stok 
+         FROM bahan_baku 
+         WHERE id = ? 
+         FOR UPDATE`,
         [resep.bahan_id]
       );
 
@@ -34,35 +40,45 @@ exports.processStockDeduction = async (items, connection) => {
       const stokSekarang = bahanRows[0].stok;
 
       if (stokSekarang < totalKebutuhan) {
-        throw new Error("Stok tidak cukup untuk bahan ID " + resep.bahan_id);
+        throw new Error(
+          "Stok tidak cukup untuk bahan ID " + resep.bahan_id
+        );
       }
 
-      // Kurangi stok
+      // update stok
       await connection.query(
-        `UPDATE bahan_baku 
-         SET stok = stok - ? 
+        `UPDATE bahan_baku
+         SET stok = stok - ?
          WHERE id = ?`,
         [totalKebutuhan, resep.bahan_id]
       );
-      // Catat di inventory ledger
+
+      // record ledger
       await ledgerService.record(
         connection,
-        bahan_id,
+        resep.bahan_id,
         "SALE_DEDUCTION",
         0,
-        qty,
-        transaksi_id,
+        totalKebutuhan,
+        transaksiId,
         "TRANSACTION",
-        user_id
+        userId
       );
     }
   }
 };
-exports.rollbackStock = async (transaksiId, connection) => {
+
+
+
+exports.rollbackStock = async (
+  transaksiId,
+  userId,
+  connection
+) => {
 
   const [details] = await connection.query(
-    `SELECT menu_id, qty 
-     FROM transaksi_detail 
+    `SELECT menu_id, qty
+     FROM transaksi_detail
      WHERE transaksi_id = ?`,
     [transaksiId]
   );
@@ -70,8 +86,8 @@ exports.rollbackStock = async (transaksiId, connection) => {
   for (let item of details) {
 
     const [resepRows] = await connection.query(
-      `SELECT bahan_id, qty 
-       FROM resep 
+      `SELECT bahan_id, qty
+       FROM resep
        WHERE menu_id = ?`,
       [item.menu_id]
     );
@@ -81,21 +97,23 @@ exports.rollbackStock = async (transaksiId, connection) => {
       const totalReturn = resep.qty * item.qty;
 
       await connection.query(
-        `UPDATE bahan_baku 
-         SET stok = stok + ? 
+        `UPDATE bahan_baku
+         SET stok = stok + ?
          WHERE id = ?`,
         [totalReturn, resep.bahan_id]
       );
+
+      // record ledger
       await ledgerService.record(
         connection,
-        bahan_id,
+        resep.bahan_id,
         "TRANSACTION_CANCEL",
-        qty,
+        totalReturn,
         0,
-        transaksi_id,
+        transaksiId,
         "TRANSACTION",
-        user_id
-     );
+        userId
+      );
     }
   }
 };
