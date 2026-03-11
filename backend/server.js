@@ -15,6 +15,7 @@ app.use("/api/payroll", require("./routes/payrollRoutes"));
 app.use("/api/closing", require("./routes/closingRoutes"));
 app.use("/api/monthly-closing", require("./routes/monthlyClosingRoutes"));
 app.use("/api/report", require("./routes/reportRoutes"));
+app.use("/api/inventory", require("./routes/inventoryRoutes"));
 
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 5000}`);
