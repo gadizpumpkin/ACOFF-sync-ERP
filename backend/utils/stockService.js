@@ -1,4 +1,5 @@
 const db = require("../config/db");
+const ledgerService = require("./inventoryLedgerService");
 
 exports.processStockDeduction = async (items, connection) => {
 
@@ -43,6 +44,17 @@ exports.processStockDeduction = async (items, connection) => {
          WHERE id = ?`,
         [totalKebutuhan, resep.bahan_id]
       );
+      // Catat di inventory ledger
+      await ledgerService.record(
+        connection,
+        bahan_id,
+        "SALE_DEDUCTION",
+        0,
+        qty,
+        transaksi_id,
+        "TRANSACTION",
+        user_id
+      );
     }
   }
 };
@@ -74,6 +86,16 @@ exports.rollbackStock = async (transaksiId, connection) => {
          WHERE id = ?`,
         [totalReturn, resep.bahan_id]
       );
+      await ledgerService.record(
+        connection,
+        bahan_id,
+        "TRANSACTION_CANCEL",
+        qty,
+        0,
+        transaksi_id,
+        "TRANSACTION",
+        user_id
+     );
     }
   }
 };
