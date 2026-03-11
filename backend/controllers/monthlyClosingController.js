@@ -26,7 +26,7 @@ exports.closeMonth = async (req, res) => {
       throw new Error("Bulan sudah dikunci");
     }
 
-    // 🔥 Validasi: semua hari sudah closing
+    // Validasi: semua hari sudah closing
     const [days] = await connection.query(`
       SELECT COUNT(DISTINCT DATE(tanggal)) AS total_hari
       FROM transaksi

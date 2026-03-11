@@ -34,6 +34,18 @@ document.getElementById("logoutBtn").addEventListener("click", function() {
   localStorage.removeItem("token");
   window.location.href = "index.html";
 });
+function exportPnl(){
+
+  const year = 2026;
+  const month = 3;
+
+  const token = localStorage.getItem("token");
+
+  window.open(
+    `http://localhost:5000/api/report/export-pnl?year=${year}&month=${month}&token=${token}`
+  );
+
+}
 
 
 // ============================
