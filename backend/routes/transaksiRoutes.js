@@ -51,21 +51,8 @@ router.put(
   "/:id/status",
   verifyToken,
   allowRoles("Owner", "Manajer"),
-  updateStatus
-);
-router.put(
-  "/:id/status",
-  verifyToken,
-  allowRoles("Owner"),
   checkClosing,
   updateStatus
-);
-router.put(
-  "/:id/status",
-  verifyToken,
-  allowRoles("Owner", "Manajer"),
-checkClosing,
-updateStatus
 );
 
 module.exports = router;
