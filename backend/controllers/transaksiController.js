@@ -131,3 +131,18 @@ exports.createTransaksi = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+exports.updateStatus = async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // contoh sederhana
+    await db.query(
+      "UPDATE transaksi SET status = 'Canceled' WHERE id = ?",
+      [id]
+    );
+
+    res.json({ message: "Status berhasil diupdate" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

@@ -54,5 +54,4 @@ router.put(
   checkClosing,
   updateStatus
 );
-
 module.exports = router;
