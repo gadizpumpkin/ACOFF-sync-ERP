@@ -1,3 +1,4 @@
+const db = require("../config/db");
 exports.createTransaksi = async (req, res) => {
 
   const { items } = req.body;
