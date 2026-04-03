@@ -6,7 +6,7 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
@@ -15,24 +15,6 @@ if (sessionUser.role !== "Karyawan") {
   alert("Akses ditolak. Absensi hanya untuk Karyawan.");
   window.location.href = "dashboard.html";
 }
-
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Absensi") window.location.href = "absensi.html";
-    else if (menu === "Transaksi Penjualan") window.location.href = "transaksi.html";
-    else if (menu === "Paycheck") alert("Belum dibuat (paycheck)");
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
-});
 
 // ==========================
 // STORAGE
@@ -46,50 +28,38 @@ function saveAbsensiData(data) {
 }
 
 // ==========================
-// UTIL DATE
+// UTIL DATE & TIME
 // ==========================
 function getTodayDate() {
   const d = new Date();
-  const yyyy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
+  return d.toISOString().split("T")[0];
 }
 
 function getCurrentTime() {
   const d = new Date();
-  const hh = String(d.getHours()).padStart(2, "0");
-  const min = String(d.getMinutes()).padStart(2, "0");
-  return `${hh}:${min}`;
+  return d.toTimeString().slice(0, 5);
 }
 
 // ==========================
 // SHIFT VALIDATION
 // ==========================
-// aturan shift:
-// masuk mulai 19:00
-// keluar mulai 00:00
 function canAbsenMasuk() {
-  const d = new Date();
-  const hour = d.getHours();
-  return hour >= 19;
+  return new Date().getHours() >= 19;
 }
 
 function canAbsenKeluar() {
-  const d = new Date();
-  const hour = d.getHours();
-  return hour >= 0 && hour <= 3; 
-  // keluar jam 00:00 - 03:00 (toleransi)
+  const h = new Date().getHours();
+  return h >= 0 && h <= 3;
 }
 
 // ==========================
-// CHECK TODAY STATUS
+// GET DATA HARI INI
 // ==========================
 function getTodayAbsensi() {
-  const absensi = getAbsensiData();
   const today = getTodayDate();
-
-  return absensi.find(a => a.tanggal === today && a.user === sessionUser.username);
+  return getAbsensiData().find(
+    (a) => a.tanggal === today && a.user === sessionUser.username
+  );
 }
 
 // ==========================
@@ -97,32 +67,29 @@ function getTodayAbsensi() {
 // ==========================
 function absenMasuk() {
   if (!canAbsenMasuk()) {
-    alert("Belum waktunya absen masuk. Minimal jam 19:00.");
+    alert("Belum waktunya absen masuk (≥19:00)");
     return;
   }
 
-  const today = getTodayAbsensi();
-  if (today && today.jamMasuk) {
-    alert("Anda sudah absen masuk hari ini.");
+  if (getTodayAbsensi()) {
+    alert("Sudah absen masuk hari ini");
     return;
   }
 
-  const absensi = getAbsensiData();
+  const data = getAbsensiData();
 
-  absensi.push({
+  data.push({
     id: "ABS-" + Date.now(),
     user: sessionUser.username,
     tanggal: getTodayDate(),
     jamMasuk: getCurrentTime(),
     jamKeluar: null,
-    status: "Belum Lengkap"
+    status: "Belum Lengkap",
   });
 
-  saveAbsensiData(absensi);
-
-  renderTodayStatus();
-  renderHistory();
-  alert("Absen masuk berhasil.");
+  saveAbsensiData(data);
+  renderAll();
+  alert("Absen masuk berhasil");
 }
 
 // ==========================
@@ -130,65 +97,100 @@ function absenMasuk() {
 // ==========================
 function absenKeluar() {
   if (!canAbsenKeluar()) {
-    alert("Belum waktunya absen keluar. Minimal jam 00:00.");
+    alert("Belum waktunya absen keluar (00:00–03:00)");
     return;
   }
 
-  let absensi = getAbsensiData();
+  const data = getAbsensiData();
   const today = getTodayDate();
 
-  const record = absensi.find(a => a.tanggal === today && a.user === sessionUser.username);
+  const record = data.find(
+    (a) => a.tanggal === today && a.user === sessionUser.username
+  );
 
   if (!record) {
-    alert("Anda belum absen masuk hari ini.");
+    alert("Belum absen masuk");
     return;
   }
 
   if (record.jamKeluar) {
-    alert("Anda sudah absen keluar hari ini.");
+    alert("Sudah absen keluar");
     return;
   }
 
   record.jamKeluar = getCurrentTime();
   record.status = "Hadir";
 
-  saveAbsensiData(absensi);
-
-  renderTodayStatus();
-  renderHistory();
-  alert("Absen keluar berhasil. Status Hadir.");
+  saveAbsensiData(data);
+  renderAll();
+  alert("Absen keluar berhasil");
 }
 
 // ==========================
-// RENDER TODAY STATUS
+// HITUNG DURASI
+// ==========================
+function hitungDurasi(masuk, keluar) {
+  if (!masuk || !keluar) return "-";
+
+  const [h1, m1] = masuk.split(":").map(Number);
+  const [h2, m2] = keluar.split(":").map(Number);
+
+  let start = h1 * 60 + m1;
+  let end = h2 * 60 + m2;
+
+  if (end < start) end += 24 * 60;
+
+  const diff = end - start;
+  const jam = Math.floor(diff / 60);
+  const menit = diff % 60;
+
+  return `${jam}j ${menit}m`;
+}
+
+// ==========================
+// RENDER STATUS HARI INI
 // ==========================
 function renderTodayStatus() {
-  const todayText = document.getElementById("tanggalHariIni");
-  const jamText = document.getElementById("jamSekarang");
-  const statusText = document.getElementById("statusHariIni");
-
-  todayText.textContent = getTodayDate();
-  jamText.textContent = getCurrentTime();
+  const statusEl = document.getElementById("statusHariIni");
+  const masukEl = document.getElementById("displayJamMasuk");
+  const keluarEl = document.getElementById("displayJamKeluar");
+  const durasiEl = document.getElementById("displayDurasi");
 
   const record = getTodayAbsensi();
 
   if (!record) {
-    statusText.textContent = "Belum Absen";
-    statusText.className = "status-waiting";
+    statusEl.textContent = "Belum Absen";
+    statusEl.className = "cs-status-pill waiting";
+    masukEl.textContent = "-";
+    keluarEl.textContent = "-";
+    durasiEl.textContent = "-";
     return;
   }
+
+  masukEl.textContent = record.jamMasuk || "-";
+  keluarEl.textContent = record.jamKeluar || "-";
+  durasiEl.textContent = hitungDurasi(record.jamMasuk, record.jamKeluar);
 
   if (record.jamMasuk && !record.jamKeluar) {
-    statusText.textContent = "Sudah Masuk (Belum Keluar)";
-    statusText.className = "status-belum-lengkap";
-    return;
+    statusEl.textContent = "Sudah Masuk";
+    statusEl.className = "cs-status-pill partial";
+  } else if (record.jamMasuk && record.jamKeluar) {
+    statusEl.textContent = "Hadir";
+    statusEl.className = "cs-status-pill hadir";
   }
+}
 
-  if (record.jamMasuk && record.jamKeluar) {
-    statusText.textContent = "Hadir";
-    statusText.className = "status-hadir";
-    return;
-  }
+// ==========================
+// RENDER TOTAL HADIR
+// ==========================
+function renderTotalHadir() {
+  const totalEl = document.getElementById("totalHadir");
+
+  const total = getAbsensiData().filter(
+    (a) => a.user === sessionUser.username && a.status === "Hadir"
+  ).length;
+
+  totalEl.textContent = total;
 }
 
 // ==========================
@@ -198,20 +200,21 @@ function renderHistory() {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
-  const absensi = getAbsensiData().filter(a => a.user === sessionUser.username);
+  const data = getAbsensiData().filter(
+    (a) => a.user === sessionUser.username
+  );
 
-  absensi.slice().reverse().forEach(a => {
-    let statusClass = "status-waiting";
-    if (a.status === "Hadir") statusClass = "status-hadir";
-    if (a.status === "Belum Lengkap") statusClass = "status-belum-lengkap";
-    if (a.status === "Tidak Hadir") statusClass = "status-tidak-hadir";
+  data.reverse().forEach((a) => {
+    let cls = "waiting";
+    if (a.status === "Hadir") cls = "hadir";
+    else if (a.status === "Belum Lengkap") cls = "partial";
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${a.tanggal}</td>
       <td>${a.jamMasuk || "-"}</td>
       <td>${a.jamKeluar || "-"}</td>
-      <td class="${statusClass}">${a.status}</td>
+      <td><span class="cs-status-pill ${cls}">${a.status}</span></td>
     `;
 
     tbody.appendChild(tr);
@@ -225,12 +228,15 @@ document.getElementById("btnMasuk").addEventListener("click", absenMasuk);
 document.getElementById("btnKeluar").addEventListener("click", absenKeluar);
 
 // ==========================
-// LIVE CLOCK UPDATE
+// RENDER ALL
 // ==========================
-setInterval(() => {
-  document.getElementById("jamSekarang").textContent = getCurrentTime();
-}, 1000);
+function renderAll() {
+  renderTodayStatus();
+  renderHistory();
+  renderTotalHadir();
+}
 
+// ==========================
 // INIT
-renderTodayStatus();
-renderHistory();
+// ==========================
+renderAll();

@@ -4,57 +4,174 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Absensi</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/absensi.css">
 </head>
 <body>
 
-  <header class="navbar">
-    <h2>Coffee Street - Absensi</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Absensi</span></span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="userRole">Karyawan</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li class="active">
+          <a href="absensi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Absensi
+          </a>
+        </li>
+        <li>
+          <a href="laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Laporan
+          </a>
+        </li>
+        <li>
+          <a href="profil.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Profil
+          </a>
+        </li>
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1>Absensi Karyawan</h1>
-      <p>Shift kerja Coffee Street: <b>19:00 - 00:00</b></p>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-absen">
-        <h3>Status Absensi Hari Ini</h3>
-        <p><b>Tanggal:</b> <span id="tanggalHariIni"></span></p>
-        <p><b>Jam Sekarang:</b> <span id="jamSekarang"></span></p>
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Absensi Karyawan</h1>
+        <p class="cs-page-sub">Shift kerja Coffee Street: <strong>19:00 &ndash; 00:00</strong></p>
+      </div>
 
-        <p><b>Status:</b> <span id="statusHariIni" class="status-waiting">Belum Absen</span></p>
-
-        <div class="action-row">
-          <button id="btnMasuk" class="btn-success">Absen Masuk</button>
-          <button id="btnKeluar" class="btn-primary">Absen Keluar</button>
+      <!-- STAT CARDS -->
+      <div class="cs-grid-top">
+        <div class="cs-stat">
+          <div class="cs-stat-label">Tanggal</div>
+          <div class="cs-stat-value cs-stat-date" id="tanggalHariIni">—</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-label">Jam Sekarang</div>
+          <div class="cs-stat-value cs-stat-gold" id="jamSekarang">—</div>
+        </div>
+        <div class="cs-stat">
+          <div class="cs-stat-label">Kehadiran Bulan Ini</div>
+          <div class="cs-stat-value">
+            <span id="totalHadir">0</span>
+            <span class="cs-stat-unit">hari</span>
+          </div>
         </div>
       </div>
 
-      <div class="card-table">
-        <h3>Riwayat Absensi Saya</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Jam Masuk</th>
-              <th>Jam Keluar</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="historyTable"></tbody>
-        </table>
+      <!-- CARD ABSEN -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Status Absensi Hari Ini
+          </div>
+          <span class="cs-status-pill waiting" id="statusHariIni">
+            <span class="cs-pulse"></span>
+            Belum Absen
+          </span>
+        </div>
+
+        <div class="cs-time-grid">
+          <div class="cs-time-item">
+            <label>Jam Masuk</label>
+            <div class="cs-time-val" id="displayJamMasuk">—</div>
+          </div>
+          <div class="cs-time-item">
+            <label>Jam Keluar</label>
+            <div class="cs-time-val" id="displayJamKeluar">—</div>
+          </div>
+          <div class="cs-time-item">
+            <label>Durasi</label>
+            <div class="cs-time-val" id="displayDurasi">—</div>
+          </div>
+        </div>
+
+        <div class="cs-action-row">
+          <button id="btnMasuk" class="cs-btn-masuk">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 3v10M3 8l5-5 5 5" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Absen Masuk
+          </button>
+          <button id="btnKeluar" class="cs-btn-keluar">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 13V3M3 8l5 5 5-5" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Absen Keluar
+          </button>
+        </div>
+      </div>
+
+      <!-- CARD RIWAYAT -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Riwayat Absensi Saya
+          </div>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Jam Masuk</th>
+                <th>Jam Keluar</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable">
+              <!-- Diisi oleh absensi.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </main>
@@ -62,5 +179,25 @@
 
   <script src="js/auth.js"></script>
   <script src="js/absensi.js"></script>
+
+  <!-- Live clock script (bisa dipindah ke absensi.js) -->
+  <script>
+    function updateClock() {
+      var now = new Date();
+      var tgl = now.toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+      var jam = now.toLocaleTimeString('id-ID', {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      });
+      var elTgl = document.getElementById('tanggalHariIni');
+      var elJam = document.getElementById('jamSekarang');
+      if (elTgl) elTgl.textContent = tgl;
+      if (elJam) elJam.textContent = jam;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+  </script>
+
 </body>
 </html>
