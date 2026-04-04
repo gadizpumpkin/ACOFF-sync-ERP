@@ -6,7 +6,7 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
@@ -15,24 +15,6 @@ if (sessionUser.role !== "Manajer") {
   alert("Akses ditolak. Halaman ini hanya untuk Manajer.");
   window.location.href = "dashboard.html";
 }
-
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Kelola Supplier") window.location.href = "supplier.html";
-    else if (menu === "Pembelian Bahan Baku") window.location.href = "pembelian.html";
-    else if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
-});
 
 // ==========================
 // STORAGE
@@ -51,26 +33,22 @@ function saveSupplierData(data) {
 function addSupplier(nama, hp, alamat) {
   const suppliers = getSupplierData();
 
-  const supplier = {
+  suppliers.push({
     id: "SUP-" + Date.now(),
     nama,
     hp,
     alamat
-  };
+  });
 
-  suppliers.push(supplier);
   saveSupplierData(suppliers);
 }
 
 function updateSupplier(id, nama, hp, alamat) {
   let suppliers = getSupplierData();
 
-  suppliers = suppliers.map(s => {
-    if (s.id === id) {
-      return { ...s, nama, hp, alamat };
-    }
-    return s;
-  });
+  suppliers = suppliers.map(s =>
+    s.id === id ? { ...s, nama, hp, alamat } : s
+  );
 
   saveSupplierData(suppliers);
 }
@@ -86,9 +64,25 @@ function deleteSupplier(id) {
 // ==========================
 function renderSupplierTable() {
   const tbody = document.getElementById("supplierTable");
+  const count = document.getElementById("supplierCount");
+
   tbody.innerHTML = "";
 
   const suppliers = getSupplierData();
+
+  // update badge count
+  count.textContent = suppliers.length + " supplier";
+
+  if (suppliers.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4">
+          <div class="cs-empty">Belum ada supplier</div>
+        </td>
+      </tr>
+    `;
+    return;
+  }
 
   suppliers.forEach(s => {
     const tr = document.createElement("tr");
@@ -96,14 +90,28 @@ function renderSupplierTable() {
     tr.innerHTML = `
       <td>${s.nama}</td>
       <td>${s.hp}</td>
-      <td>${s.alamat}</td>
+      <td class="cs-td-alamat">${s.alamat}</td>
       <td>
-        <div class="action-btn">
-          <button class="btn-edit" onclick="editSupplier('${s.id}')">Edit</button>
-          <button class="btn-delete" onclick="removeSupplier('${s.id}')">Hapus</button>
-        </div>
+        <div class="cs-action-btn"></div>
       </td>
     `;
+
+    const actionDiv = tr.querySelector(".cs-action-btn");
+
+    // tombol edit
+    const btnEdit = document.createElement("button");
+    btnEdit.className = "cs-btn-edit";
+    btnEdit.textContent = "Edit";
+    btnEdit.onclick = () => editSupplier(s.id);
+
+    // tombol delete
+    const btnDelete = document.createElement("button");
+    btnDelete.className = "cs-btn-delete";
+    btnDelete.textContent = "Hapus";
+    btnDelete.onclick = () => removeSupplier(s.id);
+
+    actionDiv.appendChild(btnEdit);
+    actionDiv.appendChild(btnDelete);
 
     tbody.appendChild(tr);
   });
@@ -113,8 +121,7 @@ function renderSupplierTable() {
 // EDIT MODE
 // ==========================
 function editSupplier(id) {
-  const suppliers = getSupplierData();
-  const supplier = suppliers.find(s => s.id === id);
+  const supplier = getSupplierData().find(s => s.id === id);
 
   if (!supplier) return alert("Supplier tidak ditemukan.");
 
@@ -124,24 +131,23 @@ function editSupplier(id) {
   document.getElementById("supplierAlamat").value = supplier.alamat;
 
   document.getElementById("btnSubmit").textContent = "Update Supplier";
+  document.getElementById("formTitle").textContent = "Edit Supplier";
 }
 
 // ==========================
 // DELETE
 // ==========================
 function removeSupplier(id) {
-  if (!confirm("Yakin ingin menghapus supplier ini?")) return;
+  if (!confirm("Yakin hapus supplier ini?")) return;
 
   deleteSupplier(id);
   renderSupplierTable();
-
-  alert("Supplier berhasil dihapus.");
 }
 
 // ==========================
 // FORM SUBMIT
 // ==========================
-document.getElementById("supplierForm").addEventListener("submit", function(e) {
+document.getElementById("supplierForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const id = document.getElementById("supplierId").value;
@@ -150,32 +156,35 @@ document.getElementById("supplierForm").addEventListener("submit", function(e) {
   const alamat = document.getElementById("supplierAlamat").value.trim();
 
   if (!nama || !hp || !alamat) {
-    alert("Semua field wajib diisi.");
-    return;
+    return alert("Semua field wajib diisi.");
   }
 
   if (id) {
     updateSupplier(id, nama, hp, alamat);
-    alert("Supplier berhasil diupdate.");
   } else {
     addSupplier(nama, hp, alamat);
-    alert("Supplier berhasil ditambahkan.");
   }
 
   resetForm();
   renderSupplierTable();
 });
 
+// ==========================
 // RESET FORM
+// ==========================
 function resetForm() {
   document.getElementById("supplierId").value = "";
   document.getElementById("supplierNama").value = "";
   document.getElementById("supplierHp").value = "";
   document.getElementById("supplierAlamat").value = "";
+
   document.getElementById("btnSubmit").textContent = "Simpan Supplier";
+  document.getElementById("formTitle").textContent = "Form Tambah Supplier";
 }
 
 document.getElementById("btnReset").addEventListener("click", resetForm);
 
+// ==========================
 // INIT
+// ==========================
 renderSupplierTable();

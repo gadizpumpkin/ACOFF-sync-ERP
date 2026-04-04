@@ -1,60 +1,501 @@
-.card-form, .card-table {
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* ============================================================
+   Coffee Street — supplier.css
+   Tema konsisten dengan absensi.css & transaksi.css
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap');
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-textarea {
-  width: 100%;
-  padding: 10px;
-  border-radius: 10px;
-  border: 1px solid #ccc;
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F5F3EF;
+  color: #1a1a18;
+  min-height: 100vh;
+}
+
+/* ---------- NAVBAR ---------- */
+.cs-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #1a1008;
+  height: 60px;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(201, 145, 58, 0.2);
+}
+
+.cs-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-nav-logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.cs-nav-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: #C9913A;
+  letter-spacing: 0.02em;
+}
+
+.cs-nav-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(201, 145, 58, 0.55);
+  margin-left: 4px;
+}
+
+.cs-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-role-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(201, 145, 58, 0.12);
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.cs-btn-logout {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(220, 70, 60, 0.1);
+  color: #e05050;
+  border: 1px solid rgba(220, 70, 60, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.cs-btn-logout:hover {
+  background: rgba(220, 70, 60, 0.2);
+}
+
+/* ---------- LAYOUT ---------- */
+.cs-layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* ---------- SIDEBAR ---------- */
+.cs-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-right: 0.5px solid rgba(0, 0, 0, 0.08);
+  padding: 1.5rem 0;
+}
+
+.cs-sidebar-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #888780;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 1.25rem;
+  margin-bottom: 8px;
+}
+
+.cs-menu {
+  list-style: none;
+}
+
+.cs-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 1.25rem;
   font-size: 14px;
-  resize: vertical;
-  min-height: 70px;
+  font-weight: 400;
+  color: #5f5e5a;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-table {
+.cs-menu li a:hover {
+  background: #f5f3ef;
+  color: #1a1a18;
+}
+
+.cs-menu li.active a {
+  border-left-color: #C9913A;
+  color: #C9913A;
+  background: rgba(201, 145, 58, 0.06);
+  font-weight: 500;
+}
+
+.cs-menu-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.cs-menu li.active a .cs-menu-icon {
+  opacity: 1;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+.cs-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 960px;
+}
+
+/* ---------- PAGE HEADER ---------- */
+.cs-page-header {
+  margin-bottom: 1.75rem;
+}
+
+.cs-page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a18;
+  margin-bottom: 4px;
+}
+
+.cs-page-sub {
+  font-size: 13px;
+  color: #888780;
+}
+
+.cs-page-sub strong {
+  color: #C9913A;
+  font-weight: 500;
+}
+
+/* ---------- CARDS ---------- */
+.cs-card {
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cs-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.cs-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a18;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #C9913A;
+  flex-shrink: 0;
+}
+
+/* ---------- COUNT BADGE ---------- */
+.cs-count-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(201, 145, 58, 0.08);
+  color: #854F0B;
+  border: 1px solid rgba(201, 145, 58, 0.2);
+  border-radius: 20px;
+  padding: 3px 12px;
+}
+
+/* ---------- FORM ---------- */
+.cs-form {
+  width: 100%;
+}
+
+.cs-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.cs-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.cs-form-group:last-of-type {
+  margin-bottom: 0;
+}
+
+.cs-form-grid .cs-form-group {
+  margin-bottom: 0;
+}
+
+.cs-form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888780;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.cs-form-group input[type="text"],
+.cs-form-group textarea {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #1a1a18;
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.cs-form-group input[type="text"]::placeholder,
+.cs-form-group textarea::placeholder {
+  color: #b4b2a9;
+}
+
+.cs-form-group input[type="text"]:focus,
+.cs-form-group textarea:focus {
+  border-color: rgba(201, 145, 58, 0.5);
+  box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
+  background: #ffffff;
+}
+
+.cs-form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  line-height: 1.6;
+}
+
+/* ---------- FORM ACTIONS ---------- */
+.cs-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.cs-btn-save,
+.cs-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.cs-btn-save {
+  background: #1a1008;
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.35);
+}
+
+.cs-btn-save:hover {
+  background: #251708;
+}
+
+.cs-btn-save:active {
+  transform: scale(0.98);
+}
+
+.cs-btn-reset {
+  background: #f5f3ef;
+  color: #5f5e5a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cs-btn-reset:hover {
+  background: #ebe8e2;
+  color: #1a1a18;
+}
+
+/* ---------- TABLE ---------- */
+.cs-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  font-size: 13.5px;
 }
 
-table th, table td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  font-size: 14px;
+.cs-table thead th {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888780;
+  padding: 0 14px 10px;
+  text-align: left;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
 }
 
-.action-btn {
+.cs-table tbody tr {
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.12s ease;
+}
+
+.cs-table tbody tr:hover {
+  background: #faf9f7;
+}
+
+.cs-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.cs-table td {
+  padding: 12px 14px;
+  color: #1a1a18;
+  vertical-align: middle;
+}
+
+.cs-table td.cs-td-alamat {
+  color: #5f5e5a;
+  font-size: 13px;
+  max-width: 260px;
+}
+
+/* ---------- ACTION BUTTONS (in table) ---------- */
+.cs-action-btn {
   display: flex;
   gap: 6px;
 }
 
-.btn-edit {
-  padding: 6px 10px;
-  border: none;
-  background: orange;
-  color: white;
-  border-radius: 8px;
+.cs-btn-edit,
+.cs-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.btn-delete {
-  padding: 6px 10px;
-  border: none;
-  background: red;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
+.cs-btn-edit {
+  background: rgba(201, 145, 58, 0.08);
+  color: #854F0B;
+  border: 1px solid rgba(201, 145, 58, 0.25);
 }
 
-.btn-edit:hover {
-  background: #cc8400;
+.cs-btn-edit:hover {
+  background: rgba(201, 145, 58, 0.18);
 }
 
-.btn-delete:hover {
-  background: #b40000;
+.cs-btn-delete {
+  background: rgba(226, 75, 74, 0.08);
+  color: #A32D2D;
+  border: 1px solid rgba(226, 75, 74, 0.2);
+}
+
+.cs-btn-delete:hover {
+  background: rgba(226, 75, 74, 0.18);
+}
+
+/* ---------- EMPTY STATE ---------- */
+.cs-empty {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: #b4b2a9;
+  font-size: 14px;
+}
+
+.cs-empty-icon {
+  display: block;
+  margin: 0 auto 10px;
+  opacity: 0.35;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .cs-nav {
+    padding: 0 1rem;
+  }
+
+  .cs-sidebar {
+    display: none;
+  }
+
+  .cs-main {
+    padding: 1.25rem 1rem;
+    max-width: 100%;
+  }
+
+  .cs-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cs-form-actions {
+    flex-direction: column;
+  }
+
+  .cs-btn-save,
+  .cs-btn-reset {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cs-page-title {
+    font-size: 22px;
+  }
+
+  .cs-table td.cs-td-alamat {
+    max-width: 160px;
+  }
+}
+
+@media (max-width: 480px) {
+  .cs-action-btn {
+    flex-direction: column;
+  }
 }
