@@ -4,67 +4,171 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Kelola Resep</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/resep.css">
 </head>
 <body>
 
-  <header class="navbar">
-    <h2>Coffee Street - Kelola Resep</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Resep</span></span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="userRole">Manajer</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="absensi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Absensi
+          </a>
+        </li>
+        <li>
+          <a href="transaksi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="12" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Transaksi
+          </a>
+        </li>
+        <li>
+          <a href="supplier.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="6" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 6V5a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Supplier
+          </a>
+        </li>
+        <li class="active">
+          <a href="resep.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Resep
+          </a>
+        </li>
+        <li>
+          <a href="laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Laporan
+          </a>
+        </li>
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1>Kelola Resep Produk</h1>
-      <p>Resep digunakan untuk mengurangi stok bahan baku otomatis saat transaksi PAID.</p>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-form">
-        <h3>Tambah Detail Resep</h3>
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Kelola Resep Produk</h1>
+        <p class="cs-page-sub">Resep digunakan untuk mengurangi stok bahan baku otomatis saat transaksi <strong>Paid</strong>.</p>
+      </div>
 
-        <form id="resepForm">
-          <div class="form-group">
-            <label>Pilih Menu</label>
-            <select id="selectMenu" required></select>
+      <!-- FORM RESEP -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Tambah Detail Resep
           </div>
-
-          <div class="form-group">
-            <label>Pilih Bahan Baku</label>
-            <select id="selectBahan" required></select>
+        </div>
+        <form id="resepForm" class="cs-form">
+          <div class="cs-form-grid">
+            <div class="cs-form-group">
+              <label for="selectMenu">Pilih Menu</label>
+              <select id="selectMenu" required>
+                <option value="" disabled selected>-- Pilih menu --</option>
+              </select>
+            </div>
+            <div class="cs-form-group">
+              <label for="selectBahan">Pilih Bahan Baku</label>
+              <select id="selectBahan" required>
+                <option value="" disabled selected>-- Pilih bahan --</option>
+              </select>
+            </div>
+            <div class="cs-form-group">
+              <label for="jumlahGram">Jumlah Pemakaian</label>
+              <div class="cs-input-unit">
+                <input type="number" id="jumlahGram" placeholder="Contoh: 15" min="0" step="0.1" required>
+                <span class="cs-unit-label">gram</span>
+              </div>
+            </div>
           </div>
-
-          <div class="form-group">
-            <label>Jumlah Pemakaian (gram)</label>
-            <input type="number" id="jumlahGram" placeholder="Contoh: 15" required>
+          <div class="cs-form-actions">
+            <button type="submit" class="cs-btn-save">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Tambah Resep
+            </button>
           </div>
-
-          <button type="submit" class="btn-primary">Tambah Resep</button>
         </form>
       </div>
 
-      <div class="card-table">
-        <h3>Daftar Resep per Menu</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Menu</th>
-              <th>Bahan Baku</th>
-              <th>Gram</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="resepTable"></tbody>
-        </table>
+      <!-- DAFTAR RESEP -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Daftar Resep per Menu
+          </div>
+          <span class="cs-count-badge" id="resepCount">0 resep</span>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>Menu</th>
+                <th>Bahan Baku</th>
+                <th>Jumlah</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="resepTable">
+              <!-- diisi resep.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </main>
