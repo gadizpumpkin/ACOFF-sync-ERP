@@ -4,93 +4,226 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Transaksi</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/transaksi.css">
 </head>
 <body>
 
-  <header class="navbar">
-    <h2>Coffee Street - Transaksi Penjualan</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Transaksi</span></span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="userRole">Karyawan</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="absensi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Absensi
+          </a>
+        </li>
+        <li class="active">
+          <a href="transaksi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="12" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 10v1.5l1 1" stroke="currentColor" stroke-width="1" stroke-linecap="round"/>
+            </svg>
+            Transaksi
+          </a>
+        </li>
+        <li>
+          <a href="laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Laporan
+          </a>
+        </li>
+        <li>
+          <a href="profil.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Profil
+          </a>
+        </li>
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1>Transaksi Penjualan</h1>
-      <p>Karyawan melakukan input transaksi. Stok otomatis berkurang saat transaksi PAID.</p>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-form">
-        <h3>Input Item Transaksi</h3>
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Transaksi Penjualan</h1>
+        <p class="cs-page-sub">Input transaksi karyawan. Stok otomatis berkurang saat transaksi <strong>Paid</strong>.</p>
+      </div>
 
-        <form id="transaksiForm">
-          <div class="form-group">
-            <label>Pilih Menu</label>
-            <select id="selectMenu" required></select>
+      <!-- FORM INPUT ITEM -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Input Item Transaksi
           </div>
-
-          <div class="form-group">
-            <label>Qty</label>
-            <input type="number" id="qtyMenu" value="1" min="1" required>
+        </div>
+        <form id="transaksiForm" class="cs-form">
+          <div class="cs-form-row">
+            <div class="cs-form-group cs-form-grow">
+              <label for="selectMenu">Pilih Menu</label>
+              <select id="selectMenu" required>
+                <option value="" disabled selected>-- Pilih menu --</option>
+              </select>
+            </div>
+            <div class="cs-form-group cs-form-qty">
+              <label for="qtyMenu">Qty</label>
+              <input type="number" id="qtyMenu" value="1" min="1" required>
+            </div>
+            <div class="cs-form-group cs-form-action">
+              <label>&nbsp;</label>
+              <button type="submit" class="cs-btn-add">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                  <path d="M7 1v12M1 7h12" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                Tambah Item
+              </button>
+            </div>
           </div>
-
-          <button type="submit" class="btn-primary">Tambah Item</button>
         </form>
       </div>
 
-      <div class="card-table">
-        <h3>Keranjang Transaksi</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Menu</th>
-              <th>Harga</th>
-              <th>Qty</th>
-              <th>Subtotal</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="cartTable"></tbody>
-        </table>
+      <!-- KERANJANG -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Keranjang Transaksi
+          </div>
+          <div class="cs-total-badge">
+            Total: <span id="totalHarga" class="cs-total-val">Rp 0</span>
+          </div>
+        </div>
 
-        <h3 class="total-text">Total: <span id="totalHarga">Rp 0</span></h3>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>Menu</th>
+                <th>Harga</th>
+                <th>Qty</th>
+                <th>Subtotal</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="cartTable">
+              <!-- diisi transaksi.js -->
+            </tbody>
+          </table>
+        </div>
 
-        <div class="action-row">
-          <button id="btnSaveDraft" class="btn-secondary">Simpan Draft</button>
-          <button id="btnPaid" class="btn-success">Bayar (Paid)</button>
-          <button id="btnCancel" class="btn-danger">Cancel Transaksi</button>
+        <div class="cs-action-row">
+          <button id="btnSaveDraft" class="cs-btn-draft">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 10V12h2l6-6-2-2-6 6zM11.5 3.5l-1-1a.7.7 0 00-1 0l-.9.9 2 2 .9-.9a.7.7 0 000-1z" fill="currentColor"/>
+            </svg>
+            Simpan Draft
+          </button>
+          <button id="btnPaid" class="cs-btn-paid">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Bayar (Paid)
+          </button>
+          <button id="btnCancel" class="cs-btn-cancel">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            Cancel
+          </button>
         </div>
       </div>
 
-      <div class="card-table">
-        <h3>Riwayat Transaksi</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Tanggal</th>
-              <th>Status</th>
-              <th>Total</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="historyTable"></tbody>
-        </table>
+      <!-- RIWAYAT TRANSAKSI -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Riwayat Transaksi
+          </div>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tanggal</th>
+                <th>Status</th>
+                <th>Total</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="historyTable">
+              <!-- diisi transaksi.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
-      <div class="card-receipt" id="receiptBox" style="display:none;">
-        <h3>Struk Transaksi</h3>
-        <div id="receiptContent"></div>
-        <button class="btn-primary" onclick="window.print()">Cetak</button>
+      <!-- STRUK / RECEIPT -->
+      <div class="cs-card cs-receipt" id="receiptBox" style="display:none;">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Struk Transaksi
+          </div>
+          <button class="cs-btn-print" onclick="window.print()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <rect x="2" y="5" width="10" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 5V3a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 9h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M4 11h4" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Cetak Struk
+          </button>
+        </div>
+        <div id="receiptContent" class="cs-receipt-content"></div>
       </div>
 
     </main>
