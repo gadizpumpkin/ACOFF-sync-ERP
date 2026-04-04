@@ -6,28 +6,9 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
-});
-
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Transaksi Penjualan") window.location.href = "transaksi.html";
-    else if (menu === "Kelola Menu") window.location.href = "menu.html";
-    else if (menu === "Kelola Resep") window.location.href = "resep.html";
-    else if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
 });
 
 // ==========================
@@ -67,7 +48,7 @@ let cart = [];
 // ==========================
 function loadMenuDropdown() {
   const selectMenu = document.getElementById("selectMenu");
-  selectMenu.innerHTML = "";
+  selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
 
   const menus = getMenuData();
 
@@ -78,7 +59,7 @@ function loadMenuDropdown() {
 
   menus.forEach(m => {
     const opt = document.createElement("option");
-    opt.value = m.id;
+    opt.value = String(m.id);
     opt.textContent = `${m.nama} (Rp ${m.harga.toLocaleString("id-ID")})`;
     selectMenu.appendChild(opt);
   });
@@ -89,7 +70,7 @@ function loadMenuDropdown() {
 // ==========================
 function addToCart(menuId, qty) {
   const menuData = getMenuData();
-  const menu = menuData.find(m => m.id === menuId);
+  const menu = menuData.find(m => String(m.id) === String(menuId));
 
   if (!menu) {
     alert("Menu tidak ditemukan.");
@@ -118,7 +99,7 @@ function removeFromCart(menuId) {
 }
 
 function calculateTotal() {
-  return cart.reduce((sum, item) => sum + (item.harga * item.qty), 0);
+  return cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
 }
 
 function renderCart() {
@@ -135,9 +116,13 @@ function renderCart() {
       <td>${item.qty}</td>
       <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
       <td>
-        <button class="btn-delete" onclick="removeFromCart('${item.menuId}')">Hapus</button>
+        <button class="cs-btn-delete" data-id="${item.menuId}">Hapus</button>
       </td>
     `;
+
+    tr.querySelector(".cs-btn-delete").addEventListener("click", () => {
+      removeFromCart(item.menuId);
+    });
 
     tbody.appendChild(tr);
   });
@@ -147,17 +132,16 @@ function renderCart() {
 }
 
 // ==========================
-// STOCK VALIDATION BASED ON RECIPE
+// VALIDASI STOK
 // ==========================
 function validateStockForCart() {
   const resepData = getResepData();
   const bahanData = getBahanBakuData();
 
-  // hitung kebutuhan bahan baku total
   let kebutuhan = {};
 
   cart.forEach(item => {
-    const resepMenu = resepData.filter(r => r.menuId === item.menuId);
+    const resepMenu = resepData.filter(r => String(r.menuId) === String(item.menuId));
 
     resepMenu.forEach(r => {
       const totalGram = r.gram * item.qty;
@@ -166,15 +150,15 @@ function validateStockForCart() {
     });
   });
 
-  // cek stok
   for (const bahanId in kebutuhan) {
-    const bahan = bahanData.find(b => b.id === bahanId);
-    if (!bahan) return { valid: false, message: "Bahan baku tidak ditemukan." };
+    const bahan = bahanData.find(b => String(b.id) === String(bahanId));
+
+    if (!bahan) return { valid: false, message: "Bahan tidak ditemukan." };
 
     if (bahan.stok < kebutuhan[bahanId]) {
       return {
         valid: false,
-        message: `Stok ${bahan.nama} tidak cukup. Dibutuhkan ${kebutuhan[bahanId]} gram, stok tersedia ${bahan.stok} gram`
+        message: `Stok ${bahan.nama} kurang (${bahan.stok})`
       };
     }
   }
@@ -183,124 +167,100 @@ function validateStockForCart() {
 }
 
 // ==========================
-// APPLY STOCK (DECREASE)
+// STOCK UPDATE
 // ==========================
 function applyStockDecrease(kebutuhan) {
   let bahanData = getBahanBakuData();
 
-  for (const bahanId in kebutuhan) {
-    bahanData = bahanData.map(b => {
-      if (b.id === bahanId) {
-        return { ...b, stok: b.stok - kebutuhan[bahanId] };
-      }
-      return b;
-    });
-  }
+  bahanData = bahanData.map(b => {
+    if (kebutuhan[b.id]) {
+      return { ...b, stok: b.stok - kebutuhan[b.id] };
+    }
+    return b;
+  });
 
   saveBahanBakuData(bahanData);
 }
 
-// ==========================
-// ROLLBACK STOCK (INCREASE)
-// ==========================
 function rollbackStockIncrease(kebutuhan) {
   let bahanData = getBahanBakuData();
 
-  for (const bahanId in kebutuhan) {
-    bahanData = bahanData.map(b => {
-      if (b.id === bahanId) {
-        return { ...b, stok: b.stok + kebutuhan[bahanId] };
-      }
-      return b;
-    });
-  }
+  bahanData = bahanData.map(b => {
+    if (kebutuhan[b.id]) {
+      return { ...b, stok: b.stok + kebutuhan[b.id] };
+    }
+    return b;
+  });
 
   saveBahanBakuData(bahanData);
 }
 
 // ==========================
-// SAVE TRANSACTION
+// CREATE TRANSACTION
 // ==========================
 function createTransaction(status) {
-  if (cart.length === 0) {
-    alert("Keranjang masih kosong.");
-    return;
-  }
+  if (cart.length === 0) return alert("Keranjang kosong.");
 
   const transaksiData = getTransaksiData();
   const total = calculateTotal();
 
-  const transaksi = {
+  const trx = {
     id: "TRX-" + Date.now(),
     tanggal: new Date().toLocaleString("id-ID"),
-    status: status,
-    total: total,
+    status,
+    total,
     items: cart,
     kebutuhanBahan: null,
     createdBy: sessionUser.username
   };
 
-  // jika paid: cek stok + kurangi stok
   if (status === "Paid") {
     const check = validateStockForCart();
 
-    if (!check.valid) {
-      alert(check.message);
-      return;
-    }
+    if (!check.valid) return alert(check.message);
 
-    transaksi.kebutuhanBahan = check.kebutuhan;
+    trx.kebutuhanBahan = check.kebutuhan;
     applyStockDecrease(check.kebutuhan);
   }
 
-  transaksiData.push(transaksi);
+  transaksiData.push(trx);
   saveTransaksiData(transaksiData);
 
-  // reset cart
   cart = [];
   renderCart();
   renderHistory();
 
-  if (status === "Paid") {
-    generateReceipt(transaksi);
-  }
+  if (status === "Paid") generateReceipt(trx);
 
-  alert("Transaksi berhasil disimpan: " + status);
+  alert("Transaksi berhasil: " + status);
 }
 
 // ==========================
 // CANCEL TRANSACTION
 // ==========================
 function cancelTransaction(trxId) {
-  let transaksiData = getTransaksiData();
-  const trx = transaksiData.find(t => t.id === trxId);
+  let data = getTransaksiData();
+  const trx = data.find(t => t.id === trxId);
 
-  if (!trx) return alert("Transaksi tidak ditemukan.");
+  if (!trx) return alert("Tidak ditemukan.");
 
-  if (trx.status === "Canceled") {
-    alert("Transaksi sudah canceled.");
-    return;
-  }
+  if (trx.status === "Canceled") return alert("Sudah dibatalkan.");
 
-  // rollback jika sebelumnya paid
   if (trx.status === "Paid" && trx.kebutuhanBahan) {
     rollbackStockIncrease(trx.kebutuhanBahan);
   }
 
   trx.status = "Canceled";
-
-  saveTransaksiData(transaksiData);
+  saveTransaksiData(data);
   renderHistory();
-
-  alert("Transaksi berhasil dibatalkan + stok rollback.");
 }
 
 // ==========================
-// RECEIPT GENERATION
+// RECEIPT
 // ==========================
 function generateReceipt(trx) {
-  const receiptBox = document.getElementById("receiptBox");
-  const receiptContent = document.getElementById("receiptContent");
+  const box = document.getElementById("receiptBox");
+  const content = document.getElementById("receiptContent");
 
   let html = `
     <p><b>Coffee Street</b></p>
@@ -311,8 +271,8 @@ function generateReceipt(trx) {
     <ul>
   `;
 
-  trx.items.forEach(item => {
-    html += `<li>${item.nama} x${item.qty} = Rp ${(item.harga * item.qty).toLocaleString("id-ID")}</li>`;
+  trx.items.forEach(i => {
+    html += `<li>${i.nama} x${i.qty} = Rp ${(i.harga * i.qty).toLocaleString("id-ID")}</li>`;
   });
 
   html += `
@@ -322,87 +282,80 @@ function generateReceipt(trx) {
     <p>Status: ${trx.status}</p>
   `;
 
-  receiptContent.innerHTML = html;
-  receiptBox.style.display = "block";
+  content.innerHTML = html;
+  box.style.display = "block";
 }
 
 // ==========================
-// HISTORY TABLE
+// HISTORY
 // ==========================
 function renderHistory() {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
-  const transaksiData = getTransaksiData();
+  const data = getTransaksiData();
 
-  transaksiData.slice().reverse().forEach(trx => {
-    let statusClass = "status-draft";
-    if (trx.status === "Paid") statusClass = "status-paid";
-    if (trx.status === "Canceled") statusClass = "status-canceled";
+  data.slice().reverse().forEach(trx => {
+    let statusClass = "cs-status-pill draft";
+    if (trx.status === "Paid") statusClass = "cs-status-pill paid";
+    if (trx.status === "Canceled") statusClass = "cs-status-pill canceled";
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${trx.id}</td>
       <td>${trx.tanggal}</td>
-      <td class="${statusClass}">${trx.status}</td>
+      <td><span class="${statusClass}">${trx.status}</span></td>
       <td>Rp ${trx.total.toLocaleString("id-ID")}</td>
-      <td>
-        <button class="btn-secondary" onclick="generateReceipt(${JSON.stringify(trx).replace(/"/g, '&quot;')})">
-          Struk
-        </button>
-        <button class="btn-danger" onclick="cancelTransaction('${trx.id}')">
-          Cancel
-        </button>
-      </td>
+      <td></td>
     `;
+
+    const actionTd = tr.children[4];
+
+    // tombol struk
+    const btnView = document.createElement("button");
+    btnView.className = "cs-btn-view";
+    btnView.textContent = "Struk";
+    btnView.onclick = () => generateReceipt(trx);
+
+    // tombol cancel
+    const btnCancel = document.createElement("button");
+    btnCancel.className = "cs-btn-cancel";
+    btnCancel.textContent = "Cancel";
+    btnCancel.onclick = () => cancelTransaction(trx.id);
+
+    actionTd.appendChild(btnView);
+    actionTd.appendChild(btnCancel);
 
     tbody.appendChild(tr);
   });
 }
 
 // ==========================
-// EVENT HANDLER
+// EVENT
 // ==========================
-document.getElementById("transaksiForm").addEventListener("submit", function(e) {
+document.getElementById("transaksiForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   if (sessionUser.role !== "Karyawan") {
-    alert("Akses ditolak. Hanya Karyawan yang boleh input transaksi.");
-    return;
+    return alert("Hanya Karyawan.");
   }
 
   const menuId = document.getElementById("selectMenu").value;
   const qty = parseInt(document.getElementById("qtyMenu").value);
 
-  if (!menuId) {
-    alert("Pilih menu terlebih dahulu.");
-    return;
-  }
+  if (!menuId) return alert("Pilih menu.");
 
   addToCart(menuId, qty);
 });
 
-document.getElementById("btnSaveDraft").addEventListener("click", function() {
-  if (sessionUser.role !== "Karyawan") {
-    alert("Akses ditolak.");
-    return;
-  }
-  createTransaction("Draft");
-});
+document.getElementById("btnSaveDraft").onclick = () => createTransaction("Draft");
+document.getElementById("btnPaid").onclick = () => createTransaction("Paid");
 
-document.getElementById("btnPaid").addEventListener("click", function() {
-  if (sessionUser.role !== "Karyawan") {
-    alert("Akses ditolak.");
-    return;
-  }
-  createTransaction("Paid");
-});
-
-document.getElementById("btnCancel").addEventListener("click", function() {
+document.getElementById("btnCancel").onclick = () => {
   cart = [];
   renderCart();
-  alert("Keranjang transaksi dibatalkan.");
-});
+};
 
 // ==========================
 // INIT
