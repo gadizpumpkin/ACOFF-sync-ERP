@@ -6,7 +6,7 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
@@ -15,22 +15,6 @@ if (sessionUser.role !== "Manajer") {
   alert("Akses ditolak. Generate laporan hanya untuk Manajer.");
   window.location.href = "dashboard.html";
 }
-
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Generate Laporan") window.location.href = "laporan.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
-});
 
 // ==========================
 // STORAGE
@@ -80,14 +64,13 @@ function calculateTopMenu(transaksiList) {
     });
   });
 
-  const sorted = Object.entries(counter)
+  return Object.entries(counter)
     .map(([menuId, qty]) => {
       const menu = menuData.find(m => m.id === menuId);
       return { menu: menu ? menu.nama : "Unknown", qty };
     })
-    .sort((a, b) => b.qty - a.qty);
-
-  return sorted.slice(0, 5);
+    .sort((a, b) => b.qty - a.qty)
+    .slice(0, 5);
 }
 
 // ==========================
@@ -97,15 +80,14 @@ function calculateBahanTerpakai(transaksiList) {
   const resep = getResepData();
   const bahanData = getBahanBakuData();
 
-  let usage = {}; // bahanId => total gram
+  let usage = {};
 
   transaksiList.forEach(t => {
     t.items.forEach(item => {
       const resepMenu = resep.filter(r => r.menuId === item.menuId);
 
       resepMenu.forEach(r => {
-        const totalGram = r.gram * item.qty;
-        usage[r.bahanId] = (usage[r.bahanId] || 0) + totalGram;
+        usage[r.bahanId] = (usage[r.bahanId] || 0) + (r.gram * item.qty);
       });
     });
   });
@@ -114,7 +96,7 @@ function calculateBahanTerpakai(transaksiList) {
     const bahan = bahanData.find(b => b.id === bahanId);
     return {
       bahan: bahan ? bahan.nama : "Unknown",
-      gram: gram
+      gram
     };
   });
 }
@@ -133,7 +115,7 @@ function generateLaporan() {
   }
 
   if (new Date(mulai) > new Date(selesai)) {
-    alert("Periode mulai tidak boleh lebih besar dari selesai.");
+    alert("Periode mulai tidak valid.");
     return;
   }
 
@@ -143,15 +125,14 @@ function generateLaporan() {
     t.status === "Paid" && isDateInRange(t.tanggal, mulai, selesai)
   );
 
-  let totalOmzet = 0;
-  transaksiPeriode.forEach(t => totalOmzet += t.totalBayar);
+  let totalOmzet = transaksiPeriode.reduce((sum, t) => sum + t.totalBayar, 0);
 
   const laporan = {
     id: "LP-" + Date.now(),
     type: jenis,
     periodeMulai: mulai,
     periodeSelesai: selesai,
-    totalOmzet: totalOmzet,
+    totalOmzet,
     totalTransaksi: transaksiPeriode.length,
     topMenu: calculateTopMenu(transaksiPeriode),
     bahanTerpakai: calculateBahanTerpakai(transaksiPeriode),
@@ -161,33 +142,31 @@ function generateLaporan() {
     approvedBy: null
   };
 
-  const laporanData = getLaporanData();
-  laporanData.push(laporan);
-  saveLaporanData(laporanData);
+  const data = getLaporanData();
+  data.push(laporan);
+  saveLaporanData(data);
 
   renderLaporanTable();
-  alert("Laporan berhasil dibuat (Draft).");
+  alert("Laporan berhasil dibuat (Draft)");
 }
 
 // ==========================
-// SUBMIT TO OWNER
+// SUBMIT
 // ==========================
 function submitLaporan(id) {
-  let laporanData = getLaporanData();
-  const laporan = laporanData.find(l => l.id === id);
+  let data = getLaporanData();
+  const laporan = data.find(l => l.id === id);
 
-  if (!laporan) return alert("Laporan tidak ditemukan.");
+  if (!laporan) return;
 
   if (laporan.status !== "Draft") {
-    alert("Hanya laporan Draft yang bisa dikirim approval.");
+    alert("Hanya Draft yang bisa dikirim.");
     return;
   }
 
   laporan.status = "Pending";
 
-  saveLaporanData(laporanData);
-
-  alert("Laporan berhasil dikirim ke Owner untuk approval.");
+  saveLaporanData(data);
   renderLaporanTable();
 }
 
@@ -200,30 +179,49 @@ function viewLaporan(id) {
 }
 
 // ==========================
-// RENDER TABLE
+// RENDER TABLE (FIX UI)
 // ==========================
 function renderLaporanTable() {
   const tbody = document.getElementById("laporanTable");
   tbody.innerHTML = "";
 
-  const laporan = getLaporanData().slice().reverse();
+  const data = getLaporanData().slice().reverse();
 
-  laporan.forEach(l => {
-    let statusClass = "status-draft";
-    if (l.status === "Pending") statusClass = "status-pending";
-    if (l.status === "Approved") statusClass = "status-approved";
-    if (l.status === "Rejected") statusClass = "status-rejected";
+  data.forEach(l => {
+
+    // badge jenis
+    const jenisBadge = `
+      <span class="cs-jenis-badge ${l.type.toLowerCase()}">
+        ${l.type}
+      </span>
+    `;
+
+    // status pill
+    const statusClass = l.status.toLowerCase();
+    const statusBadge = `
+      <span class="cs-status-pill ${statusClass}">
+        <span class="cs-pulse"></span>
+        ${l.status}
+      </span>
+    `;
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
-      <td>${l.type}</td>
+      <td>${jenisBadge}</td>
       <td>${l.periodeMulai} s/d ${l.periodeSelesai}</td>
-      <td>Rp ${l.totalOmzet.toLocaleString("id-ID")}</td>
+      <td class="cs-td-omzet">Rp ${l.totalOmzet.toLocaleString("id-ID")}</td>
       <td>${l.totalTransaksi}</td>
-      <td class="${statusClass}">${l.status}</td>
+      <td>${statusBadge}</td>
       <td>
-        <button class="btn-view" onclick="viewLaporan('${l.id}')">View</button>
-        <button class="btn-submit" onclick="submitLaporan('${l.id}')">Submit</button>
+        <div class="cs-action-btn">
+          <button class="cs-btn-view" onclick="viewLaporan('${l.id}')">View</button>
+          ${
+            l.status === "Draft"
+              ? `<button class="cs-btn-submit-laporan" onclick="submitLaporan('${l.id}')">Submit</button>`
+              : ""
+          }
+        </div>
       </td>
     `;
 
@@ -231,8 +229,12 @@ function renderLaporanTable() {
   });
 }
 
+// ==========================
 // EVENT
+// ==========================
 document.getElementById("btnGenerate").addEventListener("click", generateLaporan);
 
+// ==========================
 // INIT
+// ==========================
 renderLaporanTable();
