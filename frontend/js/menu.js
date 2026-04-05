@@ -1,33 +1,25 @@
+// ==========================
 // AUTH CHECK
+// ==========================
 const sessionUser = getSession();
 if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
 
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
+// 🔒 RBAC HALAMAN
+if (sessionUser.role !== "Manajer") {
+  alert("Akses ditolak. Halaman ini hanya untuk Manajer.");
+  window.location.href = "dashboard.html";
+}
 
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Kelola Menu") window.location.href = "menu.html";
-    else if (menu === "Kelola Resep") window.location.href = "resep.html";
-    else if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
-});
-
+// ==========================
 // STORAGE
+// ==========================
 function getMenuData() {
   return JSON.parse(localStorage.getItem("menuData")) || [];
 }
@@ -36,22 +28,30 @@ function saveMenuData(data) {
   localStorage.setItem("menuData", JSON.stringify(data));
 }
 
-// RENDER
+// ==========================
+// RENDER TABLE
+// ==========================
 function renderTable() {
   const tbody = document.getElementById("menuTable");
+  const count = document.getElementById("menuCount");
+
   tbody.innerHTML = "";
 
   const data = getMenuData();
+
+  count.textContent = `${data.length} menu`;
 
   data.forEach(item => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
       <td>${item.nama}</td>
-      <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
+      <td class="cs-td-harga">Rp ${item.harga.toLocaleString("id-ID")}</td>
       <td>
-        <button class="btn-edit" onclick="editMenu('${item.id}')">Edit</button>
-        <button class="btn-delete" onclick="deleteMenu('${item.id}')">Hapus</button>
+        <div class="cs-action-btn">
+          <button class="cs-btn-edit" onclick="editMenu('${item.id}')">Edit</button>
+          <button class="cs-btn-delete" onclick="deleteMenu('${item.id}')">Hapus</button>
+        </div>
       </td>
     `;
 
@@ -59,14 +59,11 @@ function renderTable() {
   });
 }
 
-// CRUD
-document.getElementById("menuForm").addEventListener("submit", function(e) {
+// ==========================
+// SUBMIT FORM (CREATE / UPDATE)
+// ==========================
+document.getElementById("menuForm").addEventListener("submit", function (e) {
   e.preventDefault();
-
-  if (sessionUser.role !== "Manajer") {
-    alert("Akses ditolak. Hanya Manajer yang dapat mengelola menu.");
-    return;
-  }
 
   const id = document.getElementById("menuId").value;
   const nama = document.getElementById("menuNama").value.trim();
@@ -75,11 +72,12 @@ document.getElementById("menuForm").addEventListener("submit", function(e) {
   let data = getMenuData();
 
   if (id) {
-    data = data.map(item => {
-      if (item.id === id) return { ...item, nama, harga };
-      return item;
-    });
+    // UPDATE
+    data = data.map(item =>
+      item.id === id ? { ...item, nama, harga } : item
+    );
   } else {
+    // CREATE
     data.push({
       id: Date.now().toString(),
       nama,
@@ -92,6 +90,9 @@ document.getElementById("menuForm").addEventListener("submit", function(e) {
   renderTable();
 });
 
+// ==========================
+// EDIT
+// ==========================
 function editMenu(id) {
   const data = getMenuData();
   const item = data.find(x => x.id === id);
@@ -100,9 +101,13 @@ function editMenu(id) {
   document.getElementById("menuNama").value = item.nama;
   document.getElementById("menuHarga").value = item.harga;
 
-  document.getElementById("btnSubmit").textContent = "Update";
+  document.getElementById("btnSubmit").innerHTML = "Update";
+  document.getElementById("formTitle").textContent = "Form Edit Menu";
 }
 
+// ==========================
+// DELETE
+// ==========================
 function deleteMenu(id) {
   if (!confirm("Yakin ingin menghapus menu ini?")) return;
 
@@ -113,14 +118,27 @@ function deleteMenu(id) {
   renderTable();
 }
 
+// ==========================
+// RESET FORM
+// ==========================
 function resetForm() {
   document.getElementById("menuId").value = "";
   document.getElementById("menuNama").value = "";
   document.getElementById("menuHarga").value = "";
-  document.getElementById("btnSubmit").textContent = "Simpan";
+
+  document.getElementById("btnSubmit").innerHTML = `
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Simpan
+  `;
+
+  document.getElementById("formTitle").textContent = "Form Tambah Menu";
 }
 
 document.getElementById("btnReset").addEventListener("click", resetForm);
 
+// ==========================
 // INIT
+// ==========================
 renderTable();
