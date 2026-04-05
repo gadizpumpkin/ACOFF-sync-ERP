@@ -4,74 +4,221 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Payroll</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/payroll.css">
 </head>
 <body>
 
-  <header class="navbar">
-    <h2>Coffee Street - Payroll (Manajer)</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Payroll</span></span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="userRole">Manajer</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="absensi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Absensi
+          </a>
+        </li>
+        <li>
+          <a href="transaksi.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h8M2 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <circle cx="12" cy="11" r="3" stroke="currentColor" stroke-width="1.5"/>
+            </svg>
+            Transaksi
+          </a>
+        </li>
+        <li>
+          <a href="supplier.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="6" width="12" height="8" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 6V5a3 3 0 016 0v1" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Supplier
+          </a>
+        </li>
+        <li>
+          <a href="resep.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M4 2h8a1 1 0 011 1v10a1 1 0 01-1 1H4a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M6 6h4M6 9h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Resep
+          </a>
+        </li>
+        <li>
+          <a href="pembelian.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 3h1.5l2 7h7l1.5-5H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="7" cy="13" r="1" fill="currentColor"/>
+              <circle cx="11" cy="13" r="1" fill="currentColor"/>
+            </svg>
+            Pembelian
+          </a>
+        </li>
+        <li class="active">
+          <a href="payroll.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 8h2M9 8h2M5 11h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M5 5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Payroll
+          </a>
+        </li>
+        <li>
+          <a href="laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Laporan
+          </a>
+        </li>
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1>Payroll Harian</h1>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-form">
-        <h3>Aturan Payroll (Dynamic Formula)</h3>
-
-        <div class="form-group">
-          <label>Persentase Profit untuk Payroll (%)</label>
-          <input type="number" id="payrollPercent" min="0" max="100" />
-        </div>
-
-        <div class="form-group">
-          <label>Metode Pembagian</label>
-          <select id="payrollMethod">
-            <option value="equal">Equal (dibagi rata)</option>
-          </select>
-        </div>
-
-        <button id="btnSaveRule" class="btn-primary">Simpan Aturan</button>
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Payroll Harian</h1>
+        <p class="cs-page-sub">Kelola aturan payroll dan generate pembayaran harian untuk karyawan.</p>
       </div>
 
-      <div class="card-form">
-        <h3>Generate Payroll Hari Ini</h3>
-        <p><b>Tanggal:</b> <span id="tanggalHariIni"></span></p>
-
-        <button id="btnGeneratePayroll" class="btn-success">Generate Payroll</button>
+      <!-- ATURAN PAYROLL -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Aturan Payroll
+          </div>
+          <span class="cs-info-badge">Dynamic Formula</span>
+        </div>
+        <div class="cs-form">
+          <div class="cs-form-grid">
+            <div class="cs-form-group">
+              <label for="payrollPercent">Persentase Profit untuk Payroll</label>
+              <div class="cs-input-unit">
+                <input type="number" id="payrollPercent" min="0" max="100" placeholder="Contoh: 30">
+                <span class="cs-unit-label">%</span>
+              </div>
+            </div>
+            <div class="cs-form-group">
+              <label for="payrollMethod">Metode Pembagian</label>
+              <select id="payrollMethod">
+                <option value="equal">Equal (dibagi rata)</option>
+              </select>
+            </div>
+          </div>
+          <div class="cs-form-actions">
+            <button id="btnSaveRule" class="cs-btn-save">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              Simpan Aturan
+            </button>
+          </div>
+        </div>
       </div>
 
-      <div class="card-table">
-        <h3>Riwayat Payroll</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Tanggal</th>
-              <th>Total Profit</th>
-              <th>Payroll Pool</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody id="payrollTable"></tbody>
-        </table>
+      <!-- GENERATE PAYROLL -->
+      <div class="cs-card cs-card-generate">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Generate Payroll Hari Ini
+          </div>
+          <span class="cs-date-badge" id="tanggalHariIni">—</span>
+        </div>
+        <p class="cs-generate-desc">Sistem akan menghitung profit hari ini dan mendistribusikan payroll ke seluruh karyawan yang hadir berdasarkan aturan di atas.</p>
+        <div class="cs-form-actions">
+          <button id="btnGeneratePayroll" class="cs-btn-generate">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1v3M7 10v3M1 7h3M10 7h3" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+              <circle cx="7" cy="7" r="2.5" stroke="white" stroke-width="1.5"/>
+            </svg>
+            Generate Payroll
+          </button>
+        </div>
+      </div>
+
+      <!-- RIWAYAT PAYROLL -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Riwayat Payroll
+          </div>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Total Profit</th>
+                <th>Payroll Pool</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="payrollTable">
+              <!-- diisi payroll.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </main>
   </div>
 
   <script src="js/auth.js"></script>
+  <script>
+    // Live date
+    var el = document.getElementById('tanggalHariIni');
+    if (el) {
+      el.textContent = new Date().toLocaleDateString('id-ID', {
+        weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+      });
+    }
+  </script>
   <script src="js/payroll.js"></script>
 </body>
 </html>
