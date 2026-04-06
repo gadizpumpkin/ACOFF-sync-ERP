@@ -1,35 +1,528 @@
+/* ============================================================
+   Coffee Street — laporan_view.css
+   Tema konsisten dengan seluruh halaman Coffee Street
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap');
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F5F3EF;
+  color: #1a1a18;
+  min-height: 100vh;
+}
+
+/* ---------- NAVBAR ---------- */
+.cs-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #1a1008;
+  height: 60px;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(201, 145, 58, 0.2);
+}
+
+.cs-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-nav-logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.cs-nav-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: #C9913A;
+  letter-spacing: 0.02em;
+}
+
+.cs-nav-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(201, 145, 58, 0.55);
+  margin-left: 4px;
+}
+
+.cs-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-role-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(201, 145, 58, 0.12);
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.cs-btn-logout {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(220, 70, 60, 0.1);
+  color: #e05050;
+  border: 1px solid rgba(220, 70, 60, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.cs-btn-logout:hover {
+  background: rgba(220, 70, 60, 0.2);
+}
+
+/* ---------- VIEW CONTAINER ---------- */
+.cs-view-container {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+/* ---------- PAGE HEADER ---------- */
+.cs-page-header {
+  margin-bottom: 1.75rem;
+}
+
+.cs-page-header-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.cs-page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a18;
+  margin-bottom: 4px;
+}
+
+.cs-page-sub {
+  font-size: 13px;
+  color: #888780;
+}
+
+/* ---------- HEADER ACTIONS ---------- */
+.cs-header-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.cs-btn-print,
+.cs-btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 9px 16px;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  white-space: nowrap;
+}
+
+.cs-btn-print {
+  background: #1a1008;
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.35);
+}
+
+.cs-btn-print:hover {
+  background: #251708;
+}
+
+.cs-btn-back {
+  background: #f5f3ef;
+  color: #5f5e5a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.cs-btn-back:hover {
+  background: #ebe8e2;
+  color: #1a1a18;
+}
+
+/* ---------- REPORT CARD ---------- */
+.cs-card {
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cs-card-report {
+  min-height: 200px;
+}
+
+/* ---------- LOADING STATE ---------- */
+.cs-report-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 3rem 1rem;
+  color: #888780;
+  font-size: 14px;
+}
+
+.cs-loading-icon {
+  width: 24px;
+  height: 24px;
+  animation: cs-spin 1s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cs-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ---------- REPORT HEADER (diisi JS) ---------- */
+.cs-report-header {
+  padding-bottom: 1.25rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.cs-report-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-report-brand-logo {
+  width: 36px;
+  height: 36px;
+}
+
+.cs-report-brand-name {
+  font-family: 'Playfair Display', serif;
+  font-size: 18px;
+  color: #C9913A;
+}
+
+.cs-report-brand-sub {
+  font-size: 12px;
+  color: #888780;
+  margin-top: 2px;
+}
+
+.cs-report-meta {
+  text-align: right;
+}
+
+.cs-report-meta-label {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: #888780;
+  margin-bottom: 4px;
+}
+
+.cs-report-meta-value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a18;
+}
+
+/* ---------- REPORT STATS GRID (diisi JS) ---------- */
+.cs-report-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.cs-stat-box {
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.cs-stat-box-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #888780;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 6px;
+}
+
+.cs-stat-box-value {
+  font-size: 20px;
+  font-weight: 500;
+  color: #1a1a18;
+}
+
+.cs-stat-box-value.gold {
+  color: #C9913A;
+}
+
+/* ---------- REPORT SECTION (diisi JS) ---------- */
+.cs-report-section {
+  margin-top: 1.5rem;
+}
+
+.cs-report-section-title {
+  font-size: 12px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888780;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-report-section-title::after {
+  content: '';
+  flex: 1;
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.07);
+}
+
+/* ---------- REPORT BOX (diisi JS) ---------- */
+.cs-report-box {
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.07);
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 10px;
+}
+
+.cs-report-box-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13.5px;
+  padding: 5px 0;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+
+.cs-report-box-row:last-child {
+  border-bottom: none;
+}
+
+.cs-report-box-label {
+  color: #888780;
+  font-size: 13px;
+}
+
+.cs-report-box-val {
+  font-weight: 500;
+  color: #1a1a18;
+}
+
+.cs-report-box-val.gold {
+  color: #C9913A;
+}
+
+/* ---------- TRANSAKSI ITEM (diisi JS) ---------- */
+.cs-transaksi-item {
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  transition: background 0.12s ease;
+}
+
+.cs-transaksi-item:hover {
+  background: #faf9f7;
+}
+
+.cs-transaksi-item-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.cs-transaksi-item-id {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888780;
+}
+
+.cs-transaksi-item-total {
+  font-size: 14px;
+  font-weight: 500;
+  color: #C9913A;
+}
+
+.cs-transaksi-item ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.cs-transaksi-item ul li {
+  font-size: 13px;
+  color: #5f5e5a;
+  padding: 3px 0;
+  display: flex;
+  justify-content: space-between;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.05);
+}
+
+.cs-transaksi-item ul li:last-child {
+  border-bottom: none;
+}
+
+/* ---------- STATUS PILLS ---------- */
+.cs-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cs-status-pill.draft {
+  background: rgba(136, 135, 128, 0.1);
+  color: #5f5e5a;
+  border: 1px solid rgba(136, 135, 128, 0.2);
+}
+
+.cs-status-pill.pending {
+  background: rgba(186, 117, 23, 0.1);
+  color: #854F0B;
+  border: 1px solid rgba(186, 117, 23, 0.25);
+}
+
+.cs-status-pill.approved {
+  background: rgba(99, 153, 34, 0.1);
+  color: #3B6D11;
+  border: 1px solid rgba(99, 153, 34, 0.25);
+}
+
+.cs-status-pill.rejected {
+  background: rgba(226, 75, 74, 0.1);
+  color: #A32D2D;
+  border: 1px solid rgba(226, 75, 74, 0.25);
+}
+
+.cs-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ---------- PRINT STYLES ---------- */
 @media print {
-  button {
-    display: none;
+  .cs-nav,
+  .cs-header-actions {
+    display: none !important;
+  }
+
+  body {
+    background: white;
+  }
+
+  .cs-view-container {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .cs-card {
+    border: none;
+    box-shadow: none;
+    padding: 0;
+  }
+
+  .cs-report-box,
+  .cs-transaksi-item {
+    break-inside: avoid;
   }
 }
 
-.view-container {
-  padding: 20px;
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+  .cs-nav {
+    padding: 0 1rem;
+  }
+
+  .cs-view-container {
+    padding: 1.25rem 1rem;
+  }
+
+  .cs-page-header-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .cs-header-actions {
+    width: 100%;
+  }
+
+  .cs-btn-print,
+  .cs-btn-back {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .cs-report-stats {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cs-report-header {
+    flex-direction: column;
+  }
+
+  .cs-report-meta {
+    text-align: left;
+  }
+
+  .cs-page-title {
+    font-size: 22px;
+  }
 }
 
-.card-report {
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-}
-
-.report-box {
-  margin-top: 15px;
-  padding: 15px;
-  border: 1px solid #ddd;
-  border-radius: 12px;
-}
-
-ul {
-  padding-left: 20px;
-}
-
-.transaksi-item {
-  margin-top: 10px;
-  padding: 12px;
-  border: 1px solid #ccc;
-  border-radius: 12px;
+@media (max-width: 480px) {
+  .cs-report-stats {
+    grid-template-columns: 1fr;
+  }
 }
