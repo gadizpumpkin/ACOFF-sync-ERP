@@ -6,7 +6,7 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
@@ -19,119 +19,159 @@ function getLaporanData() {
 }
 
 // ==========================
-// VIEW LAPORAN
+// RENDER VIEW (FULL UI)
 // ==========================
 function renderLaporanView() {
   const laporanId = localStorage.getItem("selectedLaporanId");
   const laporan = getLaporanData().find(l => l.id === laporanId);
 
+  const container = document.getElementById("laporanContent");
+
   if (!laporan) {
-    document.getElementById("laporanContent").innerHTML = "Laporan tidak ditemukan.";
+    container.innerHTML = "Laporan tidak ditemukan.";
     return;
   }
 
-  let html = `
-    <p><b>Jenis:</b> ${laporan.type}</p>
-    <p><b>Periode:</b> ${laporan.periodeMulai} s/d ${laporan.periodeSelesai}</p>
-    <p><b>Status:</b> ${laporan.status}</p>
-    <p><b>Total Omzet:</b> Rp ${laporan.totalOmzet.toLocaleString("id-ID")}</p>
-    <p><b>Total Transaksi:</b> ${laporan.totalTransaksi}</p>
+  // STATUS BADGE
+  const statusClass = laporan.status.toLowerCase();
+  const statusBadge = `
+    <span class="cs-status-pill ${statusClass}">
+      <span class="cs-pulse"></span>
+      ${laporan.status}
+    </span>
+  `;
 
-    <div class="report-box">
-      <h3>Top Menu</h3>
-      <ul>
+  // ==========================
+  // HEADER
+  // ==========================
+  let html = `
+    <div class="cs-report-header">
+      
+      <div class="cs-report-brand">
+        <svg class="cs-report-brand-logo" viewBox="0 0 32 32">
+          <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        </svg>
+        <div>
+          <div class="cs-report-brand-name">Coffee Street</div>
+          <div class="cs-report-brand-sub">Generated Report</div>
+        </div>
+      </div>
+
+      <div class="cs-report-meta">
+        <div class="cs-report-meta-label">Periode</div>
+        <div class="cs-report-meta-value">
+          ${laporan.periodeMulai} - ${laporan.periodeSelesai}
+        </div>
+        <div style="margin-top:6px">${statusBadge}</div>
+      </div>
+
+    </div>
+  `;
+
+  // ==========================
+  // STATS
+  // ==========================
+  html += `
+    <div class="cs-report-stats">
+      <div class="cs-stat-box">
+        <div class="cs-stat-box-label">Jenis</div>
+        <div class="cs-stat-box-value">${laporan.type}</div>
+      </div>
+
+      <div class="cs-stat-box">
+        <div class="cs-stat-box-label">Total Transaksi</div>
+        <div class="cs-stat-box-value">${laporan.totalTransaksi}</div>
+      </div>
+
+      <div class="cs-stat-box">
+        <div class="cs-stat-box-label">Total Omzet</div>
+        <div class="cs-stat-box-value gold">
+          Rp ${laporan.totalOmzet.toLocaleString("id-ID")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // ==========================
+  // TOP MENU
+  // ==========================
+  html += `
+    <div class="cs-report-section">
+      <div class="cs-report-section-title">Top Menu</div>
+      <div class="cs-report-box">
   `;
 
   laporan.topMenu.forEach(t => {
-    html += `<li>${t.menu} (${t.qty} terjual)</li>`;
+    html += `
+      <div class="cs-report-box-row">
+        <span class="cs-report-box-label">${t.menu}</span>
+        <span class="cs-report-box-val">${t.qty} terjual</span>
+      </div>
+    `;
   });
 
-  html += `
-      </ul>
-    </div>
+  html += `</div></div>`;
 
-    <div class="report-box">
-      <h3>Bahan Baku Terpakai</h3>
-      <ul>
+  // ==========================
+  // BAHAN TERPAKAI
+  // ==========================
+  html += `
+    <div class="cs-report-section">
+      <div class="cs-report-section-title">Bahan Terpakai</div>
+      <div class="cs-report-box">
   `;
 
   laporan.bahanTerpakai.forEach(b => {
-    html += `<li>${b.bahan}: ${b.gram} gram</li>`;
+    html += `
+      <div class="cs-report-box-row">
+        <span class="cs-report-box-label">${b.bahan}</span>
+        <span class="cs-report-box-val">${b.gram} gram</span>
+      </div>
+    `;
   });
 
-  html += `
-      </ul>
-    </div>
+  html += `</div></div>`;
 
-    <div class="report-box">
-      <h3>Detail Transaksi</h3>
+  // ==========================
+  // DETAIL TRANSAKSI
+  // ==========================
+  html += `
+    <div class="cs-report-section">
+      <div class="cs-report-section-title">Detail Transaksi</div>
   `;
 
   laporan.transaksiDetail.forEach(t => {
     html += `
-      <div class="transaksi-item">
-        <p><b>ID:</b> ${t.id}</p>
-        <p><b>Tanggal:</b> ${t.tanggal}</p>
-        <p><b>Total Bayar:</b> Rp ${t.totalBayar.toLocaleString("id-ID")}</p>
-        <p><b>Status:</b> ${t.status}</p>
+      <div class="cs-transaksi-item">
+        
+        <div class="cs-transaksi-item-head">
+          <span class="cs-transaksi-item-id">${t.id}</span>
+          <span class="cs-transaksi-item-total">
+            Rp ${t.totalBayar.toLocaleString("id-ID")}
+          </span>
+        </div>
+
+        <ul>
+          ${t.items.map(item => `
+            <li>
+              <span>${item.nama}</span>
+              <span>x${item.qty}</span>
+            </li>
+          `).join("")}
+        </ul>
+
       </div>
     `;
   });
 
   html += `</div>`;
 
-  document.getElementById("laporanContent").innerHTML = html;
+  container.innerHTML = html;
+
   return laporan;
 }
 
-function exportLaporanExcel(laporan) {
-  let rows = [];
-
-  // Header laporan
-  rows.push(["Jenis", laporan.type]);
-  rows.push(["Periode Mulai", laporan.periodeMulai]);
-  rows.push(["Periode Selesai", laporan.periodeSelesai]);
-  rows.push(["Status", laporan.status]);
-  rows.push(["Total Omzet", laporan.totalOmzet]);
-  rows.push(["Total Transaksi", laporan.totalTransaksi]);
-  rows.push([]);
-
-  // Top Menu
-  rows.push(["TOP MENU"]);
-  rows.push(["Menu", "Qty"]);
-  laporan.topMenu.forEach(t => {
-    rows.push([t.menu, t.qty]);
-  });
-  rows.push([]);
-
-  // Bahan Terpakai
-  rows.push(["BAHAN TERPAKAI"]);
-  rows.push(["Bahan", "Gram"]);
-  laporan.bahanTerpakai.forEach(b => {
-    rows.push([b.bahan, b.gram]);
-  });
-  rows.push([]);
-
-  // Detail Transaksi
-  rows.push(["DETAIL TRANSAKSI"]);
-  rows.push(["ID", "Tanggal", "Total Bayar", "Status"]);
-
-  laporan.transaksiDetail.forEach(t => {
-    rows.push([t.id, t.tanggal, t.totalBayar, t.status]);
-  });
-
-  exportToCSV(`laporan_${laporan.type}_${laporan.periodeMulai}_${laporan.periodeSelesai}.csv`, rows);
-}
-
+// ==========================
 // INIT
-const laporanObj = renderLaporanView();
-
-document.getElementById("btnExportPDF").addEventListener("click", function() {
-  exportToPDF();
-});
-
-document.getElementById("btnExportExcel").addEventListener("click", function() {
-  exportLaporanExcel(laporanObj);
-});
-
+// ==========================
 renderLaporanView();
