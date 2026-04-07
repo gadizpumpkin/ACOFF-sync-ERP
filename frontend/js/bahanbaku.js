@@ -1,215 +1,214 @@
+const token = localStorage.getItem("token");
+
 // ==========================
 // AUTH CHECK
 // ==========================
-const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+if (!token) {
+  window.location.href = "index.html";
+}
 
-document.getElementById("userRole").textContent = sessionUser.role;
+// tampilkan role di navbar
+const role = localStorage.getItem("role");
+document.getElementById("userRole").textContent = role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
-  clearSession();
+// logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.clear();
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "Manajer") {
-  alert("Akses ditolak. Halaman ini hanya untuk Manajer.");
-  window.location.href = "dashboard.html";
-}
+// ==========================
+// ELEMENT
+// ==========================
+const form = document.getElementById("bahanForm");
+const table = document.getElementById("bahanTable");
+const count = document.getElementById("bahanCount");
+const notifBox = document.getElementById("notifBox");
+const notifList = document.getElementById("notifList");
 
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
+const bahanId = document.getElementById("bahanId");
+const nama = document.getElementById("bahanNama");
+const stok = document.getElementById("bahanStok");
+const min = document.getElementById("bahanMin");
 
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
-
-  li.addEventListener("click", function() {
-    if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    else if (menu === "Kelola Supplier") window.location.href = "supplier.html";
-    else if (menu === "Pembelian Bahan Baku") window.location.href = "pembelian.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  menuList.appendChild(li);
-});
+const formTitle = document.getElementById("formTitle");
 
 // ==========================
-// STORAGE
+// LOAD DATA
 // ==========================
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
-}
+async function loadBahan() {
+  try {
+    const res = await fetch("http://localhost:5000/api/bahanbaku", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
-function saveBahanBakuData(data) {
-  localStorage.setItem("bahanBakuData", JSON.stringify(data));
-}
-
-// ==========================
-// CRUD
-// ==========================
-function addBahan(nama, stok, stok_minimum) {
-  const bahan = getBahanBakuData();
-
-  bahan.push({
-    id: "BB-" + Date.now(),
-    nama: nama,
-    stok: stok,
-    stok_minimum: stok_minimum,
-    satuan: "gram"
-  });
-
-  saveBahanBakuData(bahan);
-}
-
-function updateBahan(id, nama, stok, stok_minimum) {
-  let bahan = getBahanBakuData();
-
-  bahan = bahan.map(b => {
-    if (b.id === id) {
-      return {
-        ...b,
-        nama,
-        stok,
-        stok_minimum
-      };
+    if (res.status === 401) {
+      localStorage.clear();
+      window.location.href = "index.html";
+      return;
     }
-    return b;
-  });
 
-  saveBahanBakuData(bahan);
-}
+    const data = await res.json();
 
-function deleteBahan(id) {
-  let bahan = getBahanBakuData();
-  bahan = bahan.filter(b => b.id !== id);
-  saveBahanBakuData(bahan);
+    renderTable(data);
+    renderNotif(data);
+
+  } catch (err) {
+    console.error(err);
+  }
 }
 
 // ==========================
-// RENDER TABLE + NOTIF
+// RENDER TABLE
 // ==========================
-function renderBahanTable() {
-  const tbody = document.getElementById("bahanTable");
-  tbody.innerHTML = "";
+function renderTable(data) {
+  table.innerHTML = "";
 
-  const bahan = getBahanBakuData();
+  count.textContent = data.length + " bahan";
 
-  bahan.forEach(b => {
-    const status = b.stok < b.stok_minimum ? "LOW STOCK" : "AMAN";
-    const statusClass = b.stok < b.stok_minimum ? "status-low" : "status-safe";
+  data.forEach(item => {
+
+    const isLow = item.stok <= item.minimal_stok;
 
     const tr = document.createElement("tr");
+    if (isLow) tr.classList.add("cs-row-low");
+
     tr.innerHTML = `
-      <td>${b.nama}</td>
-      <td>${b.stok}</td>
-      <td>${b.stok_minimum}</td>
-      <td class="${statusClass}">${status}</td>
+      <td>${item.nama}</td>
+      <td>${item.stok} gr</td>
+      <td>${item.minimal_stok} gr</td>
       <td>
-        <div class="action-btn">
-          <button class="btn-edit" onclick="editBahan('${b.id}')">Edit</button>
-          <button class="btn-delete" onclick="removeBahan('${b.id}')">Hapus</button>
+        <span class="cs-status-pill ${isLow ? "low" : "safe"}">
+          <span class="cs-pulse"></span>
+          ${isLow ? "Low Stock" : "Aman"}
+        </span>
+      </td>
+      <td>
+        <div class="cs-action-btn">
+          <button class="cs-btn-edit" onclick="editBahan('${item._id}', '${item.nama}', ${item.stok}, ${item.minimal_stok})">
+            Edit
+          </button>
+          <button class="cs-btn-delete" onclick="deleteBahan('${item._id}')">
+            Hapus
+          </button>
         </div>
       </td>
     `;
 
-    tbody.appendChild(tr);
+    table.appendChild(tr);
   });
-
-  renderNotif();
 }
 
-function renderNotif() {
-  const notifBox = document.getElementById("notifBox");
-  const notifList = document.getElementById("notifList");
+// ==========================
+// NOTIFIKASI STOK MINIMUM
+// ==========================
+function renderNotif(data) {
   notifList.innerHTML = "";
 
-  const bahan = getBahanBakuData();
-  const lowStock = bahan.filter(b => b.stok < b.stok_minimum);
+  const lowItems = data.filter(i => i.stok <= i.minimal_stok);
 
-  if (lowStock.length === 0) {
+  if (lowItems.length === 0) {
     notifBox.style.display = "none";
     return;
   }
 
   notifBox.style.display = "block";
 
-  lowStock.forEach(b => {
+  lowItems.forEach(item => {
     const li = document.createElement("li");
-    li.textContent = `${b.nama} stok rendah: ${b.stok} gram (minimum ${b.stok_minimum} gram)`;
+    li.textContent = `${item.nama} (Stok: ${item.stok} gr, Min: ${item.minimal_stok} gr)`;
     notifList.appendChild(li);
   });
 }
 
 // ==========================
-// EDIT MODE
+// SUBMIT FORM (CREATE / UPDATE)
 // ==========================
-function editBahan(id) {
-  const bahan = getBahanBakuData();
-  const item = bahan.find(b => b.id === id);
-
-  if (!item) return alert("Bahan baku tidak ditemukan.");
-
-  document.getElementById("bahanId").value = item.id;
-  document.getElementById("bahanNama").value = item.nama;
-  document.getElementById("bahanStok").value = item.stok;
-  document.getElementById("bahanMin").value = item.stok_minimum;
-
-  document.getElementById("btnSubmit").textContent = "Update";
-}
-
-function removeBahan(id) {
-  if (!confirm("Yakin ingin menghapus bahan baku ini?")) return;
-
-  deleteBahan(id);
-  renderBahanTable();
-
-  alert("Bahan baku berhasil dihapus.");
-}
-
-// ==========================
-// FORM SUBMIT
-// ==========================
-document.getElementById("bahanForm").addEventListener("submit", function(e) {
+form.addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  const id = document.getElementById("bahanId").value;
-  const nama = document.getElementById("bahanNama").value.trim();
-  const stok = parseInt(document.getElementById("bahanStok").value);
-  const stokMin = parseInt(document.getElementById("bahanMin").value);
+  const payload = {
+    nama: nama.value,
+    stok: parseInt(stok.value),
+    minimal_stok: parseInt(min.value)
+  };
 
-  if (!nama || isNaN(stok) || isNaN(stokMin)) {
-    alert("Data tidak valid.");
-    return;
+  try {
+
+    let url = "http://localhost:5000/api/bahanbaku";
+    let method = "POST";
+
+    if (bahanId.value) {
+      url += "/" + bahanId.value;
+      method = "PUT";
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    resetForm();
+    loadBahan();
+
+  } catch (err) {
+    console.error(err);
   }
-
-  if (stok < 0 || stokMin < 0) {
-    alert("Stok tidak boleh negatif.");
-    return;
-  }
-
-  if (id) {
-    updateBahan(id, nama, stok, stokMin);
-    alert("Bahan baku berhasil diupdate.");
-  } else {
-    addBahan(nama, stok, stokMin);
-    alert("Bahan baku berhasil ditambahkan.");
-  }
-
-  resetForm();
-  renderBahanTable();
 });
 
-// RESET FORM
-function resetForm() {
-  document.getElementById("bahanId").value = "";
-  document.getElementById("bahanNama").value = "";
-  document.getElementById("bahanStok").value = "";
-  document.getElementById("bahanMin").value = "";
-  document.getElementById("btnSubmit").textContent = "Simpan";
+// ==========================
+// EDIT
+// ==========================
+window.editBahan = function(id, n, s, m) {
+  bahanId.value = id;
+  nama.value = n;
+  stok.value = s;
+  min.value = m;
+
+  formTitle.textContent = "Edit Bahan Baku";
 }
 
+// ==========================
+// DELETE
+// ==========================
+window.deleteBahan = async function(id) {
+  if (!confirm("Yakin hapus bahan ini?")) return;
+
+  try {
+    await fetch(`http://localhost:5000/api/bahanbaku/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    loadBahan();
+
+  } catch (err) {
+    console.error(err);
+  }
+}
+
+// ==========================
+// RESET
+// ==========================
 document.getElementById("btnReset").addEventListener("click", resetForm);
 
+function resetForm() {
+  bahanId.value = "";
+  form.reset();
+  formTitle.textContent = "Form Tambah Bahan Baku";
+}
+
+// ==========================
 // INIT
-renderBahanTable();
+// ==========================
+loadBahan();
