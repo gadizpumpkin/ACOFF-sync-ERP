@@ -1,1 +1,316 @@
-M
+# ☕ Coffee Street -- Business Management Information System
+
+## Project Title
+
+**Coffee Street -- Integrated Business Management Information System**
+
+------------------------------------------------------------------------
+
+## Project Description
+
+Coffee Street is an integrated Business Management Information System
+designed to support end‑to‑end operational processes in a coffee shop
+environment.\
+The system enables owners and managers to monitor sales, inventory,
+purchasing, employee attendance, payroll, and financial performance in
+real‑time.
+
+The platform emphasizes **data consistency**, **process automation**,
+and **decision support analytics** to improve operational efficiency and
+profitability.
+
+------------------------------------------------------------------------
+
+## Objective
+
+The primary objectives of this system are:
+
+-   Provide real‑time operational visibility
+-   Automate daily and monthly financial closing
+-   Improve inventory accuracy using ledger tracking
+-   Support decision making using analytics dashboards
+-   Standardize business workflow using role‑based access
+-   Reduce manual calculation errors
+-   Enable scalable architecture for multi‑branch expansion
+
+------------------------------------------------------------------------
+
+## Core Features
+
+### 1. Authentication & Authorization
+
+-   Secure login system
+-   Password hashing using bcrypt
+-   Role‑based access control (Owner, Manager, Employee)
+
+### 2. Sales Management
+
+-   Record transactions
+-   Transaction details tracking
+-   Sales summary dashboard
+
+### 3. Inventory Management
+
+-   Raw material stock tracking
+-   Inventory Ledger (stock movement history)
+-   Automatic stock deduction based on recipe usage
+
+### 4. Purchase Management
+
+-   Supplier database
+-   Purchase request workflow
+-   Approval system
+-   Automatic stock updates after goods received
+
+### 5. Financial System
+
+-   Daily Closing
+-   Monthly Closing
+-   Automatic Profit & Loss calculation
+-   Financial report archive
+
+### 6. Employee Management
+
+-   Attendance tracking
+-   Payroll calculation
+-   Payroll configuration per role
+
+### 7. Analytics Dashboard
+
+-   Menu performance analytics
+-   Profit trend analytics
+-   Purchase analytics
+-   Inventory usage analytics
+
+### 8. Enterprise Features
+
+-   Automated purchase suggestion
+-   Forecasting raw material demand
+-   Multi-branch support (future)
+-   Backup & restore system
+
+------------------------------------------------------------------------
+
+## Tech Stack
+
+### Backend
+
+-   Node.js
+-   Express.js
+-   MySQL
+-   JWT Authentication
+-   Bcrypt
+
+### Database
+
+-   MySQL relational schema
+-   Transaction-safe queries
+-   Ledger-based inventory design
+
+### Tools
+
+-   Postman (API Testing)
+-   GitHub (Version Control)
+-   VS Code (Development IDE)
+
+------------------------------------------------------------------------
+
+## Project Structure
+
+    coffee-street/
+    │
+    ├── config/
+    │   └── db.js
+    │
+    ├── controllers/
+    │   ├── authController.js
+    │   ├── transaksiController.js
+    │   ├── pembelianController.js
+    │   ├── closingController.js
+    │   └── payrollController.js
+    │
+    ├── services/
+    │   ├── ledgerService.js
+    │   ├── pnlService.js
+    │   └── analyticsService.js
+    │
+    ├── utils/
+    │   ├── hashPassword.js
+    │   ├── auditService.js
+    │   └── validator.js
+    │
+    ├── routes/
+    │   ├── authRoutes.js
+    │   ├── transaksiRoutes.js
+    │   ├── pembelianRoutes.js
+    │   ├── closingRoutes.js
+    │   └── payrollRoutes.js
+    │
+    ├── database/
+    │   └── schema.sql
+    │
+    ├── server.js
+    └── README.md
+
+------------------------------------------------------------------------
+
+## Installation Guide
+
+### 1. Clone repository
+
+    git clone https://github.com/yourusername/coffee-street.git
+    cd coffee-street
+
+### 2. Install dependencies
+
+    npm install
+
+### 3. Setup database
+
+Create database in MySQL:
+
+    CREATE DATABASE coffe_street;
+
+Import schema:
+
+    mysql -u root -p coffe_street < database/schema.sql
+
+### 4. Configure environment variables
+
+Create `.env` file:
+
+    DB_HOST=localhost
+    DB_USER=root
+    DB_PASS=yourpassword
+    DB_NAME=coffe_street
+    JWT_SECRET=secretkey
+    PORT=3000
+
+### 5. Run server
+
+    node server.js
+
+Server will run at:
+
+    http://localhost:3000
+
+------------------------------------------------------------------------
+
+## General Usage Guide
+
+### Step 1 -- Login
+
+Use registered user credentials.
+
+Roles: - Owner - Manager - Employee
+
+Password is stored using bcrypt hashing.
+
+------------------------------------------------------------------------
+
+### Step 2 -- Setup Master Data
+
+Add:
+
+-   Menu
+-   Raw Materials
+-   Supplier
+-   Recipe (menu → bahan baku)
+
+------------------------------------------------------------------------
+
+### Step 3 -- Daily Operation
+
+#### Sales
+
+Record transactions:
+
+    POST /transaksi
+
+System will: - store sales - reduce inventory automatically
+
+#### Purchase
+
+Create purchase order:
+
+    POST /pembelian
+
+Workflow:
+
+Draft → Approved → Received
+
+When status = Received: - stock updated - ledger recorded
+
+------------------------------------------------------------------------
+
+### Step 4 -- Daily Closing
+
+Execute daily closing:
+
+    POST /closing/daily
+
+System will: - calculate daily profit - store snapshot
+
+------------------------------------------------------------------------
+
+### Step 5 -- Monthly Closing
+
+    POST /closing/monthly
+
+System will: - aggregate daily snapshots - generate monthly P&L - lock
+period
+
+------------------------------------------------------------------------
+
+### Step 6 -- Analytics
+
+Owner can monitor:
+
+-   best selling menu
+-   profit trends
+-   stock usage
+-   purchase efficiency
+
+------------------------------------------------------------------------
+
+## Example API Flow
+
+Login:
+
+    POST /auth/login
+
+Create Transaction:
+
+    POST /transaksi
+
+Update Purchase Status:
+
+    PATCH /pembelian/:id/status
+
+Daily Closing:
+
+    POST /closing/daily
+
+Monthly PNL:
+
+    GET /laporan/pnl
+
+------------------------------------------------------------------------
+
+## System Workflow Overview
+
+    Login
+     → Master Data Setup
+     → Sales Transaction
+     → Inventory Update
+     → Purchase Management
+     → Daily Closing
+     → Monthly Closing
+     → Profit & Loss Report
+     → Analytics Dashboard
+
+------------------------------------------------------------------------
+
+## Author
+
+Coffee Street System Development
