@@ -391,5 +391,7 @@ Monthly PNL:
 ------------------------------------------------------------------------
 
 ## Author
-
-Coffee Street System Development
+Sepi Ananda
+Information Systems Student
+UPN "Veteran" Yogyakarta
+## Coffee Street System Development
