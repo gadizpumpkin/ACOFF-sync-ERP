@@ -117,39 +117,88 @@ The primary objectives of this system are:
 
 ## Project Structure
 
-    coffee-street/
+    project-root/
     │
-    ├── config/
-    │   └── db.js
+    ├── backend/
+    │ ├── config/
+    │ │ └── db.js
+    │ │
+    │ ├── controllers/
+    │ │ ├── analyticsController.js
+    │ │ ├── authController.js
+    │ │ ├── closingController.js
+    │ │ ├── dashboardController.js
+    │ │ ├── inventoryController.js
+    │ │ ├── laporanController.js
+    │ │ ├── monthlyClosingController.js
+    │ │ ├── payrollController.js
+    │ │ ├── pembelianController.js
+    │ │ ├── reportExportController.js
+    │ │ └── transaksiController.js
+    │ │
+    │ ├── middleware/
+    │ │ ├── authMiddleware.js
+    │ │ ├── closingMiddleware.js
+    │ │ └── roleMiddleware.js
+    │ │
+    │ ├── routes/
+    │ │ ├── analyticsRoutes.js
+    │ │ ├── authRoutes.js
+    │ │ ├── closingRoutes.js
+    │ │ ├── dashboardRoutes.js
+    │ │ ├── inventoryRoutes.js
+    │ │ ├── laporanRoutes.js
+    │ │ ├── monthlyClosingRoutes.js
+    │ │ ├── payrollRoutes.js
+    │ │ ├── pembelianRoutes.js
+    │ │ ├── reportRoutes.js
+    │ │ └── transaksiRoutes.js
+    │ │
+    │ ├── utils/
+    │ │ ├── auditService.js
+    │ │ ├── hashPassword.js
+    │ │ ├── inventoryLedgerService.js
+    │ │ ├── payrollService.js
+    │ │ └── stockService.js
+    │ │
+    │ ├── .env
+    │ ├── hash.js
+    │ ├── package.json
+    │ ├── package-lock.json
+    │ ├── server.js
+    │ └── node_modules/
     │
-    ├── controllers/
-    │   ├── authController.js
-    │   ├── transaksiController.js
-    │   ├── pembelianController.js
-    │   ├── closingController.js
-    │   └── payrollController.js
+    ├── frontend/
+    │ ├── css/
+    │ │ ├── main.css
+    │ │ ├── dashboard.css
+    │ │ ├── inventory.css
+    │ │ ├── payroll.css
+    │ │ └── laporan.css
+    │ │
+    │ ├── js/
+    │ │ ├── api.js
+    │ │ ├── auth.js
+    │ │ ├── dashboard.js
+    │ │ ├── inventory.js
+    │ │ ├── payroll.js
+    │ │ ├── laporan.js
+    │ │ └── utils.js
+    │ │
+    │ ├── pages/
+    │ │ ├── index.html
+    │ │ ├── login.html
+    │ │ ├── dashboard.html
+    │ │ ├── inventory.html
+    │ │ ├── payroll.html
+    │ │ ├── pembelian.html
+    │ │ ├── laporan.html
+    │ │ └── transaksi.html
+    │ │
+    │ └── assets/
+    │ ├── images/
+    │ └── icons/
     │
-    ├── services/
-    │   ├── ledgerService.js
-    │   ├── pnlService.js
-    │   └── analyticsService.js
-    │
-    ├── utils/
-    │   ├── hashPassword.js
-    │   ├── auditService.js
-    │   └── validator.js
-    │
-    ├── routes/
-    │   ├── authRoutes.js
-    │   ├── transaksiRoutes.js
-    │   ├── pembelianRoutes.js
-    │   ├── closingRoutes.js
-    │   └── payrollRoutes.js
-    │
-    ├── database/
-    │   └── schema.sql
-    │
-    ├── server.js
     └── README.md
 
 ------------------------------------------------------------------------
