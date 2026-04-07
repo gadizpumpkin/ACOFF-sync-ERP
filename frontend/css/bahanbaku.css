@@ -1,71 +1,584 @@
-.card-form, .card-table, .card-warning {
-  margin-top: 20px;
-  background: white;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+/* ============================================================
+   Coffee Street — bahanbaku.css
+   Tema konsisten dengan seluruh halaman Coffee Street
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap');
+
+/* ---------- Reset & Base ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.card-warning {
-  border-left: 6px solid red;
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #F5F3EF;
+  color: #1a1a18;
+  min-height: 100vh;
 }
 
-table {
+/* ---------- NAVBAR ---------- */
+.cs-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: #1a1008;
+  height: 60px;
+  padding: 0 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(201, 145, 58, 0.2);
+}
+
+.cs-nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.cs-nav-logo {
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
+}
+
+.cs-nav-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 17px;
+  color: #C9913A;
+  letter-spacing: 0.02em;
+}
+
+.cs-nav-subtitle {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: rgba(201, 145, 58, 0.55);
+  margin-left: 4px;
+}
+
+.cs-nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.cs-role-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(201, 145, 58, 0.12);
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.3);
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+
+.cs-btn-logout {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  background: rgba(220, 70, 60, 0.1);
+  color: #e05050;
+  border: 1px solid rgba(220, 70, 60, 0.3);
+  border-radius: 8px;
+  padding: 6px 14px;
+  cursor: pointer;
+  transition: background 0.18s ease;
+}
+
+.cs-btn-logout:hover {
+  background: rgba(220, 70, 60, 0.2);
+}
+
+/* ---------- LAYOUT ---------- */
+.cs-layout {
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* ---------- SIDEBAR ---------- */
+.cs-sidebar {
+  width: 210px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-right: 0.5px solid rgba(0, 0, 0, 0.08);
+  padding: 1.5rem 0;
+}
+
+.cs-sidebar-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: #888780;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0 1.25rem;
+  margin-bottom: 8px;
+}
+
+.cs-menu {
+  list-style: none;
+}
+
+.cs-menu li a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 1.25rem;
+  font-size: 14px;
+  font-weight: 400;
+  color: #5f5e5a;
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.cs-menu li a:hover {
+  background: #f5f3ef;
+  color: #1a1a18;
+}
+
+.cs-menu li.active a {
+  border-left-color: #C9913A;
+  color: #C9913A;
+  background: rgba(201, 145, 58, 0.06);
+  font-weight: 500;
+}
+
+.cs-menu-icon {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  opacity: 0.7;
+}
+
+.cs-menu li.active a .cs-menu-icon {
+  opacity: 1;
+}
+
+/* ---------- MAIN CONTENT ---------- */
+.cs-main {
+  flex: 1;
+  padding: 2rem;
+  max-width: 960px;
+}
+
+/* ---------- PAGE HEADER ---------- */
+.cs-page-header {
+  margin-bottom: 1.75rem;
+}
+
+.cs-page-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a18;
+  margin-bottom: 4px;
+}
+
+.cs-page-sub {
+  font-size: 13px;
+  color: #888780;
+}
+
+.cs-page-sub strong {
+  color: #C9913A;
+  font-weight: 500;
+}
+
+/* ---------- NOTIFIKASI STOK ---------- */
+.cs-notif-box {
+  background: rgba(226, 75, 74, 0.05);
+  border: 1px solid rgba(226, 75, 74, 0.25);
+  border-left: 3px solid #e24b4a;
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.5rem;
+}
+
+.cs-notif-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #A32D2D;
+  margin-bottom: 10px;
+}
+
+.cs-notif-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cs-notif-list li {
+  font-size: 13px;
+  color: #A32D2D;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-notif-list li::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #e24b4a;
+  flex-shrink: 0;
+}
+
+/* ---------- CARDS ---------- */
+.cs-card {
+  background: #ffffff;
+  border: 0.5px solid rgba(0, 0, 0, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.cs-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+  padding-bottom: 1rem;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.cs-card-title {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a18;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cs-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #C9913A;
+  flex-shrink: 0;
+}
+
+/* ---------- COUNT BADGE ---------- */
+.cs-count-badge {
+  font-size: 12px;
+  font-weight: 500;
+  background: rgba(201, 145, 58, 0.08);
+  color: #854F0B;
+  border: 1px solid rgba(201, 145, 58, 0.2);
+  border-radius: 20px;
+  padding: 3px 12px;
+}
+
+/* ---------- FORM ---------- */
+.cs-form {
+  width: 100%;
+}
+
+.cs-form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px;
+}
+
+.cs-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.cs-form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888780;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.cs-form-group input[type="text"],
+.cs-form-group input[type="number"] {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #1a1a18;
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.cs-form-group input::placeholder {
+  color: #b4b2a9;
+}
+
+.cs-form-group input:focus {
+  border-color: rgba(201, 145, 58, 0.5);
+  box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
+  background: #ffffff;
+}
+
+/* ---------- INPUT WITH UNIT ---------- */
+.cs-input-unit {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cs-input-unit input[type="number"] {
+  padding-right: 48px;
+}
+
+.cs-unit-label {
+  position: absolute;
+  right: 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #b4b2a9;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- FORM ACTIONS ---------- */
+.cs-form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 1.25rem;
+  padding-top: 1.25rem;
+  border-top: 0.5px solid rgba(0, 0, 0, 0.07);
+}
+
+.cs-btn-save {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #1a1008;
+  color: #C9913A;
+  border: 1px solid rgba(201, 145, 58, 0.35);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.18s ease, transform 0.1s ease;
+}
+
+.cs-btn-save:hover {
+  background: #251708;
+}
+
+.cs-btn-save:active {
+  transform: scale(0.98);
+}
+
+.cs-btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: #f5f3ef;
+  color: #5f5e5a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.18s ease;
+}
+
+.cs-btn-reset:hover {
+  background: #ebe8e2;
+  color: #1a1a18;
+}
+
+/* ---------- TABLE ---------- */
+.cs-table-wrap {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.cs-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 15px;
+  font-size: 13.5px;
 }
 
-table th, table td {
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  font-size: 14px;
+.cs-table thead th {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #888780;
+  padding: 0 14px 10px;
+  text-align: left;
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.08);
+  white-space: nowrap;
 }
 
-.status-safe {
-  color: green;
-  font-weight: bold;
+.cs-table tbody tr {
+  border-bottom: 0.5px solid rgba(0, 0, 0, 0.06);
+  transition: background 0.12s ease;
 }
 
-.status-low {
-  color: red;
-  font-weight: bold;
+.cs-table tbody tr:hover {
+  background: #faf9f7;
 }
 
-.action-btn {
+.cs-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.cs-table td {
+  padding: 12px 14px;
+  color: #1a1a18;
+  vertical-align: middle;
+}
+
+/* Highlight row stok rendah */
+.cs-table tbody tr.cs-row-low {
+  background: rgba(226, 75, 74, 0.03);
+}
+
+.cs-table tbody tr.cs-row-low:hover {
+  background: rgba(226, 75, 74, 0.07);
+}
+
+/* ---------- STATUS PILLS ---------- */
+.cs-status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.cs-status-pill.safe {
+  background: rgba(99, 153, 34, 0.1);
+  color: #3B6D11;
+  border: 1px solid rgba(99, 153, 34, 0.25);
+}
+
+.cs-status-pill.low {
+  background: rgba(226, 75, 74, 0.1);
+  color: #A32D2D;
+  border: 1px solid rgba(226, 75, 74, 0.25);
+}
+
+.cs-pulse {
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  flex-shrink: 0;
+}
+
+/* ---------- ACTION BUTTONS (in table) ---------- */
+.cs-action-btn {
   display: flex;
   gap: 6px;
 }
 
-.btn-edit {
-  padding: 6px 10px;
-  border: none;
-  background: orange;
-  color: white;
-  border-radius: 8px;
+.cs-btn-edit,
+.cs-btn-delete {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 11px;
+  border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
 }
 
-.btn-delete {
-  padding: 6px 10px;
-  border: none;
-  background: red;
-  color: white;
-  border-radius: 8px;
-  cursor: pointer;
+.cs-btn-edit {
+  background: rgba(201, 145, 58, 0.08);
+  color: #854F0B;
+  border: 1px solid rgba(201, 145, 58, 0.25);
 }
 
-.btn-edit:hover {
-  background: #cc8400;
+.cs-btn-edit:hover {
+  background: rgba(201, 145, 58, 0.18);
 }
 
-.btn-delete:hover {
-  background: #b40000;
+.cs-btn-delete {
+  background: rgba(226, 75, 74, 0.08);
+  color: #A32D2D;
+  border: 1px solid rgba(226, 75, 74, 0.2);
 }
 
-#notifList li {
-  margin-bottom: 8px;
-  font-size: 14px;
-  font-weight: bold;
-  color: red;
+.cs-btn-delete:hover {
+  background: rgba(226, 75, 74, 0.18);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 900px) {
+  .cs-form-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .cs-form-grid .cs-form-group:first-child {
+    grid-column: span 2;
+  }
+}
+
+@media (max-width: 768px) {
+  .cs-nav {
+    padding: 0 1rem;
+  }
+
+  .cs-sidebar {
+    display: none;
+  }
+
+  .cs-main {
+    padding: 1.25rem 1rem;
+    max-width: 100%;
+  }
+
+  .cs-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .cs-form-grid .cs-form-group:first-child {
+    grid-column: span 1;
+  }
+
+  .cs-form-actions {
+    flex-direction: column;
+  }
+
+  .cs-btn-save,
+  .cs-btn-reset {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .cs-page-title {
+    font-size: 22px;
+  }
 }
