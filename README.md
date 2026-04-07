@@ -1,8 +1,8 @@
-# ☕ Coffee Street -- Business Management Information System
+# Business Management Information System
 
-## Project Title
+##  ☕Coffee Street -- Integrated Business Management Information System
 
-**Coffee Street -- Integrated Business Management Information System**
+
 
 ------------------------------------------------------------------------
 
