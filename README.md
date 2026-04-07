@@ -2,7 +2,7 @@
 
 ##  ☕Coffee Street -- Integrated Business Management Information System
 
-
+[Project Description](#project-descryption) | [Objectiove](#objective) | [Core Features](#core-features) | [Tech Stack](#tech-stack) | [Project Structure](#project-structure) | [Installation Guide](#installation-guide) | [General Usage Guide](#general-usage-guide) | [Example API Flow](#example-api-flow) | [System Workflow Overview](#system-workflow-overview) | [Author](#author)
 
 ------------------------------------------------------------------------
 
