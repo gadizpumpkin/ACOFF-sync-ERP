@@ -1,41 +1,78 @@
+// ==========================
+// AUTH CHECK
+// ==========================
 const sessionUser = getSession();
 
 if (!sessionUser) {
   window.location.href = "index.html";
 }
 
-// Header info
+// ==========================
+// HEADER INFO
+// ==========================
 document.getElementById("userRole").textContent = sessionUser.role;
-document.getElementById("welcomeTitle").textContent =
-  "Selamat datang, " + sessionUser.username + " (" + sessionUser.role + ")";
 
-// Menu rendering
+const welcomeEl = document.getElementById("welcomeTitle");
+if (welcomeEl) {
+  welcomeEl.textContent =
+    "Selamat datang, " + sessionUser.username + " (" + sessionUser.role + ")";
+}
+
+// ==========================
+// MENU MAPPING (ROUTING)
+// ==========================
+const menuRoutes = {
+  "Dashboard": "dashboard.html",
+  "Absensi": "absensi.html",
+  "Transaksi Penjualan": "transaksi.html",
+  "Kelola Menu": "menu.html",
+  "Kelola Resep": "resep.html",
+  "Kelola Bahan Baku": "bahanbaku.html",
+  "Kelola Supplier": "supplier.html",
+  "Pembelian Bahan Baku": "pembelian.html",
+  "Generate Laporan": "laporan.html",
+  "Lihat Laporan": "laporan.html"
+};
+
+// ==========================
+// RENDER MENU (SESUAI CSS)
+// ==========================
 const menuList = document.getElementById("menuList");
 const menus = getMenuByRole(sessionUser.role);
 
+// kosongkan dulu (biar tidak double)
+menuList.innerHTML = "";
+
 menus.forEach(menu => {
   const li = document.createElement("li");
-  li.textContent = menu;
+  const a = document.createElement("a");
 
-  li.addEventListener("click", function() {
+  a.textContent = menu;
 
-    if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    if (menu === "Kelola Menu") window.location.href = "menu.html";
-    if (menu === "Kelola Resep") window.location.href = "resep.html";
+  // kasih link kalau ada
+  if (menuRoutes[menu]) {
+    a.href = menuRoutes[menu];
+  } else {
+    a.href = "#";
+  }
 
-  });
-
+  li.appendChild(a);
   menuList.appendChild(li);
 });
 
-// Logout
-document.getElementById("logoutBtn").addEventListener("click", function() {
+// ==========================
+// LOGOUT
+// ==========================
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   localStorage.removeItem("token");
   window.location.href = "index.html";
 });
-function exportPnl(){
 
+// ==========================
+// EXPORT PNL
+// ==========================
+function exportPnl() {
   const year = 2026;
   const month = 3;
 
@@ -44,21 +81,16 @@ function exportPnl(){
   window.open(
     `http://localhost:5000/api/report/export-pnl?year=${year}&month=${month}&token=${token}`
   );
-
 }
 
-
 // ============================
-// LOW STOCK BADGE (OWNER ONLY)
+// LOW STOCK BADGE (OWNER)
 // ============================
-
 async function loadLowStock() {
 
-  // Hanya Owner yang perlu badge ini
   if (sessionUser.role !== "Owner") return;
 
   try {
-
     const token = localStorage.getItem("token");
 
     const res = await fetch("http://localhost:5000/api/dashboard/low-stock", {
@@ -87,10 +119,11 @@ async function loadLowStock() {
     }
 
   } catch (err) {
-    console.error("Low stock fetch error:", err);
+    console.error("Low stock error:", err);
   }
 }
 
+// klik badge
 const badge = document.getElementById("lowStockBadge");
 
 if (badge) {
@@ -115,8 +148,7 @@ if (badge) {
     alert(detail);
   });
 }
-// Jalankan pertama kali
-loadLowStock();
 
-// Auto refresh setiap 30 detik
+// INIT
+loadLowStock();
 setInterval(loadLowStock, 30000);
