@@ -4,36 +4,78 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Login</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/login.css">
 </head>
 <body>
 
-  <div class="container">
-    <div class="card">
-      <h1 class="title">Coffee Street</h1>
-      <p class="subtitle">Login Sistem Manajemen Bisnis</p>
+  <div class="cs-login-bg">
 
-      <form id="loginForm">
-        <div class="form-group">
+    <!-- Decorative corner accent -->
+    <div class="cs-login-deco cs-deco-tl"></div>
+    <div class="cs-login-deco cs-deco-br"></div>
+
+    <div class="cs-login-card">
+
+      <!-- Brand -->
+      <div class="cs-login-brand">
+        <svg class="cs-login-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="24" cy="24" r="22" stroke="#C9913A" stroke-width="2"/>
+          <path d="M13 30c0-6.075 4.925-11 11-11s11 4.925 11 11" stroke="#C9913A" stroke-width="2" stroke-linecap="round"/>
+          <path d="M19 30v-5a5 5 0 0110 0v5" stroke="#C9913A" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M33 22c1.5-1.5 3.5-1.5 3.5 0s-1.5 2-1.5 3.5" stroke="#C9913A" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
+        <h1 class="cs-login-title">Coffee Street</h1>
+        <p class="cs-login-subtitle">Sistem Manajemen Bisnis</p>
+      </div>
+
+      <!-- Divider -->
+      <div class="cs-login-divider"></div>
+
+      <!-- Form -->
+      <form id="loginForm" class="cs-login-form">
+        <div class="cs-form-group">
           <label for="username">Username</label>
-          <input id="username" type="text" placeholder="Masukkan username" required>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+            <input id="username" type="text" placeholder="Masukkan username" required autocomplete="username">
+          </div>
         </div>
 
-        <div class="form-group">
+        <div class="cs-form-group">
           <label for="password">Password</label>
-          <input id="password" type="password" placeholder="Masukkan password" required>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+              <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+            </svg>
+            <input id="password" type="password" placeholder="Masukkan password" required autocomplete="current-password">
+          </div>
         </div>
 
-        <button type="submit" class="btn-primary">Login</button>
+        <button type="submit" class="cs-btn-login">
+          Masuk
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
 
-        <p id="errorMsg" class="error"></p>
+        <p id="errorMsg" class="cs-error-msg"></p>
       </form>
+
+      <!-- Footer -->
+      <p class="cs-login-footer">&copy; 2025 Coffee Street &mdash; All rights reserved</p>
+
     </div>
   </div>
 
-  <!-- <script src="js/auth.js"></script> -->
   <script src="js/login.js"></script>
 </body>
 </html>
