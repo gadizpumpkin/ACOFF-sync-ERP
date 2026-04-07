@@ -2,7 +2,7 @@
 
 ##  ☕Coffee Street -- Integrated Business Management Information System
 
-[Project Description](#project-descryption) | [Objectiove](#objective) | [Core Features](#core-features) | [Tech Stack](#tech-stack) | [Project Structure](#project-structure) | [Installation Guide](#installation-guide) | [General Usage Guide](#general-usage-guide) | [Example API Flow](#example-api-flow) | [System Workflow Overview](#system-workflow-overview) | [Author](#author)
+[Project Description](#project-descryption) | [Objective](#objective) | [Core Features](#core-features) | [Tech Stack](#tech-stack) | [Project Structure](#project-structure) | [Installation Guide](#installation-guide) | [General Usage Guide](#general-usage-guide) | [Example API Flow](#example-api-flow) | [System Workflow Overview](#system-workflow-overview) | [Author](#author)
 
 ------------------------------------------------------------------------
 
@@ -394,4 +394,4 @@ Monthly PNL:
 Sepi Ananda
 Information Systems Student
 UPN "Veteran" Yogyakarta
-## Coffee Street System Development
+## Coffee Street System Developer
