@@ -16,7 +16,9 @@ if (sessionUser.role !== "Owner") {
   window.location.href = "dashboard.html";
 }
 
-// RBAC MENU
+// ==========================
+// RBAC MENU (optional jika ingin dinamis)
+// ==========================
 const menuList = document.getElementById("menuList");
 const menus = getMenuByRole(sessionUser.role);
 
@@ -129,21 +131,26 @@ function renderTable() {
   const pembelianData = getPembelianData();
 
   pembelianData.slice().reverse().forEach(po => {
-    let statusClass = "status-pending";
-    if (po.status === "Approved") statusClass = "status-approved";
-    if (po.status === "Rejected") statusClass = "status-rejected";
-    if (po.status === "Received") statusClass = "status-received";
+    // Sesuaikan dengan class pill CSS
+    let statusClass = "cs-status-pill pending";
+    if (po.status === "Approved") statusClass = "cs-status-pill approved";
+    if (po.status === "Rejected") statusClass = "cs-status-pill rejected";
+    if (po.status === "Received") statusClass = "cs-status-pill received";
 
     let actions = "";
 
     if (po.status === "Pending") {
       actions = `
-        <button class="btn-approve" onclick="approvePembelian('${po.id}')">Approve</button>
-        <button class="btn-reject" onclick="rejectPembelian('${po.id}')">Reject</button>
+        <div class="cs-action-btn">
+          <button class="cs-btn-approve" onclick="approvePembelian('${po.id}')">Approve</button>
+          <button class="cs-btn-reject" onclick="rejectPembelian('${po.id}')">Reject</button>
+        </div>
       `;
     } else if (po.status === "Approved") {
       actions = `
-        <button class="btn-receive" onclick="receivePembelian('${po.id}')">Received</button>
+        <div class="cs-action-btn">
+          <button class="cs-btn-receive" onclick="receivePembelian('${po.id}')">Received</button>
+        </div>
       `;
     } else {
       actions = "-";
@@ -151,11 +158,11 @@ function renderTable() {
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${po.id}</td>
+      <td class="cs-td-id">${po.id}</td>
       <td>${po.supplierNama}</td>
       <td>${po.tanggal}</td>
-      <td class="${statusClass}">${po.status}</td>
-      <td>Rp ${po.total.toLocaleString("id-ID")}</td>
+      <td><span class="${statusClass}"><span class="cs-pulse"></span>${po.status}</span></td>
+      <td class="cs-td-total">Rp ${po.total.toLocaleString("id-ID")}</td>
       <td>${actions}</td>
     `;
 
