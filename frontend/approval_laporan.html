@@ -4,44 +4,123 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Approval Laporan</title>
-
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/dashboard.css">
   <link rel="stylesheet" href="css/approval_laporan.css">
 </head>
 <body>
 
-  <header class="navbar">
-    <h2>Coffee Street - Approval Laporan (Owner)</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Approval Laporan</span></span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="userRole">Owner</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="approval_pembelian.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 3h1.5l2 7h7l1.5-5H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="7" cy="13" r="1" fill="currentColor"/>
+              <circle cx="11" cy="13" r="1" fill="currentColor"/>
+            </svg>
+            Approval Pembelian
+          </a>
+        </li>
+        <li>
+          <a href="approval_payroll.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 8h2M9 8h2M5 11h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M5 5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Approval Payroll
+          </a>
+        </li>
+        <li class="active">
+          <a href="approval_laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Approval Laporan
+          </a>
+        </li>
+        <li>
+          <a href="audit_log.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Audit Log
+          </a>
+        </li>
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1>Approval Laporan</h1>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-table">
-        <h3>Laporan Pending</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Jenis</th>
-              <th>Periode</th>
-              <th>Total Omzet</th>
-              <th>Total Transaksi</th>
-              <th>Aksi</th>
-            </tr>
-          </thead>
-          <tbody id="pendingTable"></tbody>
-        </table>
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Approval Laporan</h1>
+        <p class="cs-page-sub">Owner meninjau dan melakukan approval laporan <strong>Weekly</strong> / <strong>Monthly</strong> yang diajukan manajer.</p>
+      </div>
+
+      <!-- TABEL LAPORAN PENDING -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Laporan Pending
+          </div>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table">
+            <thead>
+              <tr>
+                <th>Jenis</th>
+                <th>Periode</th>
+                <th>Total Omzet</th>
+                <th>Total Transaksi</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="pendingTable">
+              <!-- diisi approval_laporan.js -->
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </main>
