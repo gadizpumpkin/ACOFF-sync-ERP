@@ -32,6 +32,7 @@ menus.forEach(menu => {
   a.textContent = menu;
 
   switch (menu) {
+
     case "Dashboard":
       a.href = "dashboard.html";
       break;
@@ -42,11 +43,11 @@ menus.forEach(menu => {
 
     case "Approval Payroll":
       a.href = "approval_payroll.html";
-      li.classList.add("active");
       break;
 
-    case "Laporan":
-      a.href = "laporan.html";
+    case "Approval Laporan":
+      a.href = "approval_laporan.html";
+      li.classList.add("active");
       break;
 
     case "Audit Log":
@@ -59,25 +60,18 @@ menus.forEach(menu => {
 
   li.appendChild(a);
   menuList.appendChild(li);
+
 });
 
 // ==========================
 // STORAGE
 // ==========================
-function getPayrollData() {
-  return JSON.parse(localStorage.getItem("payrollData")) || [];
+function getLaporanData() {
+  return JSON.parse(localStorage.getItem("laporanData")) || [];
 }
 
-function savePayrollData(data) {
-  localStorage.setItem("payrollData", JSON.stringify(data));
-}
-
-function getPaycheckData() {
-  return JSON.parse(localStorage.getItem("paycheckData")) || [];
-}
-
-function savePaycheckData(data) {
-  localStorage.setItem("paycheckData", JSON.stringify(data));
+function saveLaporanData(data) {
+  localStorage.setItem("laporanData", JSON.stringify(data));
 }
 
 // ==========================
@@ -88,46 +82,24 @@ function formatRupiah(value) {
 }
 
 // ==========================
-// GENERATE PAYCHECK AFTER APPROVAL
-// ==========================
-function generatePaycheck(payroll) {
-
-  let paycheck = getPaycheckData();
-
-  payroll.detail.forEach(d => {
-
-    paycheck.push({
-      id: "PC-" + Date.now() + "-" + d.user,
-      payrollId: payroll.id,
-      user: d.user,
-      tanggal: payroll.tanggal,
-      gaji: d.gaji,
-      status: "Published"
-    });
-
-  });
-
-  savePaycheckData(paycheck);
-}
-
-// ==========================
 // RENDER TABLE
 // ==========================
-function renderPendingPayroll() {
+function renderPendingLaporan() {
 
   const tbody = document.getElementById("pendingTable");
+
   tbody.innerHTML = "";
 
-  const payroll = getPayrollData();
+  const laporan = getLaporanData();
 
-  const pending = payroll.filter(p => p.status === "Pending");
+  const pending = laporan.filter(l => l.status === "Pending");
 
   if (pending.length === 0) {
 
     tbody.innerHTML = `
       <tr>
-        <td colspan="4" style="text-align:center;color:#888780;">
-          Tidak ada payroll pending
+        <td colspan="5" style="text-align:center;color:#888780;">
+          Tidak ada laporan pending
         </td>
       </tr>
     `;
@@ -135,47 +107,64 @@ function renderPendingPayroll() {
     return;
   }
 
-  pending.forEach(p => {
+  pending.forEach(l => {
 
     const tr = document.createElement("tr");
 
+    const jenisClass =
+      l.jenis === "Weekly"
+        ? "cs-jenis-badge weekly"
+        : "cs-jenis-badge monthly";
+
     tr.innerHTML = `
-      <td>${p.tanggal}</td>
 
-      <td class="cs-td-profit">
-        ${formatRupiah(p.totalProfit)}
-      </td>
-
-      <td class="cs-td-pool">
-        ${formatRupiah(p.payrollPool)}
+      <td>
+        <span class="${jenisClass}">
+          ${l.jenis}
+        </span>
       </td>
 
       <td>
+        ${l.periode}
+      </td>
+
+      <td class="cs-td-omzet">
+        ${formatRupiah(l.totalOmzet)}
+      </td>
+
+      <td>
+        ${l.totalTransaksi}
+      </td>
+
+      <td>
+
         <div class="cs-action-btn">
 
-          <button 
+          <button
             class="cs-btn-view"
-            onclick="viewDetail('${p.id}')"
+            onclick="viewDetail('${l.id}')"
           >
             Detail
           </button>
 
-          <button 
+          <button
             class="cs-btn-approve"
-            onclick="approvePayroll('${p.id}')"
+            onclick="approveLaporan('${l.id}')"
           >
             Approve
           </button>
 
-          <button 
+          <button
             class="cs-btn-reject"
-            onclick="rejectPayroll('${p.id}')"
+            onclick="rejectLaporan('${l.id}')"
           >
             Reject
           </button>
 
         </div>
+
       </td>
+
     `;
 
     tbody.appendChild(tr);
@@ -189,197 +178,97 @@ function renderPendingPayroll() {
 // ==========================
 function viewDetail(id) {
 
-  const payroll = getPayrollData();
+  const laporan = getLaporanData();
 
-  const item = payroll.find(p => p.id === id);
+  const item = laporan.find(l => l.id === id);
 
   if (!item) {
-    alert("Payroll tidak ditemukan.");
+    alert("Laporan tidak ditemukan");
     return;
   }
 
-  let html = `
+  alert(
 
-    <div class="cs-detail-content">
+`
+Jenis      : ${item.jenis}
 
-      <div class="cs-detail-row">
-        <div class="cs-detail-label">Tanggal</div>
-        <div class="cs-detail-val">
-          ${item.tanggal}
-        </div>
-      </div>
+Periode    : ${item.periode}
 
-      <div class="cs-detail-row">
-        <div class="cs-detail-label">Total Profit</div>
-        <div class="cs-detail-val gold">
-          ${formatRupiah(item.totalProfit)}
-        </div>
-      </div>
+Total Omzet:
+${formatRupiah(item.totalOmzet)}
 
-      <div class="cs-detail-row">
-        <div class="cs-detail-label">Payroll Pool</div>
-        <div class="cs-detail-val gold">
-          ${formatRupiah(item.payrollPool)}
-        </div>
-      </div>
+Total Transaksi:
+${item.totalTransaksi}
 
-  `;
+Catatan:
+${item.catatan || "-"}
 
-  // ======================
-  // TABEL DISTRIBUSI
-  // ======================
-  if (item.detail.length === 0) {
-
-    html += `
-      <p style="margin-top:1rem;color:#888780;">
-        Tidak ada karyawan hadir
-      </p>
-    `;
-
-  } else {
-
-    html += `
-      <table class="cs-detail-table">
-
-        <thead>
-          <tr>
-            <th>Karyawan</th>
-            <th>Gaji</th>
-          </tr>
-        </thead>
-
-        <tbody>
-    `;
-
-    item.detail.forEach(d => {
-
-      html += `
-        <tr>
-
-          <td>
-            ${d.user}
-          </td>
-
-          <td class="gold">
-            ${formatRupiah(d.gaji)}
-          </td>
-
-        </tr>
-      `;
-
-    });
-
-    html += `
-        </tbody>
-      </table>
-    `;
-  }
-
-  // ======================
-  // ACTION BUTTON
-  // ======================
-  html += `
-
-      <div class="cs-detail-actions">
-
-        <button 
-          class="cs-btn-detail-approve"
-          onclick="approvePayroll('${item.id}')"
-        >
-          Approve Payroll
-        </button>
-
-        <button 
-          class="cs-btn-detail-reject"
-          onclick="rejectPayroll('${item.id}')"
-        >
-          Reject
-        </button>
-
-      </div>
-
-    </div>
-  `;
-
-  document.getElementById("detailPayroll").innerHTML = html;
+`
+  );
 
 }
 
 // ==========================
 // APPROVE
 // ==========================
-function approvePayroll(id) {
+function approveLaporan(id) {
 
-  let payroll = getPayrollData();
+  let laporan = getLaporanData();
 
-  const item = payroll.find(p => p.id === id);
+  const item = laporan.find(l => l.id === id);
 
   if (!item) {
-    alert("Payroll tidak ditemukan.");
+    alert("Laporan tidak ditemukan");
     return;
   }
 
   const confirmApprove = confirm(
-    "Approve payroll ini?\nPaycheck otomatis dibuat."
+    "Approve laporan ini?"
   );
 
   if (!confirmApprove) return;
 
   item.status = "Approved";
 
-  savePayrollData(payroll);
+  saveLaporanData(laporan);
 
-  generatePaycheck(item);
+  alert("Laporan disetujui");
 
-  alert("Payroll disetujui");
-
-  renderPendingPayroll();
-
-  document.getElementById("detailPayroll").innerHTML = `
-    <div class="cs-detail-placeholder">
-      Pilih payroll untuk melihat detail distribusi gaji
-    </div>
-  `;
+  renderPendingLaporan();
 
 }
 
 // ==========================
 // REJECT
 // ==========================
-function rejectPayroll(id) {
+function rejectLaporan(id) {
 
-  let payroll = getPayrollData();
+  let laporan = getLaporanData();
 
-  const item = payroll.find(p => p.id === id);
+  const item = laporan.find(l => l.id === id);
 
   if (!item) {
-    alert("Payroll tidak ditemukan.");
+    alert("Laporan tidak ditemukan");
     return;
   }
 
   const confirmReject = confirm(
-    "Reject payroll ini?"
+    "Reject laporan ini?"
   );
 
   if (!confirmReject) return;
 
   item.status = "Rejected";
 
-  savePayrollData(payroll);
+  saveLaporanData(laporan);
 
-  alert("Payroll ditolak");
+  alert("Laporan ditolak");
 
-  renderPendingPayroll();
-
-  document.getElementById("detailPayroll").innerHTML = `
-    <div class="cs-detail-placeholder">
-      Pilih payroll untuk melihat detail distribusi gaji
-    </div>
-  `;
+  renderPendingLaporan();
 
 }
 
 // ==========================
 // INIT
 // ==========================
-renderPendingPayroll();
+renderPendingLaporan();
