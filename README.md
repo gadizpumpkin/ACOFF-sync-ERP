@@ -1,6 +1,6 @@
 # Business Management Information System
 
-##  ☕Coffee Street -- Integrated Business Management Information System
+##  ☕ACOFF -- Automated Coffee Operations & Financial Framework
 
 [Project Description](#project-descryption) | [Objective](#objective) | [Core Features](#core-features) | [Tech Stack](#tech-stack) | [Project Structure](#project-structure) | [Installation Guide](#installation-guide) | [General Usage Guide](#general-usage-guide) | [Example API Flow](#example-api-flow) | [System Workflow Overview](#system-workflow-overview) | [Author](#author)
 
@@ -8,7 +8,7 @@
 
 ## Project Description
 
-Coffee Street is an integrated Business Management Information System
+ACOFF is an integrated Business Management Information System
 designed to support end‑to‑end operational processes in a coffee shop
 environment.\
 The system enables owners and managers to monitor sales, inventory,
