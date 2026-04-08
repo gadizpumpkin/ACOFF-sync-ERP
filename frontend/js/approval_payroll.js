@@ -6,7 +6,7 @@ if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
+document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
@@ -16,19 +16,48 @@ if (sessionUser.role !== "Owner") {
   window.location.href = "dashboard.html";
 }
 
+// ==========================
 // RBAC MENU
+// ==========================
 const menuList = document.getElementById("menuList");
 const menus = getMenuByRole(sessionUser.role);
 
+menuList.innerHTML = "";
+
 menus.forEach(menu => {
+
   const li = document.createElement("li");
-  li.textContent = menu;
 
-  li.addEventListener("click", function() {
-    if (menu === "Approval Payroll") window.location.href = "approval_payroll.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
+  const a = document.createElement("a");
+  a.textContent = menu;
 
+  switch (menu) {
+    case "Dashboard":
+      a.href = "dashboard.html";
+      break;
+
+    case "Approval Pembelian":
+      a.href = "approval_pembelian.html";
+      break;
+
+    case "Approval Payroll":
+      a.href = "approval_payroll.html";
+      li.classList.add("active");
+      break;
+
+    case "Laporan":
+      a.href = "laporan.html";
+      break;
+
+    case "Audit Log":
+      a.href = "audit_log.html";
+      break;
+
+    default:
+      a.href = "#";
+  }
+
+  li.appendChild(a);
   menuList.appendChild(li);
 });
 
@@ -52,12 +81,21 @@ function savePaycheckData(data) {
 }
 
 // ==========================
+// UTIL FORMAT
+// ==========================
+function formatRupiah(value) {
+  return "Rp " + Number(value).toLocaleString("id-ID");
+}
+
+// ==========================
 // GENERATE PAYCHECK AFTER APPROVAL
 // ==========================
 function generatePaycheck(payroll) {
+
   let paycheck = getPaycheckData();
 
   payroll.detail.forEach(d => {
+
     paycheck.push({
       id: "PC-" + Date.now() + "-" + d.user,
       payrollId: payroll.id,
@@ -66,6 +104,7 @@ function generatePaycheck(payroll) {
       gaji: d.gaji,
       status: "Published"
     });
+
   });
 
   savePaycheckData(paycheck);
@@ -75,102 +114,272 @@ function generatePaycheck(payroll) {
 // RENDER TABLE
 // ==========================
 function renderPendingPayroll() {
+
   const tbody = document.getElementById("pendingTable");
   tbody.innerHTML = "";
 
   const payroll = getPayrollData();
+
   const pending = payroll.filter(p => p.status === "Pending");
 
+  if (pending.length === 0) {
+
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="4" style="text-align:center;color:#888780;">
+          Tidak ada payroll pending
+        </td>
+      </tr>
+    `;
+
+    return;
+  }
+
   pending.forEach(p => {
+
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${p.tanggal}</td>
-      <td>Rp ${p.totalProfit.toLocaleString("id-ID")}</td>
-      <td>Rp ${p.payrollPool.toLocaleString("id-ID")}</td>
+
+      <td class="cs-td-profit">
+        ${formatRupiah(p.totalProfit)}
+      </td>
+
+      <td class="cs-td-pool">
+        ${formatRupiah(p.payrollPool)}
+      </td>
+
       <td>
-        <div class="action-btn">
-          <button class="btn-view" onclick="viewDetail('${p.id}')">Detail</button>
-          <button class="btn-approve" onclick="approvePayroll('${p.id}')">Approve</button>
-          <button class="btn-reject" onclick="rejectPayroll('${p.id}')">Reject</button>
+        <div class="cs-action-btn">
+
+          <button 
+            class="cs-btn-view"
+            onclick="viewDetail('${p.id}')"
+          >
+            Detail
+          </button>
+
+          <button 
+            class="cs-btn-approve"
+            onclick="approvePayroll('${p.id}')"
+          >
+            Approve
+          </button>
+
+          <button 
+            class="cs-btn-reject"
+            onclick="rejectPayroll('${p.id}')"
+          >
+            Reject
+          </button>
+
         </div>
       </td>
     `;
 
     tbody.appendChild(tr);
+
   });
+
 }
 
 // ==========================
 // VIEW DETAIL
 // ==========================
 function viewDetail(id) {
+
   const payroll = getPayrollData();
+
   const item = payroll.find(p => p.id === id);
 
-  if (!item) return alert("Payroll tidak ditemukan.");
-
-  let html = `
-    <p><b>Tanggal:</b> ${item.tanggal}</p>
-    <p><b>Total Profit:</b> Rp ${item.totalProfit.toLocaleString("id-ID")}</p>
-    <p><b>Payroll Pool:</b> Rp ${item.payrollPool.toLocaleString("id-ID")}</p>
-    <h4>Detail Pembagian</h4>
-  `;
-
-  if (item.detail.length === 0) {
-    html += `<p>Tidak ada karyawan hadir.</p>`;
-  } else {
-    html += `<ul>`;
-    item.detail.forEach(d => {
-      html += `<li>${d.user} → Rp ${d.gaji.toLocaleString("id-ID")}</li>`;
-    });
-    html += `</ul>`;
+  if (!item) {
+    alert("Payroll tidak ditemukan.");
+    return;
   }
 
+  let html = `
+
+    <div class="cs-detail-content">
+
+      <div class="cs-detail-row">
+        <div class="cs-detail-label">Tanggal</div>
+        <div class="cs-detail-val">
+          ${item.tanggal}
+        </div>
+      </div>
+
+      <div class="cs-detail-row">
+        <div class="cs-detail-label">Total Profit</div>
+        <div class="cs-detail-val gold">
+          ${formatRupiah(item.totalProfit)}
+        </div>
+      </div>
+
+      <div class="cs-detail-row">
+        <div class="cs-detail-label">Payroll Pool</div>
+        <div class="cs-detail-val gold">
+          ${formatRupiah(item.payrollPool)}
+        </div>
+      </div>
+
+  `;
+
+  // ======================
+  // TABEL DISTRIBUSI
+  // ======================
+  if (item.detail.length === 0) {
+
+    html += `
+      <p style="margin-top:1rem;color:#888780;">
+        Tidak ada karyawan hadir
+      </p>
+    `;
+
+  } else {
+
+    html += `
+      <table class="cs-detail-table">
+
+        <thead>
+          <tr>
+            <th>Karyawan</th>
+            <th>Gaji</th>
+          </tr>
+        </thead>
+
+        <tbody>
+    `;
+
+    item.detail.forEach(d => {
+
+      html += `
+        <tr>
+
+          <td>
+            ${d.user}
+          </td>
+
+          <td class="gold">
+            ${formatRupiah(d.gaji)}
+          </td>
+
+        </tr>
+      `;
+
+    });
+
+    html += `
+        </tbody>
+      </table>
+    `;
+  }
+
+  // ======================
+  // ACTION BUTTON
+  // ======================
+  html += `
+
+      <div class="cs-detail-actions">
+
+        <button 
+          class="cs-btn-detail-approve"
+          onclick="approvePayroll('${item.id}')"
+        >
+          Approve Payroll
+        </button>
+
+        <button 
+          class="cs-btn-detail-reject"
+          onclick="rejectPayroll('${item.id}')"
+        >
+          Reject
+        </button>
+
+      </div>
+
+    </div>
+  `;
+
   document.getElementById("detailPayroll").innerHTML = html;
+
 }
 
 // ==========================
 // APPROVE
 // ==========================
 function approvePayroll(id) {
+
   let payroll = getPayrollData();
+
   const item = payroll.find(p => p.id === id);
 
-  if (!item) return alert("Payroll tidak ditemukan.");
+  if (!item) {
+    alert("Payroll tidak ditemukan.");
+    return;
+  }
 
-  if (!confirm("Approve payroll ini? Setelah approve, paycheck akan dibuat.")) return;
+  const confirmApprove = confirm(
+    "Approve payroll ini?\nPaycheck otomatis dibuat."
+  );
+
+  if (!confirmApprove) return;
 
   item.status = "Approved";
 
   savePayrollData(payroll);
 
-  // generate paycheck
   generatePaycheck(item);
 
-  alert("Payroll disetujui dan paycheck berhasil dibuat.");
+  alert("Payroll disetujui");
+
   renderPendingPayroll();
-  document.getElementById("detailPayroll").innerHTML = "Pilih payroll untuk melihat detail.";
+
+  document.getElementById("detailPayroll").innerHTML = `
+    <div class="cs-detail-placeholder">
+      Pilih payroll untuk melihat detail distribusi gaji
+    </div>
+  `;
+
 }
 
 // ==========================
 // REJECT
 // ==========================
 function rejectPayroll(id) {
+
   let payroll = getPayrollData();
+
   const item = payroll.find(p => p.id === id);
 
-  if (!item) return alert("Payroll tidak ditemukan.");
+  if (!item) {
+    alert("Payroll tidak ditemukan.");
+    return;
+  }
 
-  if (!confirm("Reject payroll ini?")) return;
+  const confirmReject = confirm(
+    "Reject payroll ini?"
+  );
+
+  if (!confirmReject) return;
 
   item.status = "Rejected";
 
   savePayrollData(payroll);
 
-  alert("Payroll ditolak.");
+  alert("Payroll ditolak");
+
   renderPendingPayroll();
-  document.getElementById("detailPayroll").innerHTML = "Pilih payroll untuk melihat detail.";
+
+  document.getElementById("detailPayroll").innerHTML = `
+    <div class="cs-detail-placeholder">
+      Pilih payroll untuk melihat detail distribusi gaji
+    </div>
+  `;
+
 }
 
+// ==========================
 // INIT
+// ==========================
 renderPendingPayroll();
