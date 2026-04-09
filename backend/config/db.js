@@ -5,7 +5,7 @@ const db = mysql.createPool({
   user: process.env.DB_USER,
   password: process.env.DB_PASSWORD,
   database: process.env.DB_NAME,
-  port: 8111 
+  port: 3306 // pastikan port sesuai dengan konfigurasi MySQL Anda
 });;
 
 module.exports = db.promise();
