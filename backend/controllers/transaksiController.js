@@ -1,6 +1,6 @@
 const db = require("../config/db");
 const auditService = require("../utils/auditService");
-const connection = await db.getConnection();
+
 
 exports.createTransaksi = async (req, res) => {
 
