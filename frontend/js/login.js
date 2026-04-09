@@ -3,13 +3,13 @@
 // ==========================
 document.getElementById("loginForm").addEventListener("submit", async function (e) {
   e.preventDefault();
-
+  
   const username = document.getElementById("username").value.trim();
   const password = document.getElementById("password").value.trim();
   const errorMsg = document.getElementById("errorMsg");
 
   errorMsg.textContent = "";
-
+// mengambil data dari form login, lalu mengirimkannya ke backend menggunakan fetch API. Jika login berhasil, token disimpan di localStorage dan session disimpan menggunakan fungsi setSession. Jika login gagal, pesan error ditampilkan di UI.
   try {
     const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
