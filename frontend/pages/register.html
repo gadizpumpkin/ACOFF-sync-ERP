@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Coffee Street - Register</title>
+
+  <!-- Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/register.css"> <!-- reuse style login -->
+</head>
+
+<body>
+
+  <div class="cs-login-bg">
+
+    <!-- Decorative -->
+    <div class="cs-login-deco cs-deco-tl"></div>
+    <div class="cs-login-deco cs-deco-br"></div>
+
+    <div class="cs-login-card">
+
+      <!-- Brand -->
+      <div class="cs-login-brand">
+        <h1 class="cs-login-title">Coffee Street</h1>
+        <p class="cs-login-subtitle">Buat Akun Baru</p>
+      </div>
+
+      <div class="cs-login-divider"></div>
+
+      <!-- FORM REGISTER -->
+      <form id="registerForm" class="cs-login-form">
+
+        <!-- Username -->
+        <div class="cs-form-group">
+          <label>Username</label>
+          <input id="username" type="text" placeholder="Masukkan username" required>
+        </div>
+
+        <!-- Password -->
+        <div class="cs-form-group">
+          <label>Password</label>
+          <input id="password" type="password" placeholder="Masukkan password" required>
+        </div>
+
+        <!-- Role -->
+        <div class="cs-form-group">
+          <label>Role</label>
+          <select id="role" required>
+            <option value="admin">Admin</option>
+            <option value="kasir">Kasir</option>
+          </select>
+        </div>
+
+        <!-- Button -->
+        <button type="submit" class="cs-btn-login">
+          Daftar
+        </button>
+
+        <!-- Message -->
+        <p id="msg" class="cs-error-msg"></p>
+
+      </form>
+
+      <!-- Link ke Login -->
+      <p style="text-align:center; margin-top:10px;">
+        Sudah punya akun?
+        <a href="index.html">Login di sini</a>
+      </p>
+
+      <p class="cs-login-footer">&copy; 2025 Coffee Street</p>
+
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script src="js/register.js"></script>
+
+</body>
+</html>  

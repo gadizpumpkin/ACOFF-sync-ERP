@@ -1,0 +1,52 @@
+/* ============================================================
+   Coffee Street — register.css
+   Ekstensi dari login.css — import SETELAH login.css
+   ============================================================ */
+
+/* ---------- SELECT (role) ---------- */
+.cs-login-form .cs-form-group select {
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #1a1a18;
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 11px 32px 11px 12px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23888780' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  cursor: pointer;
+}
+
+.cs-login-form .cs-form-group select:focus {
+  border-color: rgba(201, 145, 58, 0.5);
+  box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
+  background-color: #ffffff;
+}
+
+/* ---------- LINK (login redirect) ---------- */
+.cs-login-card a {
+  color: #C9913A;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 13px;
+  transition: color 0.15s ease;
+}
+
+.cs-login-card a:hover {
+  color: #a87630;
+  text-decoration: underline;
+}
+
+/* ---------- REDIRECT TEXT ---------- */
+.cs-login-card p:has(a) {
+  text-align: center;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #888780;
+}
