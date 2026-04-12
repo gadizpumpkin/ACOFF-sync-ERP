@@ -9,8 +9,10 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
+
   <!-- CSS -->
-  <link rel="stylesheet" href="../css/style.css"> <!-- reuse style login -->
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/login.css">
 </head>
 
 <body>
@@ -23,41 +25,83 @@
 
     <div class="cs-login-card">
 
-      <!-- Brand -->
+      <!-- Brand (SAMA PERSIS) -->
       <div class="cs-login-brand">
+        <svg class="cs-login-logo" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="#C9913A" stroke-width="2"/>
+          <path d="M13 30c0-6.075 4.925-11 11-11s11 4.925 11 11" stroke="#C9913A" stroke-width="2" stroke-linecap="round"/>
+          <path d="M19 30v-5a5 5 0 0110 0v5" stroke="#C9913A" stroke-width="1.8" stroke-linecap="round"/>
+          <path d="M33 22c1.5-1.5 3.5-1.5 3.5 0s-1.5 2-1.5 3.5" stroke="#C9913A" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>
         <h1 class="cs-login-title">Coffee Street</h1>
         <p class="cs-login-subtitle">Buat Akun Baru</p>
       </div>
 
+      <!-- Divider -->
       <div class="cs-login-divider"></div>
 
-      <!-- FORM REGISTER -->
+      <!-- FORM -->
       <form id="registerForm" class="cs-login-form">
+
+        <!-- Nama Lengkap -->
+        <div class="cs-form-group">
+          <label for="nama_lengkap">Nama Lengkap</label>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <input id="nama_lengkap" type="text" placeholder="Masukkan nama lengkap" required>
+          </div>
+        </div>
 
         <!-- Username -->
         <div class="cs-form-group">
-          <label>Username</label>
-          <input id="username" type="text" placeholder="Masukkan username" required>
+          <label for="username">Username</label>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <input id="username" type="text" placeholder="Masukkan username" required>
+          </div>
         </div>
 
         <!-- Password -->
         <div class="cs-form-group">
-          <label>Password</label>
-          <input id="password" type="password" placeholder="Masukkan password" required>
+          <label for="password">Password</label>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.4"/>
+              <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
+            </svg>
+            <input id="password" type="password" placeholder="Masukkan password" required>
+          </div>
         </div>
 
         <!-- Role -->
         <div class="cs-form-group">
-          <label>Role</label>
-          <select id="role" required>
-            <option value="admin">Admin</option>
-            <option value="kasir">Kasir</option>
-          </select>
+          <label for="role">Role</label>
+          <div class="cs-input-wrap">
+            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 4h12M2 8h12M2 12h12" stroke="currentColor" stroke-width="1.4"/>
+            </svg>
+            <select id="role" required>
+              <option value="">-- Pilih Role --</option>
+              <option value="OWNER">Owner</option>
+              <option value="MANAGER">Manager</option>
+              <option value="KARYAWAN">Karyawan</option>
+            </select>
+          </div>
         </div>
 
         <!-- Button -->
         <button type="submit" class="cs-btn-login">
           Daftar
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+            <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
         </button>
 
         <!-- Message -->
@@ -71,13 +115,13 @@
         <a href="../pages/index.html">Login di sini</a>
       </p>
 
-      <p class="cs-login-footer">&copy; 2025 Coffee Street</p>
+      <!-- Footer -->
+      <p class="cs-login-footer">&copy; 2025 Coffee Street &mdash; All rights reserved</p>
 
     </div>
   </div>
 
-  <!-- JS -->
   <script src="../js/register.js"></script>
 
 </body>
-</html>  
+</html>
