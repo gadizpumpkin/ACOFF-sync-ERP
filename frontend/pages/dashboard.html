@@ -7,9 +7,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <base href="/ACOFF-sync-ERP/frontend/">
   <link rel="stylesheet" href="../css/dashboard.css">
-  <!-- <link rel="stylesheet" href="../css/login.css"> -->
+   <!-- <link rel="stylesheet" href="/ACOFF-sync-ERP/frontend/css/dashboard-fixed.css"> -->
 </head>
 <body>
 
@@ -112,13 +111,6 @@
     </main>
   </div>
 
-  <script>
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-    if (!token) window.location.href = "index.html";
-    const wt = document.getElementById("welcomeTitle");
-    if (wt && username) wt.textContent = "Selamat datang, " + username + " 👋";
-  </script>
   <script src="../js/auth.js"></script>
   <script src="../js/dashboard.js"></script>
 </body>
