@@ -4,65 +4,120 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Coffee Street - Dashboard</title>
-
-  <!-- <link rel="stylesheet" href="../css/style.css"> -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/dashboard.css">
 </head>
 <body>
-  <span id="lowStockBadge"
-      style="background:red;
-             color:white;
-             padding:4px 8px;
-             border-radius:12px;
-             display:none;
-             cursor:pointer;">
-  </span>
 
- <script>
-    const token = localStorage.getItem("token");
-    const username = localStorage.getItem("username");
-//
-    if (!token) {
-      window.location.href = "index.html";
-    }
-
-    document.getElementById("welcome").innerText = "Welcome, " + username;
-  </script>
-
-  <header class="navbar">
-    <h2>Coffee Street Dashboard</h2>
-    <div class="nav-right">
-      <span id="userRole"></span>
-      <button id="logoutBtn" class="btn-danger">Logout</button>
-      <button onclick="exportPnl()">Export Laporan Bulanan</button>
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street</span>
     </div>
-  </header>
+    <div class="cs-nav-right">
+      <!-- Low stock badge -->
+      <span id="lowStockBadge" class="cs-low-stock-badge" style="display:none;">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <path d="M6 1.5l4.5 8H1.5L6 1.5z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/>
+          <path d="M6 5v2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="6" cy="9" r="0.5" fill="currentColor"/>
+        </svg>
+        Stok Rendah
+      </span>
+      <span id="userRole" class="cs-role-badge"></span>
+      <button onclick="exportPnl()" class="cs-btn-export-dash">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+          <path d="M6.5 1v7M3.5 5l3 3 3-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 10h9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        Export Laporan
+      </button>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-  <div class="layout">
-    <aside class="sidebar">
-      <h3>Menu</h3>
-      <ul id="menuList"></ul>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
+
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <!-- diisi dashboard.js berdasarkan role -->
+      </ul>
     </aside>
 
-    <main class="content">
-      <h1 id="welcomeTitle"></h1>
-      <p>Silakan pilih menu di sidebar untuk mengakses fitur.</p>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
 
-      <div class="card-box">
-        <div class="card-mini">
-          <h3>Status Sistem</h3>
-          <p>RBAC Aktif</p>
+      <!-- WELCOME -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title" id="welcomeTitle"></h1>
+        <p class="cs-page-sub">Silakan pilih menu di sidebar untuk mengakses fitur.</p>
+      </div>
+
+      <!-- STAT CARDS -->
+      <div class="cs-dash-grid">
+        <div class="cs-dash-card">
+          <div class="cs-dash-card-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <rect x="2" y="3" width="16" height="14" rx="2" stroke="#C9913A" stroke-width="1.5"/>
+              <path d="M6 10h3M6 13h5" stroke="#C9913A" stroke-width="1.3" stroke-linecap="round"/>
+              <path d="M6 7h8" stroke="#C9913A" stroke-width="1.3" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="cs-dash-card-label">Status Sistem</div>
+            <div class="cs-dash-card-value">RBAC Aktif</div>
+          </div>
         </div>
 
-        <div class="card-mini">
-          <h3>Notifikasi</h3>
-          <p>Belum ada notifikasi.</p>
+        <div class="cs-dash-card">
+          <div class="cs-dash-card-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <path d="M10 2a6 6 0 016 6c0 4-6 10-6 10S4 12 4 8a6 6 0 016-6z" stroke="#C9913A" stroke-width="1.5"/>
+              <circle cx="10" cy="8" r="2" stroke="#C9913A" stroke-width="1.3"/>
+            </svg>
+          </div>
+          <div>
+            <div class="cs-dash-card-label">Notifikasi</div>
+            <div class="cs-dash-card-value" id="notifText">Belum ada notifikasi.</div>
+          </div>
+        </div>
+
+        <div class="cs-dash-card">
+          <div class="cs-dash-card-icon">
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+              <circle cx="10" cy="10" r="7" stroke="#C9913A" stroke-width="1.5"/>
+              <path d="M10 7v3l2 2" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="cs-dash-card-label">Shift Hari Ini</div>
+            <div class="cs-dash-card-value">19:00 – 00:00</div>
+          </div>
         </div>
       </div>
+
     </main>
   </div>
 
-  <script src="../js/auth.js"></script> 
+  <script>
+    const token = localStorage.getItem("token");
+    const username = localStorage.getItem("username");
+    if (!token) window.location.href = "index.html";
+    const wt = document.getElementById("welcomeTitle");
+    if (wt && username) wt.textContent = "Selamat datang, " + username + " 👋";
+  </script>
+  <script src="../js/auth.js"></script>
   <script src="../js/dashboard.js"></script>
 </body>
 </html>
