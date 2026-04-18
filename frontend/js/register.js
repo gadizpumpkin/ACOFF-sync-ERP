@@ -39,7 +39,13 @@ document.getElementById("registerForm").addEventListener("submit", async functio
       })
     });
 
-    const data = await res.json();
+  let data;
+
+try {
+  data = await res.json();
+} catch {
+  throw new Error("Response bukan JSON (kemungkinan 404)");
+}
 
     if (res.ok) {
       msg.style.color = "green";
