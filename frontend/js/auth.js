@@ -1,3 +1,16 @@
+function setSession(user) {
+  localStorage.setItem("userSession", JSON.stringify(user));
+}
+
+function getSession() {
+  const data = localStorage.getItem("userSession");
+  return data ? JSON.parse(data) : null;
+}
+
+function clearSession() {
+  localStorage.removeItem("userSession");
+}
+
 function getMenuByRole(role) {
   if (role === "Owner") {
     return [
