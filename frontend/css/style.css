@@ -162,7 +162,7 @@ body {
   box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
   background: #ffffff;
 }
-/* ---------- ROLE ---------- */
+/* ---------- ROLE ----------
 #role{
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
@@ -174,7 +174,7 @@ body {
   outline: none;
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
+} */
 /* ---------- LOGIN BUTTON ---------- */
 .cs-btn-login {
   display: flex;

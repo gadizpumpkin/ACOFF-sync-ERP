@@ -1,52 +1,243 @@
 /* ============================================================
-   Coffee Street — register.css
-   Ekstensi dari login.css — import SETELAH login.css
+   Coffee Street — login.css
+   Tema konsisten dengan seluruh halaman Coffee Street
    ============================================================ */
 
-/* ---------- SELECT (role) ---------- */
-.cs-login-form .cs-form-group select {
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap');
+
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  color: #1a1a18;
+}
+
+/* ---------- BACKGROUND ---------- */
+.cs-login-bg {
+  min-height: 100vh;
+  background: #1a1008;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Decorative corner rings */
+.cs-login-deco {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 145, 58, 0.1);
+  pointer-events: none;
+}
+
+.cs-deco-tl {
+  top: -120px;
+  left: -120px;
+  border-color: rgba(201, 145, 58, 0.08);
+  box-shadow: inset 0 0 0 60px rgba(201, 145, 58, 0.03);
+}
+
+.cs-deco-br {
+  bottom: -120px;
+  right: -120px;
+  border-color: rgba(201, 145, 58, 0.06);
+  box-shadow: inset 0 0 0 60px rgba(201, 145, 58, 0.02);
+}
+
+/* ---------- CARD ---------- */
+.cs-login-card {
+  width: 100%;
+  max-width: 400px;
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 2.25rem 2rem;
+  border: 0.5px solid rgba(201, 145, 58, 0.15);
+  position: relative;
+  z-index: 1;
+}
+
+/* ---------- BRAND ---------- */
+.cs-login-brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.cs-login-logo {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+}
+
+.cs-login-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1a1a18;
+  letter-spacing: 0.01em;
+  margin-bottom: 4px;
+}
+
+.cs-login-subtitle {
+  font-size: 13px;
+  color: #888780;
+  font-weight: 400;
+}
+
+/* ---------- DIVIDER ---------- */
+.cs-login-divider {
+  height: 0.5px;
+  background: rgba(0, 0, 0, 0.07);
+  margin-bottom: 1.5rem;
+}
+
+/* ---------- FORM ---------- */
+.cs-login-form {
+  width: 100%;
+}
+
+.cs-form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.cs-form-group label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #888780;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+/* ---------- INPUT WITH ICON ---------- */
+.cs-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.cs-input-icon {
+  position: absolute;
+  left: 12px;
+  width: 15px;
+  height: 15px;
+  color: #b4b2a9;
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.cs-input-wrap input {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   color: #1a1a18;
   background: #faf9f7;
   border: 0.5px solid rgba(0, 0, 0, 0.15);
   border-radius: 8px;
-  padding: 11px 32px 11px 12px;
+  padding: 11px 12px 11px 38px;
   outline: none;
   width: 100%;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12' fill='none'%3E%3Cpath d='M2 4l4 4 4-4' stroke='%23888780' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  cursor: pointer;
 }
 
-.cs-login-form .cs-form-group select:focus {
+.cs-input-wrap input::placeholder {
+  color: #b4b2a9;
+}
+
+.cs-input-wrap input:focus {
   border-color: rgba(201, 145, 58, 0.5);
   box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
-  background-color: #ffffff;
+  background: #ffffff;
 }
-
-/* ---------- LINK (login redirect) ---------- */
-.cs-login-card a {
+/* ---------- ROLE ---------- */
+#role{
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #1a1a18;
+  background: #faf9f7;
+  border: 0.5px solid rgba(0, 0, 0, 0.15);
+  border-radius: 8px;
+  padding: 11px 12px 11px 38px;
+  outline: none;
+  width: 100%;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* ---------- LOGIN BUTTON ---------- */
+.cs-btn-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 12px 16px;
+  margin-top: 8px;
+  background: #1a1008;
   color: #C9913A;
-  text-decoration: none;
+  border: 1px solid rgba(201, 145, 58, 0.35);
+  border-radius: 10px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 14px;
   font-weight: 500;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: background 0.18s ease, transform 0.1s ease;
+}
+
+.cs-btn-login:hover {
+  background: #251708;
+}
+
+.cs-btn-login:active {
+  transform: scale(0.98);
+}
+
+/* ---------- ERROR MESSAGE ---------- */
+.cs-error-msg {
+  min-height: 20px;
+  margin-top: 10px;
   font-size: 13px;
-  transition: color 0.15s ease;
-}
-
-.cs-login-card a:hover {
-  color: #a87630;
-  text-decoration: underline;
-}
-
-/* ---------- REDIRECT TEXT ---------- */
-.cs-login-card p:has(a) {
+  color: #A32D2D;
   text-align: center;
-  margin-top: 12px;
-  font-size: 13px;
-  color: #888780;
+  background: rgba(226, 75, 74, 0.07);
+  border-radius: 6px;
+  padding: 0;
+  transition: all 0.2s ease;
+}
+
+.cs-error-msg:not(:empty) {
+  padding: 8px 12px;
+  border: 1px solid rgba(226, 75, 74, 0.2);
+}
+
+/* ---------- FOOTER ---------- */
+.cs-login-footer {
+  margin-top: 1.5rem;
+  font-size: 11px;
+  color: #b4b2a9;
+  text-align: center;
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 480px) {
+  .cs-login-card {
+    padding: 1.75rem 1.25rem;
+    border-radius: 12px;
+  }
+
+  .cs-login-title {
+    font-size: 22px;
+  }
 }
