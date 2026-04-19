@@ -1,8 +1,11 @@
 // ==========================
 // AUTH CHECK
 // ==========================
-const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
+
+if (!sessionUser && !token) {
+  window.location.href = "index.html";
+}
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
@@ -11,8 +14,12 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
   window.location.href = "index.html";
 });
 
-// 🔒 RBAC HALAMAN
-if (sessionUser.role !== "Manajer") {
+// RBAC HALAMAN
+const role = sessionUser?.role?.trim().toUpperCase();
+
+console.log("ROLE FINAL:", role);
+
+if (role !== "MANAGER") {
   alert("Akses ditolak. Halaman ini hanya untuk Manajer.");
   window.location.href = "dashboard.html";
 }

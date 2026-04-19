@@ -1,14 +1,18 @@
 // ==========================
-// ISOLATED SCOPE (ANTI BENTROK)
+// ISOLATED SCOPE 
 // ==========================
 (function () {
 
   // ==========================
   // AUTH & SESSION
   // ==========================
+  console.log("SESSION:", getSession());
   const sessionUser = getSession();
   const token = localStorage.getItem("token");
   const username = localStorage.getItem("username");
+  console.log("SESSION:", sessionUser);
+  console.log("ROLE:", sessionUser?.role);
+  console.log("MENUS:", getMenuByRole(sessionUser?.role));
 
   // redirect kalau tidak login
   if (!sessionUser && !token) {
@@ -32,19 +36,23 @@
   // ==========================
   // MENU MAPPING
   // ==========================
-  const menuRoutes = {
-    "Dashboard": "dashboard.html",
-    "Absensi": "absensi.html",
-    "Transaksi Penjualan": "transaksi.html",
-    "Kelola Menu": "menu.html",
-    "Kelola Resep": "resep.html",
-    "Kelola Bahan Baku": "bahanbaku.html",
-    "Kelola Supplier": "supplier.html",
-    "Pembelian Bahan Baku": "pembelian.html",
-    "Approval Pembelian": "approval_pembelian.html",
-    "Generate Laporan": "laporan.html",
-    "Lihat Laporan": "laporan.html"
-  };
+ const menuRoutes = {
+  "Dashboard": "dashboard.html",
+  "Absensi": "absensi.html",
+  "Transaksi Penjualan": "transaksi.html",
+  "Kelola Menu": "menu.html",
+  "Kelola Resep": "resep.html",
+  "Kelola Bahan Baku": "bahanbaku.html",
+  "Kelola Supplier": "supplier.html",
+  "Pembelian Bahan Baku": "pembelian.html",
+  "Approval Pembelian": "approval_pembelian.html",
+  "Approval Payroll": "approval_payroll.html",
+  "Approval Laporan": "approval_laporan.html",
+  "Audit Keuangan": "audit_log.html",
+  "Generate Laporan": "laporan.html",
+  "Lihat Laporan": "laporan.html",
+  "Paycheck": "paycheck.html"
+};
 
   // ==========================
   // RENDER MENU

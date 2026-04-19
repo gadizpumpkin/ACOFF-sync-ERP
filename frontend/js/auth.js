@@ -12,8 +12,9 @@ function clearSession() {
 }
 
 function getMenuByRole(role) {
-  if (role === "Owner") {
+  if (role === "OWNER") {
     return [
+      "Dashboard",
       "Lihat Laporan",
       "Audit Keuangan",
       "Approval Pembelian",
@@ -22,8 +23,9 @@ function getMenuByRole(role) {
     ];
   }
 
-  if (role === "Manajer") {
+  if (role === "MANAGER") {
     return [
+      "Dashboard",
       "Transaksi Penjualan",
       "Kelola Menu",
       "Kelola Resep",
@@ -36,8 +38,9 @@ function getMenuByRole(role) {
     ];
   }
 
-  if (role === "Karyawan") {
+  if (role === "KARYAWAN") {
     return [
+      "Dashboard",
       "Input Transaksi",
       "Transaksi Penjualan",
       "Cetak Struk",
