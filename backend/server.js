@@ -2,6 +2,7 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const path = require("path");
+const menuRoutes = require("./routes/menuRoutes");
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.use(express.static(path.join(__dirname, "../frontend")));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/transaksi", require("./routes/transaksiRoutes"));
+app.use("/api/menu", require("./routes/menuRoutes"));
 app.use("/api/laporan", require("./routes/laporanRoutes"));
 app.use("/api/payroll", require("./routes/payrollRoutes"));
 app.use("/api/closing", require("./routes/closingRoutes"));
@@ -31,3 +33,6 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 5000}`);
 });
+
+
+
