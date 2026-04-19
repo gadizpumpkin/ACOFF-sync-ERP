@@ -20,6 +20,7 @@ app.use("/api/menu", require("./routes/menuRoutes"));
 app.use("/api/laporan", require("./routes/laporanRoutes"));
 app.use("/api/payroll", require("./routes/payrollRoutes"));
 app.use("/api/closing", require("./routes/closingRoutes"));
+app.use("/api/supplier", require("./routes/supplierRoutes"));
 app.use("/api/monthly-closing", require("./routes/monthlyClosingRoutes"));
 app.use("/api/report", require("./routes/reportRoutes"));
 app.use("/api/inventory", require("./routes/inventoryRoutes"));
