@@ -65,7 +65,7 @@ exports.login = async (req, res) => {
 
     res.json({
       token,
-      role: user.role,
+      role: user.role.toUpperCase(), //ALL UPPERCASE
       username: user.username
     });
 

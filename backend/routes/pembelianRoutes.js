@@ -5,6 +5,6 @@ const { updateStatusPembelian } = require("../controllers/pembelianController");
 router.put(
   "/:id/status",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("MANAGER", "OWNER"),
   updateStatusPembelian
 );
