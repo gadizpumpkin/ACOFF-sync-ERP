@@ -32,13 +32,13 @@ router.get(
 router.post(
   "/",
   verifyToken,
-  allowRoles("Manajer", "Owner", "Karyawan"),
+  allowRoles("MANAGER", "OWNER", "KARYAWAN"),
   createTransaksi
 );
 router.post(
   "/",
   verifyToken,
-  allowRoles("Owner", "Karyawan"),
+  allowRoles("OWNER", "KARYAWAN"),
   checkClosing,
   createTransaksi
 );
@@ -50,7 +50,7 @@ router.post(
 router.put(
   "/:id/status",
   verifyToken,
-  allowRoles("Owner", "Manajer"),
+  allowRoles("OWNER", "MANAGER"),
   checkClosing,
   updateStatus
 );
