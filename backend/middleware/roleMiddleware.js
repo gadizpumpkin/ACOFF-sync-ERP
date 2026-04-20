@@ -5,7 +5,9 @@ exports.allowRoles = (...roles) => {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!roles.includes(req.user.role)) {
+    const userRole = req.user.role.toUpperCase();
+
+    if (!roles.map(r => r.toUpperCase()).includes(userRole)) {
       return res.status(403).json({ message: "Akses ditolak" });
     }
 

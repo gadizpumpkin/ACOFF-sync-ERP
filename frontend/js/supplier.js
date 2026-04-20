@@ -1,5 +1,8 @@
-document.addEventListener("DOMContentLoaded", async function () {
+document.addEventListener("DOMContentLoaded", function () {
 
+  // ==========================
+  // AUTH
+  // ==========================
   const sessionUser = getSession();
   const token = localStorage.getItem("token");
 
@@ -8,43 +11,72 @@ document.addEventListener("DOMContentLoaded", async function () {
     return;
   }
 
-  const role = sessionUser.role.toUpperCase();
+  const role = sessionUser.role.trim().toUpperCase();
+
+  if (role !== "MANAGER") {
+    alert("Akses ditolak!");
+    window.location.href = "dashboard.html";
+    return;
+  }
 
   document.getElementById("userRole").textContent = role;
+
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    clearSession();
+    localStorage.removeItem("token");
+    window.location.href = "index.html";
+  });
 
   // ==========================
   // LOAD DATA
   // ==========================
   async function renderSupplierTable() {
-    const res = await fetch("http://localhost:5000/api/supplier", {
-      headers: {
-        "Authorization": "Bearer " + token
+    try {
+      const res = await fetch("http://localhost:5000/api/supplier", {
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
+
+      if (!res.ok) throw new Error("Gagal fetch data");
+
+      const data = await res.json();
+
+      const tbody = document.getElementById("supplierTable");
+      const count = document.getElementById("supplierCount");
+
+      tbody.innerHTML = "";
+      count.textContent = data.length + " supplier";
+
+      if (data.length === 0) {
+        tbody.innerHTML = `
+          <tr>
+            <td colspan="4">Belum ada supplier</td>
+          </tr>
+        `;
+        return;
       }
-    });
 
-    const data = await res.json();
+      data.forEach(s => {
+        const tr = document.createElement("tr");
 
-    const tbody = document.getElementById("supplierTable");
-    const count = document.getElementById("supplierCount");
+        tr.innerHTML = `
+          <td>${s.nama}</td>
+          <td>${s.hp}</td>
+          <td>${s.alamat}</td>
+          <td>
+            <button onclick="editSupplier(${s.id})">Edit</button>
+            <button onclick="deleteSupplier(${s.id})">Hapus</button>
+          </td>
+        `;
 
-    tbody.innerHTML = "";
-    count.textContent = data.length + " supplier";
+        tbody.appendChild(tr);
+      });
 
-    data.forEach(s => {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${s.nama}</td>
-        <td>${s.hp}</td>
-        <td>${s.alamat}</td>
-        <td>
-          <button onclick="editSupplier(${s.id})">Edit</button>
-          <button onclick="deleteSupplier(${s.id})">Hapus</button>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-    });
+    } catch (err) {
+      console.error(err);
+      alert("Gagal load data supplier");
+    }
   }
 
   // ==========================
@@ -54,43 +86,108 @@ document.addEventListener("DOMContentLoaded", async function () {
     e.preventDefault();
 
     const id = document.getElementById("supplierId").value;
-    const nama = document.getElementById("supplierNama").value;
-    const hp = document.getElementById("supplierHp").value;
-    const alamat = document.getElementById("supplierAlamat").value;
+    const nama = document.getElementById("supplierNama").value.trim();
+    const hp = document.getElementById("supplierHp").value.trim();
+    const alamat = document.getElementById("supplierAlamat").value.trim();
 
-    const url = id
-      ? `http://localhost:5000/api/supplier/${id}`
-      : "http://localhost:5000/api/supplier";
+    if (!nama || !hp || !alamat) {
+      alert("Semua field wajib diisi!");
+      return;
+    }
 
-    const method = id ? "PUT" : "POST";
+    try {
+      const url = id
+        ? `http://localhost:5000/api/supplier/${id}`
+        : "http://localhost:5000/api/supplier";
 
-    await fetch(url, {
-      method,
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + token
-      },
-      body: JSON.stringify({ nama, hp, alamat })
-    });
+      const method = id ? "PUT" : "POST";
 
-    renderSupplierTable();
+      const res = await fetch(url, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer " + token
+        },
+        body: JSON.stringify({ nama, hp, alamat })
+      });
+
+      if (!res.ok) throw new Error("Gagal simpan data");
+
+      resetForm();
+      renderSupplierTable();
+
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menyimpan data");
+    }
   });
+
+  // ==========================
+  // EDIT
+  // ==========================
+  window.editSupplier = function (id) {
+    fetch(`http://localhost:5000/api/supplier`, {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const s = data.find(x => x.id == id);
+        if (!s) return alert("Data tidak ditemukan");
+
+        document.getElementById("supplierId").value = s.id;
+        document.getElementById("supplierNama").value = s.nama;
+        document.getElementById("supplierHp").value = s.hp;
+        document.getElementById("supplierAlamat").value = s.alamat;
+
+        document.getElementById("btnSubmit").textContent = "Update Supplier";
+        document.getElementById("formTitle").textContent = "Edit Supplier";
+      });
+  };
 
   // ==========================
   // DELETE
   // ==========================
   window.deleteSupplier = async function (id) {
-    if (!confirm("Yakin hapus?")) return;
+    if (!confirm("Yakin hapus supplier ini?")) return;
 
-    await fetch(`http://localhost:5000/api/supplier/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Authorization": "Bearer " + token
-      }
-    });
+    try {
+      const res = await fetch(`http://localhost:5000/api/supplier/${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": "Bearer " + token
+        }
+      });
 
-    renderSupplierTable();
+      if (!res.ok) throw new Error("Gagal hapus");
+
+      renderSupplierTable();
+
+    } catch (err) {
+      console.error(err);
+      alert("Gagal menghapus data");
+    }
   };
 
+  // ==========================
+  // RESET FORM
+  // ==========================
+  function resetForm() {
+    document.getElementById("supplierId").value = "";
+    document.getElementById("supplierNama").value = "";
+    document.getElementById("supplierHp").value = "";
+    document.getElementById("supplierAlamat").value = "";
+
+    document.getElementById("btnSubmit").textContent = "Simpan Supplier";
+    document.getElementById("formTitle").textContent = "Form Tambah Supplier";
+  }
+
+  document.getElementById("btnReset").addEventListener("click", resetForm);
+
+  // ==========================
+  // INIT
+  // ==========================
   renderSupplierTable();
+
 });

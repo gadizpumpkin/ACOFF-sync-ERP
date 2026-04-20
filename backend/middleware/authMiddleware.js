@@ -14,7 +14,23 @@ exports.verifyToken = (req, res, next) => {
       return res.status(403).json({ message: "Token tidak valid" });
     }
 
-    req.user = decoded;
+    // FIX PENTING
+    req.user = {
+      ...decoded,
+      role: decoded.role.toUpperCase()
+    };
+
     next();
   });
+  
+  jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+  if (err) {
+    return res.status(403).json({ message: "Token tidak valid" });
+  }
+
+  console.log("DECODED TOKEN:", decoded); // 🔥 DEBUG DISINI
+
+  req.user = decoded;
+  next();
+});
 };
