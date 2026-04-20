@@ -6,7 +6,7 @@ exports.laporanOmzet = async (req, res) => {
 
   try {
 
-    // 1️⃣ Total omzet
+    // Total omzet
     const [omzetRows] = await db.query(
       `SELECT 
          IFNULL(SUM(total),0) AS total_omzet,
@@ -17,7 +17,7 @@ exports.laporanOmzet = async (req, res) => {
       [start, end]
     );
 
-    // 2️⃣ Top menu
+    // Top menu
     const [topMenuRows] = await db.query(
       `SELECT m.nama, SUM(td.qty) AS total_terjual
        FROM transaksi_detail td
@@ -31,7 +31,7 @@ exports.laporanOmzet = async (req, res) => {
       [start, end]
     );
 
-    // 3️⃣ Bahan terpakai
+    // Bahan terpakai
     const [bahanRows] = await db.query(
       `SELECT b.nama,
          SUM(td.qty * r.qty) AS total_gram

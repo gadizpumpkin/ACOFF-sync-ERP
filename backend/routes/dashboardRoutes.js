@@ -12,31 +12,31 @@ const { getPnlByDate } = require("../controllers/dashboardController");
 router.get(
   "/owner-summary",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   getOwnerSummary
 );
 router.get(
   "/low-stock",
   verifyToken,
-  allowRoles("Owner", "Manajer"),
+  allowRoles("OWNER", "MANAGER"),
   getLowStockAlert
 );
 router.get(
   "/low-stock",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   getLowStock
 );
 router.get(
   "/pnl",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   getPnlByDate
 );
 router.get(
   "/pnl-monthly",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   getMonthlyPnl
 );
 module.exports = router;

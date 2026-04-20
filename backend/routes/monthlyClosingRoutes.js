@@ -7,7 +7,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 router.post(
   "/close",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   closeMonth
 );
 

@@ -9,7 +9,7 @@ const { laporanOmzet } = require("../controllers/laporanController");
 router.get(
   "/omzet",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   laporanOmzet
 );
 

@@ -7,7 +7,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 router.post(
   "/today",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   closeToday
 );
 

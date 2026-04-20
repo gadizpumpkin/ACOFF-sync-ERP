@@ -7,7 +7,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 router.get(
   "/export-pnl",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   exportMonthlyPnlPDF
 );
 

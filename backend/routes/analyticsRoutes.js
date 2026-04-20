@@ -9,7 +9,7 @@ const { allowRoles } = require("../middleware/roleMiddleware");
 router.get(
   "/menu-performance",
   verifyToken,
-  allowRoles("Owner","Manager"),
+  allowRoles("OWNER","MANAGER"),
   getMenuPerformance
 );
 
