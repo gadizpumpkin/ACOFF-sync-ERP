@@ -8,14 +8,14 @@ const { generatePayroll, approvePayroll } = require("../controllers/payrollContr
 router.post(
   "/generate",
   verifyToken,
-  allowRoles("Owner","Manajer"),
+  allowRoles("OWNER","MANAGER"),
   generatePayroll
 );
 
 router.put(
   "/approve/:id",
   verifyToken,
-  allowRoles("Owner"),
+  allowRoles("OWNER"),
   approvePayroll
 );
 

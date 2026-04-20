@@ -11,7 +11,7 @@ document.getElementById("logoutBtn").addEventListener("click", () => {
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "Manajer") {
+if (sessionUser.role !== "MANAGER") {
   alert("Akses ditolak. Payroll hanya untuk Manajer.");
   window.location.href = "dashboard.html";
 }
