@@ -11,7 +11,7 @@ document.getElementById("logoutBtn").addEventListener("click", function() {
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "Owner") {
+if (sessionUser.role !== "OWNER") {
   alert("Akses ditolak. Approval laporan hanya untuk Owner.");
   window.location.href = "dashboard.html";
 }
