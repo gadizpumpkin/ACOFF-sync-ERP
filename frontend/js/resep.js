@@ -156,7 +156,7 @@ function renderTable() {
 document.getElementById("resepForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  if (sessionUser.role !== "Manajer") {
+  if (sessionUser.role !== "MANAGER") {
     alert("Akses ditolak. Hanya Manajer.");
     return;
   }

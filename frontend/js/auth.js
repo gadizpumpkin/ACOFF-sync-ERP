@@ -26,7 +26,6 @@ function getMenuByRole(role) {
   if (role === "MANAGER") {
     return [
       "Dashboard",
-      "Transaksi Penjualan",
       "Kelola Menu",
       "Kelola Resep",
       "Kelola Bahan Baku",
