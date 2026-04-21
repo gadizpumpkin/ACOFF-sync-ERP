@@ -12,7 +12,7 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
 });
 
 // hanya Owner boleh audit log
-if (sessionUser.role !== "Owner") {
+if (sessionUser.role !== "OWNER") {
   alert("Akses ditolak. Audit Log hanya untuk Owner.");
   window.location.href = "dashboard.html";
 }

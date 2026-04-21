@@ -11,7 +11,7 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "Manajer") {
+if (sessionUser.role !== "MANAGER", "OWNER") {
   alert("Akses ditolak. Generate laporan hanya untuk Manajer.");
   window.location.href = "dashboard.html";
 }
