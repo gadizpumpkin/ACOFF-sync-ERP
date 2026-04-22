@@ -11,7 +11,7 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "Karyawan") {
+if (sessionUser.role !== "KARYAWAN") {
   alert("Akses ditolak. Absensi hanya untuk Karyawan.");
   window.location.href = "dashboard.html";
 }
