@@ -17,27 +17,19 @@ if (sessionUser.role !== "KARYAWAN") {
 }
 
 // ==========================
-// STORAGE
+// BASE URL API
 // ==========================
-function getAbsensiData() {
-  return JSON.parse(localStorage.getItem("absensiData")) || [];
-}
-
-function saveAbsensiData(data) {
-  localStorage.setItem("absensiData", JSON.stringify(data));
-}
+const BASE_URL = "http://localhost:3000/api/absensi";
 
 // ==========================
 // UTIL DATE & TIME
 // ==========================
 function getTodayDate() {
-  const d = new Date();
-  return d.toISOString().split("T")[0];
+  return new Date().toISOString().split("T")[0];
 }
 
 function getCurrentTime() {
-  const d = new Date();
-  return d.toTimeString().slice(0, 5);
+  return new Date().toTimeString().slice(0, 5);
 }
 
 // ==========================
@@ -53,77 +45,91 @@ function canAbsenKeluar() {
 }
 
 // ==========================
-// GET DATA HARI INI
+// FETCH DATA ABSENSI (API)
 // ==========================
-function getTodayAbsensi() {
+async function fetchAbsensi() {
+  const res = await fetch(`${BASE_URL}/${sessionUser.username}`);
+  return await res.json();
+}
+
+// ==========================
+// GET TODAY DATA
+// ==========================
+async function getTodayAbsensi() {
+  const data = await fetchAbsensi();
   const today = getTodayDate();
-  return getAbsensiData().find(
+
+  return data.find(
     (a) => a.tanggal === today && a.user === sessionUser.username
   );
 }
 
 // ==========================
-// ABSEN MASUK
+// ABSEN MASUK (POST)
 // ==========================
-function absenMasuk() {
+async function absenMasuk() {
   if (!canAbsenMasuk()) {
     alert("Belum waktunya absen masuk (≥19:00)");
     return;
   }
 
-  if (getTodayAbsensi()) {
+  const todayData = await getTodayAbsensi();
+  if (todayData) {
     alert("Sudah absen masuk hari ini");
     return;
   }
 
-  const data = getAbsensiData();
-
-  data.push({
-    id: "ABS-" + Date.now(),
-    user: sessionUser.username,
-    tanggal: getTodayDate(),
-    jamMasuk: getCurrentTime(),
-    jamKeluar: null,
-    status: "Belum Lengkap",
+  await fetch(BASE_URL + "/masuk", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user: sessionUser.username,
+      tanggal: getTodayDate(),
+      jamMasuk: getCurrentTime(),
+    }),
   });
 
-  saveAbsensiData(data);
-  renderAll();
   alert("Absen masuk berhasil");
+  renderAll();
 }
 
 // ==========================
-// ABSEN KELUAR
+// ABSEN KELUAR (PUT)
 // ==========================
-function absenKeluar() {
+async function absenKeluar() {
   if (!canAbsenKeluar()) {
     alert("Belum waktunya absen keluar (00:00–03:00)");
     return;
   }
 
-  const data = getAbsensiData();
-  const today = getTodayDate();
+  const todayData = await getTodayAbsensi();
 
-  const record = data.find(
-    (a) => a.tanggal === today && a.user === sessionUser.username
-  );
-
-  if (!record) {
+  if (!todayData) {
     alert("Belum absen masuk");
     return;
   }
 
-  if (record.jamKeluar) {
+  if (todayData.jamKeluar) {
     alert("Sudah absen keluar");
     return;
   }
 
-  record.jamKeluar = getCurrentTime();
-  record.status = "Hadir";
+  await fetch(BASE_URL + "/keluar", {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      user: sessionUser.username,
+      tanggal: getTodayDate(),
+      jamKeluar: getCurrentTime(),
+    }),
+  });
 
-  saveAbsensiData(data);
-  renderAll();
   alert("Absen keluar berhasil");
+  renderAll();
 }
 
 // ==========================
@@ -141,22 +147,19 @@ function hitungDurasi(masuk, keluar) {
   if (end < start) end += 24 * 60;
 
   const diff = end - start;
-  const jam = Math.floor(diff / 60);
-  const menit = diff % 60;
-
-  return `${jam}j ${menit}m`;
+  return `${Math.floor(diff / 60)}j ${diff % 60}m`;
 }
 
 // ==========================
-// RENDER STATUS HARI INI
+// RENDER STATUS
 // ==========================
-function renderTodayStatus() {
+async function renderTodayStatus() {
   const statusEl = document.getElementById("statusHariIni");
   const masukEl = document.getElementById("displayJamMasuk");
   const keluarEl = document.getElementById("displayJamKeluar");
   const durasiEl = document.getElementById("displayDurasi");
 
-  const record = getTodayAbsensi();
+  const record = await getTodayAbsensi();
 
   if (!record) {
     statusEl.textContent = "Belum Absen";
@@ -174,35 +177,20 @@ function renderTodayStatus() {
   if (record.jamMasuk && !record.jamKeluar) {
     statusEl.textContent = "Sudah Masuk";
     statusEl.className = "cs-status-pill partial";
-  } else if (record.jamMasuk && record.jamKeluar) {
+  } else {
     statusEl.textContent = "Hadir";
     statusEl.className = "cs-status-pill hadir";
   }
 }
 
 // ==========================
-// RENDER TOTAL HADIR
-// ==========================
-function renderTotalHadir() {
-  const totalEl = document.getElementById("totalHadir");
-
-  const total = getAbsensiData().filter(
-    (a) => a.user === sessionUser.username && a.status === "Hadir"
-  ).length;
-
-  totalEl.textContent = total;
-}
-
-// ==========================
 // RENDER HISTORY
 // ==========================
-function renderHistory() {
+async function renderHistory() {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
-  const data = getAbsensiData().filter(
-    (a) => a.user === sessionUser.username
-  );
+  const data = await fetchAbsensi();
 
   data.reverse().forEach((a) => {
     let cls = "waiting";
@@ -216,27 +204,37 @@ function renderHistory() {
       <td>${a.jamKeluar || "-"}</td>
       <td><span class="cs-status-pill ${cls}">${a.status}</span></td>
     `;
-
     tbody.appendChild(tr);
   });
 }
 
 // ==========================
-// EVENT LISTENER
+// TOTAL HADIR
+// ==========================
+async function renderTotalHadir() {
+  const totalEl = document.getElementById("totalHadir");
+
+  const data = await fetchAbsensi();
+  const total = data.filter(
+    (a) => a.user === sessionUser.username && a.status === "Hadir"
+  ).length;
+
+  totalEl.textContent = total;
+}
+
+// ==========================
+// EVENT
 // ==========================
 document.getElementById("btnMasuk").addEventListener("click", absenMasuk);
 document.getElementById("btnKeluar").addEventListener("click", absenKeluar);
 
 // ==========================
-// RENDER ALL
-// ==========================
-function renderAll() {
-  renderTodayStatus();
-  renderHistory();
-  renderTotalHadir();
-}
-
-// ==========================
 // INIT
 // ==========================
+async function renderAll() {
+  await renderTodayStatus();
+  await renderHistory();
+  await renderTotalHadir();
+}
+
 renderAll();
