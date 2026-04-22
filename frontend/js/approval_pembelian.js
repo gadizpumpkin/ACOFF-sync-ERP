@@ -22,15 +22,33 @@ if (sessionUser.role !== "OWNER") {
 const menuList = document.getElementById("menuList");
 const menus = getMenuByRole(sessionUser.role);
 
+// mapping route halaman
+const menuRoutes = {
+  "Dashboard": "dashboard.html",
+  "Approval Pembelian": "approval_pembelian.html",
+  "Approval Payroll": "approval_payroll.html",
+  "Approval Laporan": "approval_laporan.html",
+  "Lihat Laporan": "laporan_view.html",
+  "Audit Keuangan": "audit_log.html"
+};
+
+menuList.innerHTML = "";
+
 menus.forEach(menu => {
   const li = document.createElement("li");
-  li.textContent = menu;
 
-  li.addEventListener("click", function() {
-    if (menu === "Approval Pembelian") window.location.href = "approval_pembelian.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
+  const a = document.createElement("a");
+  a.href = menuRoutes[menu] || "#";
+  a.textContent = menu;
 
+  if (!menuRoutes[menu]) {
+    a.addEventListener("click", (e) => {
+      e.preventDefault();
+      alert("Menu belum dibuat: " + menu);
+    });
+  }
+
+  li.appendChild(a);
   menuList.appendChild(li);
 });
 
