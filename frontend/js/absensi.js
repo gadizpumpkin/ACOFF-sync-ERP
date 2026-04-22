@@ -3,40 +3,31 @@
 // ==========================
 console.log("ABSENSI JS LOADED");
 
-// ==========================
-// DOM READY
-// ==========================
 document.addEventListener("DOMContentLoaded", () => {
   console.log("DOM READY");
 
-  // ==========================
-  // AUTH CHECK
-  // ==========================
   const sessionUser = getSession();
   console.log("SESSION:", sessionUser);
 
   if (!sessionUser) {
-    alert("Session habis, silakan login ulang");
+    alert("Session habis");
     window.location.href = "index.html";
     return;
   }
 
   document.getElementById("userRole").textContent = sessionUser.role;
 
-  document.getElementById("logoutBtn").addEventListener("click", function () {
+  document.getElementById("logoutBtn").addEventListener("click", () => {
     clearSession();
     window.location.href = "index.html";
   });
 
   if (sessionUser.role !== "KARYAWAN") {
-    alert("Akses ditolak. Absensi hanya untuk Karyawan.");
+    alert("Akses ditolak");
     window.location.href = "dashboard.html";
     return;
   }
 
-  // ==========================
-  // BASE URL API
-  // ==========================
   const BASE_URL = "http://localhost:5000/api/absensi";
 
   // ==========================
@@ -60,7 +51,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==========================
-  // FETCH DATA 
+  // FETCH DATA
   // ==========================
   async function fetchAbsensi() {
     try {
@@ -83,15 +74,41 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   // ==========================
-  // GET TODAY
+  // RENDER HISTORY (absensi masuk/keluar))
   // ==========================
-  async function getTodayAbsensi() {
-    const data = await fetchAbsensi();
-    const today = getTodayDate();
+  async function renderHistory() {
+    const tbody = document.getElementById("historyTable");
 
-    return data.find(
-      (a) => a.tanggal === today && a.user === sessionUser.username
-    );
+    if (!tbody) {
+      console.error("historyTable tidak ditemukan");
+      return;
+    }
+
+    tbody.innerHTML = "";
+
+    const data = await fetchAbsensi();
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" style="text-align:center;">Belum ada data</td>
+        </tr>
+      `;
+      return;
+    }
+
+    data.forEach((a) => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${a.tanggal}</td>
+        <td>${a.jam_masuk || "-"}</td>
+        <td>${a.jam_keluar || "-"}</td>
+        <td>${a.status}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
   }
 
   // ==========================
@@ -101,13 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("CLICK MASUK");
 
     if (!canAbsenMasuk()) {
-      alert("Belum waktunya absen masuk (≥19:00)");
-      return;
-    }
-
-    const todayData = await getTodayAbsensi();
-    if (todayData) {
-      alert("Sudah absen hari ini");
+      alert("Belum waktunya");
       return;
     }
 
@@ -131,11 +142,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      alert("Absen masuk berhasil");
+      alert("Berhasil absen masuk");
       renderAll();
     } catch (err) {
       console.error(err);
-      alert("Gagal koneksi ke server");
+      alert("Server error");
     }
   }
 
@@ -146,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
     console.log("CLICK KELUAR");
 
     if (!canAbsenKeluar()) {
-      alert("Belum waktunya absen keluar (00:00–03:00)");
+      alert("Belum waktunya");
       return;
     }
 
@@ -170,39 +181,27 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      alert("Absen keluar berhasil");
+      alert("Berhasil absen keluar");
       renderAll();
     } catch (err) {
       console.error(err);
-      alert("Gagal koneksi ke server");
+      alert("Server error");
     }
   }
 
   // ==========================
-  // RENDER
+  // RENDER ALL
   // ==========================
   async function renderAll() {
-    console.log("RENDER...");
-    await fetchAbsensi();
+    console.log("RENDER ALL");
+    await renderHistory();
   }
 
   // ==========================
-  // EVENT LISTENER 
+  // EVENT
   // ==========================
-  const btnMasuk = document.getElementById("btnMasuk");
-  const btnKeluar = document.getElementById("btnKeluar");
-
-  if (!btnMasuk) {
-    console.error("btnMasuk TIDAK DITEMUKAN");
-  } else {
-    btnMasuk.addEventListener("click", absenMasuk);
-  }
-
-  if (!btnKeluar) {
-    console.error("btnKeluar TIDAK DITEMUKAN");
-  } else {
-    btnKeluar.addEventListener("click", absenKeluar);
-  }
+  document.getElementById("btnMasuk")?.addEventListener("click", absenMasuk);
+  document.getElementById("btnKeluar")?.addEventListener("click", absenKeluar);
 
   // ==========================
   // INIT
