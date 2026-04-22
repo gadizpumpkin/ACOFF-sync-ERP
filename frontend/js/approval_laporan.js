@@ -1,115 +1,192 @@
-// ==========================
-// AUTH CHECK
-// ==========================
-const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+document.addEventListener("DOMContentLoaded", function () {
 
-document.getElementById("userRole").textContent = sessionUser.role;
+  // ==========================
+  // AUTH
+  // ==========================
+  const sessionUser = getSession();
 
-document.getElementById("logoutBtn").addEventListener("click", function() {
-  clearSession();
-  window.location.href = "index.html";
-});
+  if (!sessionUser) {
+    window.location.href = "index.html";
+    return;
+  }
 
-if (sessionUser.role !== "OWNER") {
-  alert("Akses ditolak. Approval laporan hanya untuk Owner.");
-  window.location.href = "dashboard.html";
-}
+  const role = sessionUser.role.trim().toUpperCase();
 
-// RBAC MENU
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
+  if (role !== "OWNER") {
+    alert("Akses hanya untuk OWNER");
+    window.location.href = "dashboard.html";
+    return;
+  }
 
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  li.textContent = menu;
+  document.getElementById("userRole").textContent = role;
 
-  li.addEventListener("click", function() {
-    if (menu === "Approval Laporan") window.location.href = "approval_laporan.html";
-    else alert("Menu belum dibuat: " + menu);
+  document.getElementById("logoutBtn").addEventListener("click", () => {
+    clearSession();
+    window.location.href = "index.html";
   });
 
-  menuList.appendChild(li);
-});
+  // ==========================
+  // SIDEBAR DINAMIS
+  // ==========================
+  const menuList = document.getElementById("menuList");
 
-// ==========================
-// STORAGE
-// ==========================
-function getLaporanData() {
-  return JSON.parse(localStorage.getItem("laporanData")) || [];
-}
+  const menuConfig = {
+    OWNER: [
+      { name: "Dashboard", url: "dashboard.html" },
+      { name: "Approval Pembelian", url: "approval_pembelian.html" },
+      { name: "Approval Payroll", url: "approval_payroll.html" },
+      { name: "Approval Laporan", url: "approval_laporan.html" },
+      { name: "Lihat Laporan", url: "laporan_view.html" },
+      { name: "Audit Log", url: "audit_log.html" }
+    ]
+  };
 
-function saveLaporanData(data) {
-  localStorage.setItem("laporanData", JSON.stringify(data));
-}
+  menuList.innerHTML = "";
 
-// VIEW
-function viewLaporan(id) {
-  localStorage.setItem("selectedLaporanId", id);
-  window.location.href = "laporan_view.html";
-}
+  menuConfig[role].forEach(menu => {
+    const li = document.createElement("li");
+    const a = document.createElement("a");
 
-// APPROVE
-function approveLaporan(id) {
-  let laporan = getLaporanData();
-  const item = laporan.find(l => l.id === id);
+    a.href = menu.url;
+    a.textContent = menu.name;
 
-  if (!item) return alert("Laporan tidak ditemukan.");
+    if (window.location.pathname.includes(menu.url)) {
+      li.classList.add("active");
+    }
 
-  if (!confirm("Approve laporan ini? Setelah approve laporan menjadi Published.")) return;
-
-  item.status = "Approved";
-  item.approvedBy = sessionUser.username;
-
-  saveLaporanData(laporan);
-
-  alert("Laporan berhasil disetujui dan dipublish.");
-  renderPending();
-}
-
-// REJECT
-function rejectLaporan(id) {
-  let laporan = getLaporanData();
-  const item = laporan.find(l => l.id === id);
-
-  if (!item) return alert("Laporan tidak ditemukan.");
-
-  if (!confirm("Reject laporan ini?")) return;
-
-  item.status = "Rejected";
-  item.approvedBy = sessionUser.username;
-
-  saveLaporanData(laporan);
-
-  alert("Laporan ditolak.");
-  renderPending();
-}
-
-// RENDER
-function renderPending() {
-  const tbody = document.getElementById("pendingTable");
-  tbody.innerHTML = "";
-
-  const laporan = getLaporanData().filter(l => l.status === "Pending");
-
-  laporan.forEach(l => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${l.type}</td>
-      <td>${l.periodeMulai} s/d ${l.periodeSelesai}</td>
-      <td>Rp ${l.totalOmzet.toLocaleString("id-ID")}</td>
-      <td>${l.totalTransaksi}</td>
-      <td>
-        <div class="action-btn">
-          <button class="btn-view" onclick="viewLaporan('${l.id}')">View</button>
-          <button class="btn-approve" onclick="approveLaporan('${l.id}')">Approve</button>
-          <button class="btn-reject" onclick="rejectLaporan('${l.id}')">Reject</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
+    li.appendChild(a);
+    menuList.appendChild(li);
   });
-}
 
-// INIT
-renderPending();
+  // ==========================
+  // DATA
+  // ==========================
+  function getData() {
+    return JSON.parse(localStorage.getItem("laporanData")) || [];
+  }
+
+  function saveData(data) {
+    localStorage.setItem("laporanData", JSON.stringify(data));
+  }
+
+  // ==========================
+  // RENDER
+  // ==========================
+  function render(data = null) {
+    const tbody = document.getElementById("pendingTable");
+    tbody.innerHTML = "";
+
+    if (!data) {
+      data = getData().filter(d => (d.status || "Pending") === "Pending");
+    }
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="7">Tidak ada data</td></tr>`;
+      updateSummary([]);
+      return;
+    }
+
+    data.forEach(d => {
+      const laba = (d.penjualan || 0) - (d.pembelian || 0) - (d.payroll || 0);
+
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${d.tanggal || "-"}</td>
+        <td>Rp ${(d.penjualan || 0).toLocaleString("id-ID")}</td>
+        <td>Rp ${(d.pembelian || 0).toLocaleString("id-ID")}</td>
+        <td>Rp ${(d.payroll || 0).toLocaleString("id-ID")}</td>
+        <td>Rp ${laba.toLocaleString("id-ID")}</td>
+        <td>${d.status || "Pending"}</td>
+        <td>
+          <button onclick="approve('${d.id}')">Approve</button>
+          <button onclick="reject('${d.id}')">Reject</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    updateSummary(data);
+  }
+
+  // ==========================
+  // SUMMARY
+  // ==========================
+  function updateSummary(data) {
+    let totalPenjualan = 0;
+    let totalPembelian = 0;
+    let totalPayroll = 0;
+
+    data.forEach(d => {
+      totalPenjualan += d.penjualan || 0;
+      totalPembelian += d.pembelian || 0;
+      totalPayroll += d.payroll || 0;
+    });
+
+    const laba = totalPenjualan - totalPembelian - totalPayroll;
+
+    document.getElementById("totalPenjualan").textContent =
+      "Rp " + totalPenjualan.toLocaleString("id-ID");
+
+    document.getElementById("totalPembelian").textContent =
+      "Rp " + totalPembelian.toLocaleString("id-ID");
+
+    document.getElementById("totalPayroll").textContent =
+      "Rp " + totalPayroll.toLocaleString("id-ID");
+
+    const labaEl = document.getElementById("labaBersih");
+    labaEl.textContent = "Rp " + laba.toLocaleString("id-ID");
+
+    labaEl.style.color = laba >= 0 ? "green" : "red";
+  }
+
+  // ==========================
+  // FILTER
+  // ==========================
+  document.getElementById("btnLoadReport").addEventListener("click", () => {
+    const periode = document.getElementById("periode").value;
+    const bulan = document.getElementById("bulan").value;
+
+    let data = getData();
+
+    if (periode === "monthly" && bulan) {
+      data = data.filter(d => d.tanggal?.startsWith(bulan));
+    }
+
+    data = data.filter(d => (d.status || "Pending") === "Pending");
+
+    render(data);
+  });
+
+  // ==========================
+  // APPROVE / REJECT
+  // ==========================
+  window.approve = function(id) {
+    let data = getData();
+
+    data = data.map(d =>
+      d.id === id ? { ...d, status: "Approved" } : d
+    );
+
+    saveData(data);
+    render();
+  };
+
+  window.reject = function(id) {
+    let data = getData();
+
+    data = data.map(d =>
+      d.id === id ? { ...d, status: "Rejected" } : d
+    );
+
+    saveData(data);
+    render();
+  };
+
+  // ==========================
+  // INIT
+  // ==========================
+  render();
+
+});

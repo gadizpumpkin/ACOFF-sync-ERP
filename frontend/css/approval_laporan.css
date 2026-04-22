@@ -120,6 +120,7 @@ body {
   margin-bottom: 8px;
 }
 
+/* Sidebar menu — mendukung <li><a> yang dibuat dinamis oleh JS */
 .cs-menu {
   list-style: none;
 }
@@ -147,17 +148,6 @@ body {
   color: #C9913A;
   background: rgba(201, 145, 58, 0.06);
   font-weight: 500;
-}
-
-.cs-menu-icon {
-  width: 16px;
-  height: 16px;
-  flex-shrink: 0;
-  opacity: 0.7;
-}
-
-.cs-menu li.active a .cs-menu-icon {
-  opacity: 1;
 }
 
 /* ---------- MAIN CONTENT ---------- */
@@ -226,12 +216,6 @@ body {
   flex-shrink: 0;
 }
 
-/* Approval action card accent */
-.cs-card-action {
-  border-color: rgba(201, 145, 58, 0.18);
-  background: #fffdf9;
-}
-
 /* ---------- FILTER ROW ---------- */
 .cs-filter-row {
   display: flex;
@@ -259,8 +243,7 @@ body {
 }
 
 .cs-form-group select,
-.cs-form-group input[type="month"],
-.cs-form-group textarea {
+.cs-form-group input[type="month"] {
   font-family: 'DM Sans', sans-serif;
   font-size: 14px;
   color: #1a1a18;
@@ -283,24 +266,12 @@ body {
 }
 
 .cs-form-group select:focus,
-.cs-form-group input[type="month"]:focus,
-.cs-form-group textarea:focus {
+.cs-form-group input[type="month"]:focus {
   border-color: rgba(201, 145, 58, 0.5);
   box-shadow: 0 0 0 3px rgba(201, 145, 58, 0.08);
-  background: #ffffff;
+  background-color: #ffffff;
 }
 
-.cs-form-group textarea {
-  resize: vertical;
-  min-height: 90px;
-  line-height: 1.6;
-}
-
-.cs-form-group textarea::placeholder {
-  color: #b4b2a9;
-}
-
-/* ---------- LOAD BUTTON ---------- */
 .cs-btn-load {
   display: inline-flex;
   align-items: center;
@@ -361,6 +332,12 @@ body {
   color: #C9913A;
 }
 
+/* Laba bersih negatif — diset via JS (labaEl.style.color) */
+/* Fallback jika JS pakai class */
+.cs-summary-val.negative {
+  color: #A32D2D;
+}
+
 /* ---------- TABLE ---------- */
 .cs-table-wrap {
   overflow-x: auto;
@@ -404,9 +381,19 @@ body {
   vertical-align: middle;
 }
 
-.cs-table td.cs-td-gold {
+/* kolom laba/penjualan */
+.cs-table td:nth-child(2),
+.cs-table td:nth-child(5) {
   font-weight: 500;
   color: #C9913A;
+}
+
+/* Kolom empty state */
+.cs-table td[colspan] {
+  text-align: center;
+  color: #b4b2a9;
+  font-size: 13px;
+  padding: 2rem 14px;
 }
 
 /* ---------- STATUS PILLS ---------- */
@@ -423,7 +410,6 @@ body {
 .cs-status-pill.pending  { background: rgba(186,117,23,.1); color: #854F0B; border: 1px solid rgba(186,117,23,.25); }
 .cs-status-pill.approved { background: rgba(99,153,34,.1);  color: #3B6D11; border: 1px solid rgba(99,153,34,.25); }
 .cs-status-pill.rejected { background: rgba(226,75,74,.1);  color: #A32D2D; border: 1px solid rgba(226,75,74,.25); }
-.cs-status-pill.draft    { background: rgba(136,135,128,.1);color: #5f5e5a; border: 1px solid rgba(136,135,128,.2);}
 
 .cs-pulse {
   display: inline-block;
@@ -434,81 +420,71 @@ body {
   flex-shrink: 0;
 }
 
-/* ---------- JENIS BADGE ---------- */
-.cs-jenis-badge {
+/* ---------- ACTION BUTTONS (dibuat oleh JS di dalam tbody) ---------- */
+.cs-action-btn {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+/* JS membuat: <button onclick="approve(...)"> dan <button onclick="reject(...)">
+   Styling default untuk semua button di dalam tbody */
+#pendingTable button {
   display: inline-flex;
   align-items: center;
-  padding: 3px 10px;
+  gap: 5px;
+  padding: 5px 11px;
   border-radius: 6px;
+  font-family: 'DM Sans', sans-serif;
   font-size: 12px;
   font-weight: 500;
-}
-
-.cs-jenis-badge.weekly  { background: rgba(55,138,221,.08); color: #185FA5; border: 1px solid rgba(55,138,221,.2); }
-.cs-jenis-badge.monthly { background: rgba(201,145,58,.08); color: #854F0B; border: 1px solid rgba(201,145,58,.2); }
-.cs-jenis-badge.daily   { background: rgba(136,135,128,.08);color: #5f5e5a; border: 1px solid rgba(136,135,128,.18);}
-
-/* ---------- APPROVAL ACTIONS ---------- */
-.cs-approval-actions {
-  display: flex;
-  gap: 10px;
-  margin-top: 1.25rem;
-  padding-top: 1.25rem;
-  border-top: 0.5px solid rgba(0, 0, 0, 0.07);
-}
-
-.cs-btn-reject-full,
-.cs-btn-approve-full,
-.cs-btn-export-full {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px 18px;
-  border-radius: 10px;
-  font-family: 'DM Sans', sans-serif;
-  font-size: 14px;
-  font-weight: 500;
   cursor: pointer;
-  transition: all 0.18s ease;
+  transition: all 0.15s ease;
   white-space: nowrap;
+  border: 1px solid transparent;
 }
 
-.cs-btn-reject-full {
-  flex: 1;
+/* Tombol Approve (pertama) */
+#pendingTable button:first-of-type {
+  background: rgba(99, 153, 34, 0.1);
+  color: #3B6D11;
+  border-color: rgba(99, 153, 34, 0.25);
+}
+
+#pendingTable button:first-of-type:hover {
+  background: rgba(99, 153, 34, 0.2);
+}
+
+/* Tombol Reject (kedua) */
+#pendingTable button:last-of-type {
   background: rgba(226, 75, 74, 0.08);
   color: #A32D2D;
-  border: 1px solid rgba(226, 75, 74, 0.25);
+  border-color: rgba(226, 75, 74, 0.2);
 }
 
-.cs-btn-reject-full:hover {
-  background: rgba(226, 75, 74, 0.16);
+#pendingTable button:last-of-type:hover {
+  background: rgba(226, 75, 74, 0.18);
 }
 
-.cs-btn-approve-full {
-  flex: 2;
-  background: #1E5728;
-  color: #ffffff;
-  border: none;
+/* Jika JS menggunakan class eksplisit */
+.cs-btn-approve {
+  background: rgba(99, 153, 34, 0.1) !important;
+  color: #3B6D11 !important;
+  border-color: rgba(99, 153, 34, 0.25) !important;
 }
 
-.cs-btn-approve-full:hover {
-  background: #174520;
+.cs-btn-approve:hover {
+  background: rgba(99, 153, 34, 0.2) !important;
 }
 
-.cs-btn-approve-full:active {
-  transform: scale(0.98);
+.cs-btn-reject {
+  background: rgba(226, 75, 74, 0.08) !important;
+  color: #A32D2D !important;
+  border-color: rgba(226, 75, 74, 0.2) !important;
 }
 
-.cs-btn-export-full {
-  flex: 1;
-  background: rgba(201, 145, 58, 0.08);
-  color: #854F0B;
-  border: 1px solid rgba(201, 145, 58, 0.25);
-}
-
-.cs-btn-export-full:hover {
-  background: rgba(201, 145, 58, 0.16);
+.cs-btn-reject:hover {
+  background: rgba(226, 75, 74, 0.18) !important;
 }
 
 /* ---------- RESPONSIVE ---------- */
@@ -546,21 +522,6 @@ body {
     justify-content: center;
   }
 
-  .cs-summary-grid {
-    grid-template-columns: 1fr 1fr;
-  }
-
-  .cs-approval-actions {
-    flex-direction: column;
-  }
-
-  .cs-btn-reject-full,
-  .cs-btn-approve-full,
-  .cs-btn-export-full {
-    flex: none;
-    width: 100%;
-  }
-
   .cs-page-title {
     font-size: 22px;
   }
@@ -569,28 +530,5 @@ body {
 @media (max-width: 480px) {
   .cs-summary-grid {
     grid-template-columns: 1fr;
-  }
-}
-
-/* ---------- PRINT ---------- */
-@media print {
-  .cs-nav,
-  .cs-sidebar,
-  .cs-card:has(#periode),
-  .cs-card-action {
-    display: none !important;
-  }
-
-  body {
-    background: white;
-  }
-
-  .cs-layout {
-    display: block;
-  }
-
-  .cs-main {
-    padding: 0;
-    max-width: 100%;
   }
 }
