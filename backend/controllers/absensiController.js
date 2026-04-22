@@ -1,158 +1,169 @@
+// backend/controllers/absensiController.js
+
 const db = require("../config/db");
 
 // ==========================
-// HELPER HITUNG JAM
+// HITUNG TOTAL JAM
 // ==========================
-function hitungTotalJam(jamMasuk, jamKeluar) {
-  if (!jamMasuk || !jamKeluar) return 0;
+function hitungJam(masuk, keluar) {
+  if (!masuk || !keluar) return 0;
 
-  const [h1, m1] = jamMasuk.split(":").map(Number);
-  const [h2, m2] = jamKeluar.split(":").map(Number);
+  const [h1, m1] = masuk.split(":").map(Number);
+  const [h2, m2] = keluar.split(":").map(Number);
 
   let start = h1 * 60 + m1;
   let end = h2 * 60 + m2;
 
   if (end < start) end += 24 * 60;
 
-  const diff = end - start;
-  return (diff / 60).toFixed(2);
+  return ((end - start) / 60).toFixed(2);
 }
 
 // ==========================
-// GET ABSENSI BY USERNAME
+// GET ABSENSI BY USER
 // ==========================
-exports.getAbsensiByUser = (req, res) => {
+exports.getByUser = async (req, res) => {
   const { username } = req.params;
+
   console.log("GET ABSENSI:", username);
 
-  const query = `
-    SELECT a.*, u.username as user
-    FROM absensi a
-    JOIN users u ON a.user_id = u.id
-    WHERE u.username = ?
-    ORDER BY a.tanggal DESC
-  `;
+  try {
+    const [rows] = await db.query(
+      `SELECT a.*, u.username 
+       FROM absensi a
+       JOIN users u ON a.user_id = u.id
+       WHERE u.username = ?
+       ORDER BY a.tanggal DESC`,
+      [username]
+    );
 
-  db.query(query, [username], (err, result) => {
-    if (err) {
-      console.error("DB ERROR:", err);
-      return res.status(500).json({
-        message: "Server error",
-        error: err.sqlMessage,
-      });
-    }
+    console.log("DATA DITEMUKAN:", rows.length);
 
-    console.log("RESULT:", result);
-    res.json(result);
-  });
+    res.json(rows);
+  } catch (err) {
+    console.error("❌ ERROR GET:", err);
+    res.status(500).json({ message: "Error ambil data" });
+  }
 };
 
 // ==========================
 // ABSEN MASUK
 // ==========================
-exports.absenMasuk = (req, res) => {
-  const { user, tanggal, jamMasuk } = req.body;
+exports.masuk = async (req, res) => {
+  const { user, tanggal, jam_masuk } = req.body;
+
   console.log("ABSEN MASUK:", req.body);
 
-  const getUser = "SELECT id FROM users WHERE username = ?";
-  db.query(getUser, [user], (err, userResult) => {
-    if (err) {
-      console.error("ERROR USER:", err);
-      return res.status(500).json({ message: "DB error" });
-    }
+  try {
+    // STEP 1: ambil user
+    console.log("STEP 1: GET USER");
 
-    if (userResult.length === 0) {
+    const [userRows] = await db.query(
+      "SELECT id FROM users WHERE username = ?",
+      [user]
+    );
+
+    console.log("STEP 2: USER RESULT =", userRows);
+
+    if (userRows.length === 0) {
       return res.status(400).json({ message: "User tidak ditemukan" });
     }
 
-    const user_id = userResult[0].id;
+    const user_id = userRows[0].id;
 
-    const checkQuery =
-      "SELECT * FROM absensi WHERE user_id = ? AND tanggal = ?";
-    db.query(checkQuery, [user_id, tanggal], (err, checkResult) => {
-      if (err) {
-        console.error("CHECK ERROR:", err);
-        return res.status(500).json({ message: "DB error" });
-      }
+    // STEP 3: cek sudah absen
+    console.log("STEP 3: CEK ABSENSI");
 
-      if (checkResult.length > 0) {
-        return res.status(400).json({ message: "Sudah absen" });
-      }
+    const [cek] = await db.query(
+      "SELECT * FROM absensi WHERE user_id=? AND tanggal=?",
+      [user_id, tanggal]
+    );
 
-      const insertQuery = `
-        INSERT INTO absensi (user_id, tanggal, jam_masuk, status)
-        VALUES (?, ?, ?, 'HADIR')
-      `;
+    console.log("STEP 4: CEK RESULT =", cek);
 
-      db.query(insertQuery, [user_id, tanggal, jamMasuk], (err) => {
-        if (err) {
-          console.error("INSERT ERROR:", err);
-          return res.status(500).json({ message: "Gagal absen masuk" });
-        }
+    if (cek.length > 0) {
+      return res.status(400).json({ message: "Sudah absen hari ini" });
+    }
 
-        res.json({ message: "Absen masuk berhasil" });
-      });
-    });
-  });
+    // STEP 5: insert
+    console.log("STEP 5: INSERT");
+
+    const [result] = await db.query(
+      `INSERT INTO absensi (user_id, tanggal, jam_masuk, status)
+       VALUES (?, ?, ?, 'HADIR')`,
+      [user_id, tanggal, jam_masuk]
+    );
+
+    console.log("✅ INSERT SUCCESS:", result.insertId);
+
+    res.json({ message: "Absen masuk berhasil" });
+
+  } catch (err) {
+    console.error("❌ ERROR MASUK:", err);
+    res.status(500).json({ message: "Gagal absen masuk" });
+  }
 };
 
 // ==========================
 // ABSEN KELUAR
 // ==========================
-exports.absenKeluar = (req, res) => {
-  const { user, tanggal, jamKeluar } = req.body;
+exports.keluar = async (req, res) => {
+  const { user, tanggal, jam_keluar } = req.body;
+
   console.log("ABSEN KELUAR:", req.body);
 
-  const getUser = "SELECT id FROM users WHERE username = ?";
-  db.query(getUser, [user], (err, userResult) => {
-    if (err) {
-      console.error("ERROR USER:", err);
-      return res.status(500).json({ message: "DB error" });
-    }
+  try {
+    console.log("STEP 1: GET USER");
 
-    if (userResult.length === 0) {
+    const [userRows] = await db.query(
+      "SELECT id FROM users WHERE username = ?",
+      [user]
+    );
+
+    console.log("STEP 2: USER RESULT =", userRows);
+
+    if (userRows.length === 0) {
       return res.status(400).json({ message: "User tidak ditemukan" });
     }
 
-    const user_id = userResult[0].id;
+    const user_id = userRows[0].id;
 
-    const getAbsensi =
-      "SELECT * FROM absensi WHERE user_id = ? AND tanggal = ?";
-    db.query(getAbsensi, [user_id, tanggal], (err, result) => {
-      if (err) {
-        console.error("GET ERROR:", err);
-        return res.status(500).json({ message: "DB error" });
-      }
+    console.log("STEP 3: GET ABSENSI");
 
-      if (result.length === 0) {
-        return res.status(400).json({ message: "Belum absen masuk" });
-      }
+    const [rows] = await db.query(
+      "SELECT * FROM absensi WHERE user_id=? AND tanggal=?",
+      [user_id, tanggal]
+    );
 
-      const data = result[0];
+    console.log("STEP 4: DATA =", rows);
 
-      if (data.jam_keluar) {
-        return res.status(400).json({ message: "Sudah absen keluar" });
-      }
+    if (rows.length === 0) {
+      return res.status(400).json({ message: "Belum absen masuk" });
+    }
 
-      const totalJam = hitungTotalJam(
-        data.jam_masuk,
-        jamKeluar
-      );
+    const data = rows[0];
 
-      const updateQuery = `
-        UPDATE absensi 
-        SET jam_keluar = ?, total_jam = ?
-        WHERE id = ?
-      `;
+    if (data.jam_keluar) {
+      return res.status(400).json({ message: "Sudah absen keluar" });
+    }
 
-      db.query(updateQuery, [jamKeluar, totalJam, data.id], (err) => {
-        if (err) {
-          console.error("UPDATE ERROR:", err);
-          return res.status(500).json({ message: "Gagal absen keluar" });
-        }
+    const total = hitungJam(data.jam_masuk, jam_keluar);
 
-        res.json({ message: "Absen keluar berhasil" });
-      });
-    });
-  });
+    console.log("STEP 5: UPDATE");
+
+    await db.query(
+      `UPDATE absensi 
+       SET jam_keluar=?, total_jam=? 
+       WHERE id=?`,
+      [jam_keluar, total, data.id]
+    );
+
+    console.log("✅ UPDATE SUCCESS");
+
+    res.json({ message: "Absen keluar berhasil" });
+
+  } catch (err) {
+    console.error("❌ ERROR KELUAR:", err);
+    res.status(500).json({ message: "Gagal absen keluar" });
+  }
 };
