@@ -112,7 +112,7 @@
   // ==========================
   async function loadLowStock() {
 
-    if (!sessionUser || sessionUser.role !== "Owner") return;
+    if (!sessionUser || sessionUser.role !== "OWNER") return;
 
     try {
       const res = await fetch("http://localhost:5000/api/dashboard/low-stock", {

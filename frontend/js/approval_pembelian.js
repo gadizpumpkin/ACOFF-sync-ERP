@@ -28,7 +28,7 @@ const menuRoutes = {
   "Approval Pembelian": "approval_pembelian.html",
   "Approval Payroll": "approval_payroll.html",
   "Approval Laporan": "approval_laporan.html",
-  "Lihat Laporan": "laporan_view.html",
+  "Export P&L": "laporan_view.html",
   "Audit Keuangan": "audit_log.html"
 };
 

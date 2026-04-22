@@ -15,7 +15,7 @@ function getMenuByRole(role) {
   if (role === "OWNER") {
     return [
       "Dashboard",
-      "Lihat Laporan",
+      "Export P&L",
       "Audit Keuangan",
       "Approval Pembelian",
       "Approval Payroll",
