@@ -51,6 +51,7 @@
   "Audit Keuangan": "audit_log.html",
   "Generate Laporan": "laporan.html",
   "Lihat Laporan": "laporan.html",
+  "Export P&L": "laporan_view.html",
   "Payroll" : "Payroll.html",
   "Paycheck": "paycheck.html"
 };
