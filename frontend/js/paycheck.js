@@ -12,7 +12,7 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
 });
 
 // hanya karyawan
-if (sessionUser.role !== "Karyawan") {
+if (sessionUser.role !== "KARYAWAN") {
   alert("Akses ditolak. Paycheck hanya untuk Karyawan.");
   window.location.href = "dashboard.html";
 }
