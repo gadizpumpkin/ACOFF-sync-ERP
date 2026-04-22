@@ -46,23 +46,33 @@ let cart = [];
 // ==========================
 // LOAD MENU DROPDOWN
 // ==========================
-function loadMenuDropdown() {
+async function loadMenuDropdown() {
   const selectMenu = document.getElementById("selectMenu");
+
   selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
 
-  const menus = getMenuData();
+  try {
+    const res = await fetch("http://localhost:3000/api/menu");
+    const menus = await res.json();
 
-  if (menus.length === 0) {
-    selectMenu.innerHTML = `<option value="">Menu kosong</option>`;
-    return;
+    console.log("MENU API:", menus); // DEBUG
+
+    if (!menus.length) {
+      selectMenu.innerHTML = `<option value="">Menu kosong</option>`;
+      return;
+    }
+
+    menus.forEach(m => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = `${m.nama} (Rp ${Number(m.harga).toLocaleString("id-ID")})`;
+      selectMenu.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("ERROR FETCH MENU:", err);
+    selectMenu.innerHTML = `<option value="">Gagal load menu</option>`;
   }
-
-  menus.forEach(m => {
-    const opt = document.createElement("option");
-    opt.value = String(m.id);
-    opt.textContent = `${m.nama} (Rp ${m.harga.toLocaleString("id-ID")})`;
-    selectMenu.appendChild(opt);
-  });
 }
 
 // ==========================
