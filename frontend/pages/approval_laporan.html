@@ -3,88 +3,217 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Coffee Street - Register</title>
+  <title>Coffee Street - Approval Laporan</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css">
-  <link rel="stylesheet" href="../css/login.css">
-  <link rel="stylesheet" href="../css/register.css">
+  <link rel="stylesheet" href="../css/approval_laporan.css">
 </head>
 <body>
 
-  <div class="cs-login-bg">
+  <!-- NAVBAR -->
+  <nav class="cs-nav">
+    <div class="cs-nav-brand">
+      <svg class="cs-nav-logo" viewBox="0 0 32 32" fill="none">
+        <circle cx="16" cy="16" r="15" stroke="#C9913A" stroke-width="1.5"/>
+        <path d="M9 20c0-3.866 3.134-7 7-7s7 3.134 7 7" stroke="#C9913A" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M13 20v-3a3 3 0 016 0v3" stroke="#C9913A" stroke-width="1.2" stroke-linecap="round"/>
+        <path d="M22 14c1-1 2.5-1 2.5 0s-1 1.5-1 2.5" stroke="#C9913A" stroke-width="1" stroke-linecap="round"/>
+      </svg>
+      <span class="cs-nav-title">Coffee Street <span class="cs-nav-subtitle">/ Approval Laporan</span></span>
+    </div>
+    <div class="cs-nav-right">
+      <span class="cs-role-badge" id="usernameDisplay">Owner</span>
+      <button id="logoutBtn" class="cs-btn-logout">Logout</button>
+    </div>
+  </nav>
 
-    <div class="cs-login-deco cs-deco-tl"></div>
-    <div class="cs-login-deco cs-deco-br"></div>
+  <!-- LAYOUT -->
+  <div class="cs-layout">
 
-    <div class="cs-login-card">
+    <!-- SIDEBAR -->
+    <aside class="cs-sidebar">
+      <div class="cs-sidebar-label">Menu</div>
+      <ul class="cs-menu" id="menuList">
+        <li>
+          <a href="dashboard.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="2" width="5" height="5" rx="1" fill="currentColor"/>
+              <rect x="9" y="2" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="2" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+              <rect x="9" y="9" width="5" height="5" rx="1" fill="currentColor" opacity=".5"/>
+            </svg>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="approval_pembelian.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M2 3h1.5l2 7h7l1.5-5H5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="7" cy="13" r="1" fill="currentColor"/>
+              <circle cx="11" cy="13" r="1" fill="currentColor"/>
+            </svg>
+            Approval Pembelian
+          </a>
+        </li>
+        <li>
+          <a href="approval_payroll.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 8h2M9 8h2M5 11h1" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <path d="M5 5h6" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Approval Payroll
+          </a>
+        </li>
+        <li class="active">
+          <a href="approval_laporan.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 4h10M3 8h10M3 12h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Approval Laporan
+          </a>
+        </li>
+        <li>
+          <a href="audit_log.html">
+            <svg class="cs-menu-icon" viewBox="0 0 16 16" fill="none">
+              <path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M5 5h6M5 8h6M5 11h3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+            </svg>
+            Audit Log
+          </a>
+        </li>
+      </ul>
+    </aside>
 
-      <!-- Brand -->
-      <div class="cs-login-brand">
-        <svg class="cs-login-logo" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="24" cy="24" r="22" stroke="#C9913A" stroke-width="2"/>
-          <path d="M13 30c0-6.075 4.925-11 11-11s11 4.925 11 11" stroke="#C9913A" stroke-width="2" stroke-linecap="round"/>
-          <path d="M19 30v-5a5 5 0 0110 0v5" stroke="#C9913A" stroke-width="1.8" stroke-linecap="round"/>
-          <path d="M33 22c1.5-1.5 3.5-1.5 3.5 0s-1.5 2-1.5 3.5" stroke="#C9913A" stroke-width="1.4" stroke-linecap="round"/>
-        </svg>
-        <h1 class="cs-login-title">Coffee Street</h1>
-        <p class="cs-login-subtitle">Buat Akun Baru</p>
+    <!-- MAIN CONTENT -->
+    <main class="cs-main">
+
+      <!-- PAGE HEADER -->
+      <div class="cs-page-header">
+        <h1 class="cs-page-title">Approval Laporan</h1>
+        <p class="cs-page-sub">Owner meninjau dan menyetujui laporan <strong>Harian</strong> / <strong>Mingguan</strong> / <strong>Bulanan</strong>.</p>
       </div>
 
-      <div class="cs-login-divider"></div>
-
-      <!-- Form Register -->
-      <form id="registerForm" class="cs-login-form">
-
-        <div class="cs-form-group">
-          <label for="username">Username</label>
-          <div class="cs-input-wrap">
-            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
-              <circle cx="8" cy="5.5" r="3" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M2 13c0-2.761 2.686-5 6-5s6 2.239 6 5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-            </svg>
-            <input id="username" type="text" placeholder="Masukkan username" required autocomplete="username">
+      <!-- FILTER -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Filter Laporan
           </div>
         </div>
-
-        <div class="cs-form-group">
-          <label for="password">Password</label>
-          <div class="cs-input-wrap">
-            <svg class="cs-input-icon" viewBox="0 0 16 16" fill="none">
-              <rect x="3" y="7" width="10" height="7" rx="1.5" stroke="currentColor" stroke-width="1.4"/>
-              <path d="M5 7V5a3 3 0 016 0v2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
-              <circle cx="8" cy="10.5" r="1" fill="currentColor"/>
-            </svg>
-            <input id="password" type="password" placeholder="Masukkan password" required autocomplete="new-password">
+        <div class="cs-filter-row">
+          <div class="cs-form-group">
+            <label for="periode">Periode</label>
+            <select id="periode">
+              <option value="daily">Harian</option>
+              <option value="weekly">Mingguan</option>
+              <option value="monthly" selected>Bulanan</option>
+            </select>
+          </div>
+          <div class="cs-form-group">
+            <label for="bulan">Bulan</label>
+            <input type="month" id="bulan">
+          </div>
+          <div class="cs-form-group cs-form-action">
+            <label>&nbsp;</label>
+            <button id="btnLoadReport" class="cs-btn-load">
+              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+                <path d="M1 6.5a5.5 5.5 0 1011 0 5.5 5.5 0 00-11 0z" stroke="white" stroke-width="1.4"/>
+                <path d="M4.5 6.5h4M6.5 4.5v4" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+              </svg>
+              Tampilkan
+            </button>
           </div>
         </div>
+      </div>
 
-        <div class="cs-form-group">
-          <label for="role">Role</label>
-          <select id="role" required>
-            <option value="" disabled selected>-- Pilih role --</option>
-            <option value="admin">Admin</option>
-            <option value="kasir">Kasir</option>
-          </select>
+      <!-- SUMMARY CARDS -->
+      <div class="cs-summary-grid">
+        <div class="cs-summary-card">
+          <div class="cs-summary-label">Total Penjualan</div>
+          <div class="cs-summary-val gold" id="totalPenjualan">Rp 0</div>
         </div>
+        <div class="cs-summary-card">
+          <div class="cs-summary-label">Total Pembelian</div>
+          <div class="cs-summary-val" id="totalPembelian">Rp 0</div>
+        </div>
+        <div class="cs-summary-card">
+          <div class="cs-summary-label">Total Payroll</div>
+          <div class="cs-summary-val" id="totalPayroll">Rp 0</div>
+        </div>
+        <div class="cs-summary-card cs-summary-card-accent">
+          <div class="cs-summary-label">Laba Bersih</div>
+          <div class="cs-summary-val gold" id="labaBersih">Rp 0</div>
+        </div>
+      </div>
 
-        <button type="submit" class="cs-btn-login">
-          Daftar Sekarang
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M2 7h10M8 3l4 4-4 4" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </button>
+      <!-- TABEL LAPORAN -->
+      <div class="cs-card">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Detail Laporan
+          </div>
+        </div>
+        <div class="cs-table-wrap">
+          <table class="cs-table" id="reportTable">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>Penjualan</th>
+                <th>Pembelian</th>
+                <th>Payroll</th>
+                <th>Profit</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="reportTableBody">
+              <!-- diisi approval_laporan.js -->
+            </tbody>
+          </table>
+        </div>
+      </div>
 
-        <p id="msg" class="cs-error-msg"></p>
-      </form>
+      <!-- APPROVAL ACTION -->
+      <div class="cs-card cs-card-action">
+        <div class="cs-card-head">
+          <div class="cs-card-title">
+            <span class="cs-dot"></span>
+            Keputusan Approval
+          </div>
+        </div>
+        <div class="cs-form-group">
+          <label for="approvalNote">Catatan Approval / Revisi</label>
+          <textarea id="approvalNote" placeholder="Tulis catatan untuk manajer jika ada revisi atau keterangan tambahan..."></textarea>
+        </div>
+        <div class="cs-approval-actions">
+          <button id="btnReject" class="cs-btn-reject-full">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M3 3l8 8M11 3l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+            </svg>
+            Reject
+          </button>
+          <button id="btnApprove" class="cs-btn-approve-full">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M2 7l3.5 3.5L12 3" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Approve & Publish
+          </button>
+          <button id="btnExport" class="cs-btn-export-full">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+              <path d="M7 1v7M4 5l3 3 3-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M2 11h10" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Export PDF
+          </button>
+        </div>
+      </div>
 
-      <p>Sudah punya akun? <a href="index.html">Login di sini</a></p>
-
-      <p class="cs-login-footer">&copy; 2025 Coffee Street &mdash; All rights reserved</p>
-
-    </div>
+    </main>
   </div>
+
   <script defer src="../js/auth.js"></script>
   <script defer src="../js/approval_laporan.js"></script>
 </body>
