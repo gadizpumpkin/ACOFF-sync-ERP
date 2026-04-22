@@ -12,11 +12,10 @@ function hitungTotalJam(jamMasuk, jamKeluar) {
   let start = h1 * 60 + m1;
   let end = h2 * 60 + m2;
 
-  // handle shift malam (lewat tengah malam)
   if (end < start) end += 24 * 60;
 
   const diff = end - start;
-  return (diff / 60).toFixed(2); // decimal jam
+  return (diff / 60).toFixed(2);
 }
 
 // ==========================
@@ -24,6 +23,7 @@ function hitungTotalJam(jamMasuk, jamKeluar) {
 // ==========================
 exports.getAbsensiByUser = (req, res) => {
   const { username } = req.params;
+  console.log("GET ABSENSI:", username);
 
   const query = `
     SELECT a.*, u.username as user
@@ -35,10 +35,14 @@ exports.getAbsensiByUser = (req, res) => {
 
   db.query(query, [username], (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json({ message: "Server error" });
+      console.error("DB ERROR:", err);
+      return res.status(500).json({
+        message: "Server error",
+        error: err.sqlMessage,
+      });
     }
 
+    console.log("RESULT:", result);
     res.json(result);
   });
 };
@@ -48,20 +52,29 @@ exports.getAbsensiByUser = (req, res) => {
 // ==========================
 exports.absenMasuk = (req, res) => {
   const { user, tanggal, jamMasuk } = req.body;
+  console.log("ABSEN MASUK:", req.body);
 
-  // ambil user_id dari username
   const getUser = "SELECT id FROM users WHERE username = ?";
   db.query(getUser, [user], (err, userResult) => {
-    if (err || userResult.length === 0) {
+    if (err) {
+      console.error("ERROR USER:", err);
+      return res.status(500).json({ message: "DB error" });
+    }
+
+    if (userResult.length === 0) {
       return res.status(400).json({ message: "User tidak ditemukan" });
     }
 
     const user_id = userResult[0].id;
 
-    // cek apakah sudah absen hari ini
     const checkQuery =
       "SELECT * FROM absensi WHERE user_id = ? AND tanggal = ?";
     db.query(checkQuery, [user_id, tanggal], (err, checkResult) => {
+      if (err) {
+        console.error("CHECK ERROR:", err);
+        return res.status(500).json({ message: "DB error" });
+      }
+
       if (checkResult.length > 0) {
         return res.status(400).json({ message: "Sudah absen" });
       }
@@ -73,7 +86,7 @@ exports.absenMasuk = (req, res) => {
 
       db.query(insertQuery, [user_id, tanggal, jamMasuk], (err) => {
         if (err) {
-          console.error(err);
+          console.error("INSERT ERROR:", err);
           return res.status(500).json({ message: "Gagal absen masuk" });
         }
 
@@ -88,19 +101,29 @@ exports.absenMasuk = (req, res) => {
 // ==========================
 exports.absenKeluar = (req, res) => {
   const { user, tanggal, jamKeluar } = req.body;
+  console.log("ABSEN KELUAR:", req.body);
 
   const getUser = "SELECT id FROM users WHERE username = ?";
   db.query(getUser, [user], (err, userResult) => {
-    if (err || userResult.length === 0) {
+    if (err) {
+      console.error("ERROR USER:", err);
+      return res.status(500).json({ message: "DB error" });
+    }
+
+    if (userResult.length === 0) {
       return res.status(400).json({ message: "User tidak ditemukan" });
     }
 
     const user_id = userResult[0].id;
 
-    // ambil data absensi hari ini
     const getAbsensi =
       "SELECT * FROM absensi WHERE user_id = ? AND tanggal = ?";
     db.query(getAbsensi, [user_id, tanggal], (err, result) => {
+      if (err) {
+        console.error("GET ERROR:", err);
+        return res.status(500).json({ message: "DB error" });
+      }
+
       if (result.length === 0) {
         return res.status(400).json({ message: "Belum absen masuk" });
       }
@@ -124,7 +147,7 @@ exports.absenKeluar = (req, res) => {
 
       db.query(updateQuery, [jamKeluar, totalJam, data.id], (err) => {
         if (err) {
-          console.error(err);
+          console.error("UPDATE ERROR:", err);
           return res.status(500).json({ message: "Gagal absen keluar" });
         }
 
