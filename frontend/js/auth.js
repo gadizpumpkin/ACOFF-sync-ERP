@@ -11,6 +11,12 @@ function clearSession() {
   localStorage.removeItem("userSession");
 }
 
+// 🔥 TAMBAHAN PENTING
+function getToken() {
+  const session = getSession();
+  return session ? session.token : null;
+}
+
 function getMenuByRole(role) {
   if (role === "OWNER") {
     return [

@@ -9,7 +9,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
   const errorMsg = document.getElementById("errorMsg");
 
   errorMsg.textContent = "";
-// mengambil data dari form login, lalu mengirimkannya ke backend menggunakan fetch API. Jika login berhasil, token disimpan di localStorage dan session disimpan menggunakan fungsi setSession. Jika login gagal, pesan error ditampilkan di UI.
+
   try {
     const res = await fetch("http://localhost:5000/api/auth/login", {
       method: "POST",
@@ -24,21 +24,16 @@ document.getElementById("loginForm").addEventListener("submit", async function (
     if (data.token) {
 
       // ==========================
-      // SIMPAN TOKEN (API)
-      // ==========================
-      localStorage.setItem("token", data.token);
-
-      // ==========================
-      // SIMPAN SESSION (FRONTEND)
+      // SIMPAN SESSION + TOKEN (FIX)
       // ==========================
       const userSession = {
         username: data.username,
-        role: data.role
+        role: data.role,
+        token: data.token // 🔥 FIX UTAMA
       };
 
       setSession(userSession);
 
-      // redirect
       window.location.href = "dashboard.html";
 
     } else {
@@ -55,14 +50,13 @@ document.getElementById("loginForm").addEventListener("submit", async function (
 // ERROR UI
 // ==========================
 function showError(msg) {
-  const errorMsg = document.getElementById("errorMsg");
-  errorMsg.textContent = msg;
+  document.getElementById("errorMsg").textContent = msg;
 }
 
 // ==========================
-// AUTO REDIRECT (JIKA SUDAH LOGIN)
+// AUTO REDIRECT
 // ==========================
 const sessionUser = getSession();
-if (sessionUser) {
+if (sessionUser && sessionUser.token) {
   window.location.href = "dashboard.html";
 }

@@ -10,48 +10,21 @@ const {
   updateStatus 
 } = require("../controllers/transaksiController");
 
-// ==========================
-// TEST ROUTE
-// ==========================
-router.get(
-  "/test",
-  verifyToken,
-  (req, res) => {
-    res.json({
-      message: "Akses berhasil",
-      user: req.user
-    });
-  }
-);
+// TEST
+router.get("/test", verifyToken, (req, res) => {
+  res.json({
+    message: "Akses berhasil",
+    user: req.user
+  });
+});
 
-
-// ==========================
-// CREATE TRANSAKSI
-// Manajer & Karyawan boleh
-// ==========================
+//SATU ROUTE POST
 router.post(
   "/",
   verifyToken,
-  allowRoles("MANAGER", "OWNER", "KARYAWAN"),
-  createTransaksi
-);
-router.post(
-  "/",
-  verifyToken,
-  allowRoles("OWNER", "KARYAWAN"),
+  allowRoles("OWNER", "MANAGER", "KARYAWAN"),
   checkClosing,
   createTransaksi
 );
-// ==========================
-// UPDATE STATUS
-// (Paid → Canceled)
-// Owner & Manajer boleh
-// ==========================
-router.put(
-  "/:id/status",
-  verifyToken,
-  allowRoles("OWNER", "MANAGER"),
-  checkClosing,
-  updateStatus
-);
+
 module.exports = router;
