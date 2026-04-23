@@ -12,39 +12,18 @@ document.getElementById("logoutBtn").addEventListener("click", function () {
 });
 
 // ==========================
-// STORAGE
+// BASE URL API
 // ==========================
-function getMenuData() {
-  return JSON.parse(localStorage.getItem("menuData")) || [];
-}
-
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
-}
-
-function saveBahanBakuData(data) {
-  localStorage.setItem("bahanBakuData", JSON.stringify(data));
-}
-
-function getResepData() {
-  return JSON.parse(localStorage.getItem("resepData")) || [];
-}
-
-function getTransaksiData() {
-  return JSON.parse(localStorage.getItem("transaksiData")) || [];
-}
-
-function saveTransaksiData(data) {
-  localStorage.setItem("transaksiData", JSON.stringify(data));
-}
+const BASE_URL = "http://localhost:5000/api";
 
 // ==========================
-// GLOBAL CART
+// GLOBAL DATA
 // ==========================
 let cart = [];
+let menuGlobal = []; // 🔥 ambil dari DB
 
 // ==========================
-// LOAD MENU DROPDOWN
+// LOAD MENU DROPDOWN (API)
 // ==========================
 async function loadMenuDropdown() {
   const selectMenu = document.getElementById("selectMenu");
@@ -52,10 +31,13 @@ async function loadMenuDropdown() {
   selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
 
   try {
-    const res = await fetch("http://localhost:3000/api/menu");
+    const res = await fetch(`${BASE_URL}/menu`);
     const menus = await res.json();
 
-    console.log("MENU API:", menus); // DEBUG
+    console.log("MENU API:", menus);
+
+    // simpan ke global
+    menuGlobal = menus;
 
     if (!menus.length) {
       selectMenu.innerHTML = `<option value="">Menu kosong</option>`;
@@ -63,9 +45,13 @@ async function loadMenuDropdown() {
     }
 
     menus.forEach(m => {
+      // hanya tampilkan menu ACTIVE
+      if (m.status !== "ACTIVE") return;
+
       const opt = document.createElement("option");
       opt.value = m.id;
-      opt.textContent = `${m.nama} (Rp ${Number(m.harga).toLocaleString("id-ID")})`;
+      opt.textContent = `${m.nama_menu} (Rp ${Number(m.harga_jual).toLocaleString("id-ID")})`;
+
       selectMenu.appendChild(opt);
     });
 
@@ -76,11 +62,10 @@ async function loadMenuDropdown() {
 }
 
 // ==========================
-// CART LOGIC
+// CART LOGIC (PAKAI DB)
 // ==========================
 function addToCart(menuId, qty) {
-  const menuData = getMenuData();
-  const menu = menuData.find(m => String(m.id) === String(menuId));
+  const menu = menuGlobal.find(m => String(m.id) === String(menuId));
 
   if (!menu) {
     alert("Menu tidak ditemukan.");
@@ -94,8 +79,8 @@ function addToCart(menuId, qty) {
   } else {
     cart.push({
       menuId: menu.id,
-      nama: menu.nama,
-      harga: menu.harga,
+      nama: menu.nama_menu,
+      harga: Number(menu.harga_jual),
       qty: qty
     });
   }
@@ -126,7 +111,7 @@ function renderCart() {
       <td>${item.qty}</td>
       <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
       <td>
-        <button class="cs-btn-delete" data-id="${item.menuId}">Hapus</button>
+        <button class="cs-btn-delete">Hapus</button>
       </td>
     `;
 
@@ -142,72 +127,16 @@ function renderCart() {
 }
 
 // ==========================
-// VALIDASI STOK
+// TRANSAKSI (Sementara masih local)
 // ==========================
-function validateStockForCart() {
-  const resepData = getResepData();
-  const bahanData = getBahanBakuData();
-
-  let kebutuhan = {};
-
-  cart.forEach(item => {
-    const resepMenu = resepData.filter(r => String(r.menuId) === String(item.menuId));
-
-    resepMenu.forEach(r => {
-      const totalGram = r.gram * item.qty;
-      if (!kebutuhan[r.bahanId]) kebutuhan[r.bahanId] = 0;
-      kebutuhan[r.bahanId] += totalGram;
-    });
-  });
-
-  for (const bahanId in kebutuhan) {
-    const bahan = bahanData.find(b => String(b.id) === String(bahanId));
-
-    if (!bahan) return { valid: false, message: "Bahan tidak ditemukan." };
-
-    if (bahan.stok < kebutuhan[bahanId]) {
-      return {
-        valid: false,
-        message: `Stok ${bahan.nama} kurang (${bahan.stok})`
-      };
-    }
-  }
-
-  return { valid: true, kebutuhan };
+function getTransaksiData() {
+  return JSON.parse(localStorage.getItem("transaksiData")) || [];
 }
 
-// ==========================
-// STOCK UPDATE
-// ==========================
-function applyStockDecrease(kebutuhan) {
-  let bahanData = getBahanBakuData();
-
-  bahanData = bahanData.map(b => {
-    if (kebutuhan[b.id]) {
-      return { ...b, stok: b.stok - kebutuhan[b.id] };
-    }
-    return b;
-  });
-
-  saveBahanBakuData(bahanData);
+function saveTransaksiData(data) {
+  localStorage.setItem("transaksiData", JSON.stringify(data));
 }
 
-function rollbackStockIncrease(kebutuhan) {
-  let bahanData = getBahanBakuData();
-
-  bahanData = bahanData.map(b => {
-    if (kebutuhan[b.id]) {
-      return { ...b, stok: b.stok + kebutuhan[b.id] };
-    }
-    return b;
-  });
-
-  saveBahanBakuData(bahanData);
-}
-
-// ==========================
-// CREATE TRANSACTION
-// ==========================
 function createTransaction(status) {
   if (cart.length === 0) return alert("Keranjang kosong.");
 
@@ -220,18 +149,8 @@ function createTransaction(status) {
     status,
     total,
     items: cart,
-    kebutuhanBahan: null,
     createdBy: sessionUser.username
   };
-
-  if (status === "Paid") {
-    const check = validateStockForCart();
-
-    if (!check.valid) return alert(check.message);
-
-    trx.kebutuhanBahan = check.kebutuhan;
-    applyStockDecrease(check.kebutuhan);
-  }
 
   transaksiData.push(trx);
   saveTransaksiData(transaksiData);
@@ -240,60 +159,7 @@ function createTransaction(status) {
   renderCart();
   renderHistory();
 
-  if (status === "Paid") generateReceipt(trx);
-
   alert("Transaksi berhasil: " + status);
-}
-
-// ==========================
-// CANCEL TRANSACTION
-// ==========================
-function cancelTransaction(trxId) {
-  let data = getTransaksiData();
-  const trx = data.find(t => t.id === trxId);
-
-  if (!trx) return alert("Tidak ditemukan.");
-
-  if (trx.status === "Canceled") return alert("Sudah dibatalkan.");
-
-  if (trx.status === "Paid" && trx.kebutuhanBahan) {
-    rollbackStockIncrease(trx.kebutuhanBahan);
-  }
-
-  trx.status = "Canceled";
-  saveTransaksiData(data);
-  renderHistory();
-}
-
-// ==========================
-// RECEIPT
-// ==========================
-function generateReceipt(trx) {
-  const box = document.getElementById("receiptBox");
-  const content = document.getElementById("receiptContent");
-
-  let html = `
-    <p><b>Coffee Street</b></p>
-    <p>ID: ${trx.id}</p>
-    <p>Tanggal: ${trx.tanggal}</p>
-    <p>Kasir: ${trx.createdBy}</p>
-    <hr/>
-    <ul>
-  `;
-
-  trx.items.forEach(i => {
-    html += `<li>${i.nama} x${i.qty} = Rp ${(i.harga * i.qty).toLocaleString("id-ID")}</li>`;
-  });
-
-  html += `
-    </ul>
-    <hr/>
-    <p><b>Total: Rp ${trx.total.toLocaleString("id-ID")}</b></p>
-    <p>Status: ${trx.status}</p>
-  `;
-
-  content.innerHTML = html;
-  box.style.display = "block";
 }
 
 // ==========================
@@ -317,25 +183,8 @@ function renderHistory() {
       <td>${trx.tanggal}</td>
       <td><span class="${statusClass}">${trx.status}</span></td>
       <td>Rp ${trx.total.toLocaleString("id-ID")}</td>
-      <td></td>
+      <td>-</td>
     `;
-
-    const actionTd = tr.children[4];
-
-    // tombol struk
-    const btnView = document.createElement("button");
-    btnView.className = "cs-btn-view";
-    btnView.textContent = "Struk";
-    btnView.onclick = () => generateReceipt(trx);
-
-    // tombol cancel
-    const btnCancel = document.createElement("button");
-    btnCancel.className = "cs-btn-cancel";
-    btnCancel.textContent = "Cancel";
-    btnCancel.onclick = () => cancelTransaction(trx.id);
-
-    actionTd.appendChild(btnView);
-    actionTd.appendChild(btnCancel);
 
     tbody.appendChild(tr);
   });
@@ -347,7 +196,7 @@ function renderHistory() {
 document.getElementById("transaksiForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  if (sessionUser.role !== "Karyawan") {
+  if (sessionUser.role !== "KARYAWAN") {
     return alert("Hanya Karyawan.");
   }
 
