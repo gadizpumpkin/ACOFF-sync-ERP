@@ -10,16 +10,10 @@ exports.processStockDeduction = async (
 
   for (let item of items) {
 
-    if (item.qty <= 0) {
-      throw new Error("Qty tidak valid");
-    }
-
     const [resepRows] = await connection.query(
-      `SELECT r.bahan_id, r.qty, b.stok
-       FROM resep r
-       JOIN bahan_baku b ON r.bahan_id = b.id
-       WHERE r.menu_id = ?
-       FOR UPDATE`,
+      `SELECT bahan_id, qty 
+       FROM resep 
+       WHERE menu_id = ?`,
       [item.menu_id]
     );
 
@@ -31,12 +25,27 @@ exports.processStockDeduction = async (
 
       const totalKebutuhan = resep.qty * item.qty;
 
-      if (resep.stok < totalKebutuhan) {
+      const [bahanRows] = await connection.query(
+        `SELECT stok 
+         FROM bahan_baku 
+         WHERE id = ? 
+         FOR UPDATE`,
+        [resep.bahan_id]
+      );
+
+      if (bahanRows.length === 0) {
+        throw new Error("Bahan tidak ditemukan");
+      }
+
+      const stokSekarang = bahanRows[0].stok;
+
+      if (stokSekarang < totalKebutuhan) {
         throw new Error(
           "Stok tidak cukup untuk bahan ID " + resep.bahan_id
         );
       }
 
+      // update stok
       await connection.query(
         `UPDATE bahan_baku
          SET stok = stok - ?
@@ -44,10 +53,11 @@ exports.processStockDeduction = async (
         [totalKebutuhan, resep.bahan_id]
       );
 
+      // record ledger
       await ledgerService.record(
         connection,
         resep.bahan_id,
-        "OUT",
+        "SALE_DEDUCTION",
         0,
         totalKebutuhan,
         transaksiId,
@@ -57,6 +67,7 @@ exports.processStockDeduction = async (
     }
   }
 };
+
 
 
 exports.rollbackStock = async (
