@@ -1,19 +1,18 @@
-const token = localStorage.getItem("token");
+const token = getToken();
+const session = getSession();
+const role = session?.role;
 
-// ==========================
-// AUTH CHECK
-// ==========================
 if (!token) {
+  clearSession();
   window.location.href = "index.html";
 }
 
-// tampilkan role di navbar
-const role = localStorage.getItem("role");
+// tampilkan role
 document.getElementById("userRole").textContent = role;
 
 // logout
 document.getElementById("logoutBtn").addEventListener("click", () => {
-  localStorage.clear();
+  clearSession();
   window.location.href = "index.html";
 });
 
@@ -45,7 +44,7 @@ async function loadBahan() {
     });
 
     if (res.status === 401) {
-      localStorage.clear();
+      clearSession ();
       window.location.href = "index.html";
       return;
     }

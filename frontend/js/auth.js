@@ -1,3 +1,6 @@
+// ==========================
+// SESSION HANDLER
+// ==========================
 function setSession(user) {
   localStorage.setItem("userSession", JSON.stringify(user));
 }
@@ -11,47 +14,29 @@ function clearSession() {
   localStorage.removeItem("userSession");
 }
 
-// 🔥 TAMBAHAN PENTING
 function getToken() {
   const session = getSession();
   return session ? session.token : null;
 }
 
-function getMenuByRole(role) {
-  if (role === "OWNER") {
-    return [
-      "Dashboard",
-      "Export P&L",
-      "Audit Keuangan",
-      "Approval Pembelian",
-      "Approval Payroll",
-      "Approval Laporan"
-    ];
-  }
+// ==========================
+// AUTO AUTH CHECK (FIX LOOP)
+// ==========================
+(function () {
+  const path = window.location.pathname;
+  const token = getToken();
 
-  if (role === "MANAGER") {
-    return [
-      "Dashboard",
-      "Kelola Menu",
-      "Kelola Resep",
-      "Kelola Bahan Baku",
-      "Kelola Supplier",
-      "Pembelian Bahan Baku",
-      "Absensi",
-      "Payroll",
-      "Generate Laporan"
-    ];
+  // kalau di halaman login
+  if (path.includes("index.html")) {
+    if (token) {
+      window.location.href = "dashboard.html";
+    }
+  } 
+  // halaman selain login
+  else {
+    if (!token) {
+      clearSession();
+      window.location.href = "index.html";
+    }
   }
-
-  if (role === "KARYAWAN") {
-    return [
-      "Dashboard",
-      "Transaksi Penjualan",
-      "Cetak Struk",
-      "Absensi",
-      "Paycheck"
-    ];
-  }
-
-  return [];
-}
+})();

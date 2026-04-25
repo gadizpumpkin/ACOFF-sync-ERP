@@ -26,7 +26,7 @@ async function loadMenuDropdown() {
   try {
     const res = await fetch(`${BASE_URL}/menu`, {
       headers: {
-        "Authorization": "Bearer " + getToken() // 🔥 FIX
+        "Authorization": "Bearer " + getToken() // FIX
       }
     });
 
