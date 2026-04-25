@@ -1,111 +1,123 @@
-const BASE_URL = "http://localhost:5000/api";
+// ==========================
+// AUTH CHECK + ROLE
+// ==========================
 const sessionUser = getSession();
+if (!sessionUser) window.location.href = "index.html";
 
-if (!sessionUser || !sessionUser.token) {
-  alert("Session habis, silakan login ulang");
-  window.location.href = "index.html";
-}
-
-// tampilkan role
 document.getElementById("userRole").textContent = sessionUser.role;
 
-// logout
 document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
 
-let cart = [];
+// ==========================
+// BASE URL API
+// ==========================
+const BASE_URL = "http://localhost:5000/api";
 
 // ==========================
-// LOAD MENU (PAKAI TOKEN)
+// GLOBAL DATA
+// ==========================
+let cart = [];
+let menuGlobal = []; // 🔥 ambil dari DB
+
+// ==========================
+// LOAD MENU DROPDOWN (API)
 // ==========================
 async function loadMenuDropdown() {
   const selectMenu = document.getElementById("selectMenu");
 
-  try {
-    const res = await fetch(`${BASE_URL}/menu`, {
-      headers: {
-        "Authorization": "Bearer " + getToken() // 🔥 FIX
-      }
-    });
+  selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
 
+  try {
+    const res = await fetch(`${BASE_URL}/menu`);
     const menus = await res.json();
 
-    selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
+    console.log("MENU API:", menus);
+
+    // simpan ke global
+    menuGlobal = menus;
 
     if (!menus.length) {
-      selectMenu.innerHTML = `<option>Menu kosong</option>`;
+      selectMenu.innerHTML = `<option value="">Menu kosong</option>`;
       return;
     }
 
     menus.forEach(m => {
+      // hanya tampilkan menu ACTIVE
+      if (m.status !== "ACTIVE") return;
+
       const opt = document.createElement("option");
       opt.value = m.id;
       opt.textContent = `${m.nama_menu} (Rp ${Number(m.harga_jual).toLocaleString("id-ID")})`;
+
       selectMenu.appendChild(opt);
     });
 
   } catch (err) {
-    console.error(err);
-    selectMenu.innerHTML = `<option>Gagal load</option>`;
+    console.error("ERROR FETCH MENU:", err);
+    selectMenu.innerHTML = `<option value="">Gagal load menu</option>`;
   }
 }
 
 // ==========================
-// ADD TO CART
+// CART LOGIC (PAKAI DB)
 // ==========================
-async function addToCart(menuId, qty) {
-  try {
-    const res = await fetch(`${BASE_URL}/menu`, {
-      headers: {
-        "Authorization": "Bearer " + getToken()
-      }
+function addToCart(menuId, qty) {
+  const menu = menuGlobal.find(m => String(m.id) === String(menuId));
+
+  if (!menu) {
+    alert("Menu tidak ditemukan.");
+    return;
+  }
+
+  const existing = cart.find(item => item.menuId === menuId);
+
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({
+      menuId: menu.id,
+      nama: menu.nama_menu,
+      harga: Number(menu.harga_jual),
+      qty: qty
     });
-
-    const menus = await res.json();
-    const menu = menus.find(m => m.id == menuId);
-
-    if (!menu) return alert("Menu tidak ditemukan");
-
-    const existing = cart.find(i => i.menuId == menuId);
-
-    if (existing) {
-      existing.qty += qty;
-    } else {
-      cart.push({
-        menuId: menu.id,
-        nama: menu.nama_menu,
-        harga: menu.harga_jual,
-        qty
-      });
-    }
-
-    renderCart();
-
-  } catch (err) {
-    console.error(err);
   }
+
+  renderCart();
 }
 
-// ==========================
-// RENDER CART
-// ==========================
+function removeFromCart(menuId) {
+  cart = cart.filter(item => item.menuId !== menuId);
+  renderCart();
+}
+
+function calculateTotal() {
+  return cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
+}
+
 function renderCart() {
   const tbody = document.getElementById("cartTable");
   tbody.innerHTML = "";
 
   cart.forEach(item => {
-    const tr = document.createElement("tr");
     const subtotal = item.harga * item.qty;
 
+    const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${item.nama}</td>
       <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
       <td>${item.qty}</td>
       <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
-      <td><button onclick="removeFromCart(${item.menuId})">Hapus</button></td>
+      <td>
+        <button class="cs-btn-delete">Hapus</button>
+      </td>
     `;
+
+    tr.querySelector(".cs-btn-delete").addEventListener("click", () => {
+      removeFromCart(item.menuId);
+    });
 
     tbody.appendChild(tr);
   });
@@ -114,52 +126,68 @@ function renderCart() {
     "Rp " + calculateTotal().toLocaleString("id-ID");
 }
 
-function removeFromCart(menuId) {
-  cart = cart.filter(i => i.menuId != menuId);
+// ==========================
+// TRANSAKSI (Sementara masih local)
+// ==========================
+function getTransaksiData() {
+  return JSON.parse(localStorage.getItem("transaksiData")) || [];
+}
+
+function saveTransaksiData(data) {
+  localStorage.setItem("transaksiData", JSON.stringify(data));
+}
+
+function createTransaction(status) {
+  if (cart.length === 0) return alert("Keranjang kosong.");
+
+  const transaksiData = getTransaksiData();
+  const total = calculateTotal();
+
+  const trx = {
+    id: "TRX-" + Date.now(),
+    tanggal: new Date().toLocaleString("id-ID"),
+    status,
+    total,
+    items: cart,
+    createdBy: sessionUser.username
+  };
+
+  transaksiData.push(trx);
+  saveTransaksiData(transaksiData);
+
+  cart = [];
   renderCart();
-}
+  renderHistory();
 
-function calculateTotal() {
-  return cart.reduce((sum, i) => sum + i.harga * i.qty, 0);
+  alert("Transaksi berhasil: " + status);
 }
 
 // ==========================
-// CREATE TRANSACTION (FIX TOKEN)
+// HISTORY
 // ==========================
-async function createTransaction(status) {
-  if (!cart.length) return alert("Keranjang kosong");
+function renderHistory() {
+  const tbody = document.getElementById("historyTable");
+  tbody.innerHTML = "";
 
-  try {
-    const res = await fetch(`${BASE_URL}/transaksi`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer " + getToken() // 🔥 FIX UTAMA
-      },
-      body: JSON.stringify({
-        user: sessionUser.username,
-        items: cart.map(i => ({
-          menuId: i.menuId,
-          qty: i.qty,
-          harga: i.harga
-        })),
-        status
-      })
-    });
+  const data = getTransaksiData();
 
-    const result = await res.json();
+  data.slice().reverse().forEach(trx => {
+    let statusClass = "cs-status-pill draft";
+    if (trx.status === "Paid") statusClass = "cs-status-pill paid";
+    if (trx.status === "Canceled") statusClass = "cs-status-pill canceled";
 
-    if (!res.ok) throw new Error(result.message);
+    const tr = document.createElement("tr");
 
-    alert("Transaksi berhasil");
+    tr.innerHTML = `
+      <td>${trx.id}</td>
+      <td>${trx.tanggal}</td>
+      <td><span class="${statusClass}">${trx.status}</span></td>
+      <td>Rp ${trx.total.toLocaleString("id-ID")}</td>
+      <td>-</td>
+    `;
 
-    cart = [];
-    renderCart();
-
-  } catch (err) {
-    console.error(err);
-    alert("ERROR: " + err.message);
-  }
+    tbody.appendChild(tr);
+  });
 }
 
 // ==========================
@@ -168,17 +196,29 @@ async function createTransaction(status) {
 document.getElementById("transaksiForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
+  if (sessionUser.role !== "KARYAWAN") {
+    return alert("Hanya Karyawan.");
+  }
+
   const menuId = document.getElementById("selectMenu").value;
   const qty = parseInt(document.getElementById("qtyMenu").value);
 
-  if (!menuId) return alert("Pilih menu");
+  if (!menuId) return alert("Pilih menu.");
 
   addToCart(menuId, qty);
 });
 
-document.getElementById("btnPaid").onclick = () => createTransaction("Paid");
 document.getElementById("btnSaveDraft").onclick = () => createTransaction("Draft");
+document.getElementById("btnPaid").onclick = () => createTransaction("Paid");
 
+document.getElementById("btnCancel").onclick = () => {
+  cart = [];
+  renderCart();
+};
+
+// ==========================
+// INIT
 // ==========================
 loadMenuDropdown();
 renderCart();
+renderHistory();

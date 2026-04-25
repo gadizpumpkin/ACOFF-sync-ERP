@@ -1,5 +1,5 @@
 const db = require("../config/db");
-const ledgerService = require("../utils/inventoryLedgerService");
+const ledgerService = require("./inventoryLedgerService");
 
 exports.processStockDeduction = async (
   transaksiId,
