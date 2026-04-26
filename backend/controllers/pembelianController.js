@@ -2,6 +2,48 @@ const db = require("../config/db");
 const auditService = require("../utils/auditService");
 const ledgerService = require("../utils/inventoryLedgerService");
 
+exports.createPembelian = async (req, res) => {
+  const { supplierId, items, total } = req.body;
+
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+
+    // 1. INSERT ke tabel pembelian
+    const [result] = await connection.query(
+      `INSERT INTO pembelian (supplier_id, total, status, created_by)
+       VALUES (?, ?, 'DRAFT', ?)`,
+      [supplierId, total, req.user.id]
+    );
+
+    const pembelianId = result.insertId;
+
+    // 2. INSERT detail
+    for (let item of items) {
+      const subtotal = item.gram * item.harga;
+      await connection.query(
+        `INSERT INTO pembelian_detail (pembelian_id, bahan_id, qty, harga, subtotal)
+        VALUES (?, ?, ?, ?, ?)`,
+        [pembelianId, item.bahanId, item.gram, item.harga, subtotal]
+      );
+    }
+
+    await connection.commit();
+    connection.release();
+
+    res.json({
+      message: "Pembelian berhasil disimpan",
+      id: pembelianId
+    });
+
+  } catch (err) {
+    await connection.rollback();
+    connection.release();
+    console.error(err);
+    res.status(500).json({ message: "Gagal simpan pembelian" });
+  }
+};
 exports.updateStatusPembelian = async (req, res) => {
 
   const { id } = req.params;

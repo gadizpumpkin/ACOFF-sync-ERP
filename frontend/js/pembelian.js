@@ -179,37 +179,45 @@ document.getElementById("pembelianForm").addEventListener("submit", function (e)
 // ==========================
 // SUBMIT PEMBELIAN
 // ==========================
-document.getElementById("btnSubmitPembelian").addEventListener("click", function () {
+document.getElementById("btnSubmitPembelian").addEventListener("click", async function () {
   if (cart.length === 0) {
     alert("Keranjang kosong.");
     return;
   }
 
   const supplierId = document.getElementById("selectSupplier").value;
-  const supplier = supplierList.find(s => s.id == supplierId);
 
-  if (!supplier) {
-    alert("Supplier tidak valid.");
-    return;
+  try {
+    const res = await fetch("http://localhost:5000/api/pembelian", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({
+        supplierId: supplierId,
+        total: calculateTotal(),
+        items: cart
+      })
+    });
+
+    const data = await res.json();
+
+    console.log("RESPONSE API:", data);
+
+    if (!res.ok) {
+      throw new Error(data.message || "Gagal simpan");
+    }
+
+    alert("Pembelian berhasil masuk database");
+
+    cart = [];
+    renderCart();
+
+  } catch (err) {
+    console.error(err);
+    alert("Error: " + err.message);
   }
-
-  const pembelian = {
-    id: "PO-" + Date.now(),
-    supplierId: supplier.id,
-    supplierNama: supplier.nama_supplier,
-    tanggal: new Date().toLocaleString("id-ID"),
-    status: "Pending",
-    total: calculateTotal(),
-    items: cart,
-    createdBy: sessionUser.username
-  };
-
-  console.log("DATA PEMBELIAN:", pembelian);
-
-  alert("Pembelian berhasil dibuat (simulasi, belum masuk DB)");
-
-  cart = [];
-  renderCart();
 });
 
 // ==========================
