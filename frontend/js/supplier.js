@@ -1,4 +1,7 @@
+console.log("SESSION:", sessionUser);
+console.log("TOKEN:", token);
 document.addEventListener("DOMContentLoaded", function () {
+console.log("ROLE RAW:", sessionUser?.role);
 
   // ==========================
   // AUTH
@@ -11,13 +14,18 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
-  const role = sessionUser.role.trim().toUpperCase();
+const role = sessionUser?.role?.toString().trim().toUpperCase();
 
-  if (role !== "MANAGER") {
-    alert("Akses ditolak!");
-    window.location.href = "dashboard.html";
-    return;
-  }
+if (!role) {
+  alert("Session tidak valid, login ulang!");
+  window.location.href = "index.html";
+  return;
+}
+if (!sessionUser || !token) {
+  console.log("SESSION / TOKEN HILANG");
+  window.location.href = "index.html";
+  return;
+}
 
   document.getElementById("userRole").textContent = role;
 
