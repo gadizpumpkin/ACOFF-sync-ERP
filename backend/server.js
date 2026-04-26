@@ -3,6 +3,7 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 const menuRoutes = require("./routes/menuRoutes");
+const supplierRoutes = require("./routes/supplierRoutes");
 
 const app = express();
 
@@ -26,6 +27,7 @@ app.use("/api/monthly-closing", require("./routes/monthlyClosingRoutes"));
 app.use("/api/report", require("./routes/reportRoutes"));
 app.use("/api/inventory", require("./routes/inventoryRoutes"));
 app.use("/api/analytics", require("./routes/analyticsRoutes"));
+app.use("/api/supplier", require("./routes/supplierRoutes"));
 
 // route utama
 app.get("/", (req, res) => {
@@ -35,6 +37,8 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 5000}`);
 });
+
+
 
 
 

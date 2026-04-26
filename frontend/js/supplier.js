@@ -1,7 +1,4 @@
-console.log("SESSION:", sessionUser);
-console.log("TOKEN:", token);
 document.addEventListener("DOMContentLoaded", function () {
-console.log("ROLE RAW:", sessionUser?.role);
 
   // ==========================
   // AUTH
@@ -9,23 +6,28 @@ console.log("ROLE RAW:", sessionUser?.role);
   const sessionUser = getSession();
   const token = localStorage.getItem("token");
 
+  console.log("SESSION:", sessionUser);
+  console.log("TOKEN:", token);
+  console.log("ROLE RAW:", sessionUser?.role);
+
   if (!sessionUser || !token) {
     window.location.href = "index.html";
     return;
   }
 
-const role = sessionUser?.role?.toString().trim().toUpperCase();
+  const role = sessionUser?.role?.toString().trim().toUpperCase();
 
-if (!role) {
-  alert("Session tidak valid, login ulang!");
-  window.location.href = "index.html";
-  return;
-}
-if (!sessionUser || !token) {
-  console.log("SESSION / TOKEN HILANG");
-  window.location.href = "index.html";
-  return;
-}
+  if (!role) {
+    alert("Session tidak valid, login ulang!");
+    window.location.href = "index.html";
+    return;
+  }
+
+  if (role !== "MANAGER") {
+    alert("Akses ditolak!");
+    window.location.href = "dashboard.html";
+    return;
+  }
 
   document.getElementById("userRole").textContent = role;
 
@@ -69,8 +71,8 @@ if (!sessionUser || !token) {
         const tr = document.createElement("tr");
 
         tr.innerHTML = `
-          <td>${s.nama}</td>
-          <td>${s.hp}</td>
+          <td>${s.nama_supplier}</td>
+          <td>${s.kontak}</td>
           <td>${s.alamat}</td>
           <td>
             <button onclick="editSupplier(${s.id})">Edit</button>
@@ -145,8 +147,8 @@ if (!sessionUser || !token) {
         if (!s) return alert("Data tidak ditemukan");
 
         document.getElementById("supplierId").value = s.id;
-        document.getElementById("supplierNama").value = s.nama;
-        document.getElementById("supplierHp").value = s.hp;
+        document.getElementById("supplierNama").value = s.nama_supplier;
+        document.getElementById("supplierHp").value = s.kontak;
         document.getElementById("supplierAlamat").value = s.alamat;
 
         document.getElementById("btnSubmit").textContent = "Update Supplier";
