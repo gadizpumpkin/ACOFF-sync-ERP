@@ -7,8 +7,11 @@ if (!token) {
   window.location.href = "index.html";
 }
 
+
+
 // tampilkan role di navbar
-const role = localStorage.getItem("role");
+const sessionUser = getSession();
+const role = sessionUser?.role;
 document.getElementById("userRole").textContent = role;
 
 // logout
@@ -87,10 +90,10 @@ function renderTable(data) {
       </td>
       <td>
         <div class="cs-action-btn">
-          <button class="cs-btn-edit" onclick="editBahan('${item._id}', '${item.nama}', ${item.stok}, ${item.minimal_stok})">
+          <button class="cs-btn-edit" onclick="editBahan('${item.id}', '${item.nama}', ${item.stok}, ${item.minimal_stok})">
             Edit
           </button>
-          <button class="cs-btn-delete" onclick="deleteBahan('${item._id}')">
+          <button class="cs-btn-delete" onclick="deleteBahan('${item.id}')">
             Hapus
           </button>
         </div>

@@ -14,6 +14,7 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, "../frontend")));
 
 // API routes
+app.use("/api/bahanbaku", require("./routes/bahanBakuRoutes"));
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/dashboard", require("./routes/dashboardRoutes"));
 app.use("/api/transaksi", require("./routes/transaksiRoutes"));
@@ -37,6 +38,8 @@ app.get("/", (req, res) => {
 app.listen(process.env.PORT || 5000, () => {
   console.log(`Server running on http://localhost:${process.env.PORT || 5000}`);
 });
+
+
 
 
 

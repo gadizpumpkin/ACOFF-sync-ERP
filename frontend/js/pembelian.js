@@ -2,12 +2,15 @@
 // AUTH CHECK
 // ==========================
 const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
+
+if (!sessionUser || !token) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
 document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
+  localStorage.removeItem("token");
   window.location.href = "index.html";
 });
 
@@ -17,29 +20,74 @@ if (sessionUser.role !== "MANAGER") {
 }
 
 // ==========================
-// STORAGE
+// GLOBAL DATA
 // ==========================
-function getSupplierData() {
-  return JSON.parse(localStorage.getItem("supplierData")) || [];
+let supplierList = [];
+let cart = [];
+
+// ==========================
+// SUPPLIER FROM API
+// ==========================
+async function loadSuppliers() {
+  const supplierSelect = document.getElementById("selectSupplier");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/supplier", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) throw new Error("Gagal ambil supplier");
+
+    const data = await res.json();
+    supplierList = data;
+
+    supplierSelect.innerHTML = `<option value="" disabled selected>-- Pilih supplier --</option>`;
+
+    data.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = s.nama_supplier; // field dari DB
+      supplierSelect.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Gagal load supplier dari server");
+  }
 }
 
+// ==========================
+// BAHAN (MASIH LOCAL)
+// ==========================
 function getBahanBakuData() {
   return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
 }
 
-function getPembelianData() {
-  return JSON.parse(localStorage.getItem("pembelianData")) || [];
-}
+// ==========================
+// LOAD DROPDOWN
+// ==========================
+async function loadDropdowns() {
+  const bahanSelect = document.getElementById("selectBahan");
 
-function savePembelianData(data) {
-  localStorage.setItem("pembelianData", JSON.stringify(data));
+  await loadSuppliers();
+
+  const bahan = getBahanBakuData();
+
+  bahanSelect.innerHTML = `<option value="" disabled selected>-- Pilih bahan --</option>`;
+
+  bahan.forEach(b => {
+    const opt = document.createElement("option");
+    opt.value = b.id;
+    opt.textContent = b.nama;
+    bahanSelect.appendChild(opt);
+  });
 }
 
 // ==========================
 // CART
 // ==========================
-let cart = [];
-
 function renderCart() {
   const tbody = document.getElementById("cartTable");
   tbody.innerHTML = "";
@@ -52,9 +100,7 @@ function renderCart() {
       <td>${item.gram} gram</td>
       <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
       <td>
-        <button class="cs-btn-delete" onclick="removeCart('${item.bahanId}')">
-          Hapus
-        </button>
+        <button onclick="removeCart('${item.bahanId}')">Hapus</button>
       </td>
     `;
 
@@ -75,58 +121,28 @@ function removeCart(bahanId) {
 }
 
 // ==========================
-// LOAD DROPDOWN
-// ==========================
-function loadDropdowns() {
-  const supplierSelect = document.getElementById("selectSupplier");
-  const bahanSelect = document.getElementById("selectBahan");
-
-  const suppliers = getSupplierData();
-  const bahan = getBahanBakuData();
-
-  // reset + default option
-  supplierSelect.innerHTML = `<option value="" disabled selected>-- Pilih supplier --</option>`;
-  bahanSelect.innerHTML = `<option value="" disabled selected>-- Pilih bahan --</option>`;
-
-  suppliers.forEach(s => {
-    const opt = document.createElement("option");
-    opt.value = s.id;
-    opt.textContent = s.nama;
-    supplierSelect.appendChild(opt);
-  });
-
-  bahan.forEach(b => {
-    const opt = document.createElement("option");
-    opt.value = b.id;
-    opt.textContent = b.nama;
-    bahanSelect.appendChild(opt);
-  });
-}
-
-// ==========================
-// FORM SUBMIT (ADD CART)
+// ADD TO CART
 // ==========================
 document.getElementById("pembelianForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
-  const supplierId = document.getElementById("selectSupplier").value;
   const bahanId = document.getElementById("selectBahan").value;
   const gram = parseInt(document.getElementById("jumlahGram").value);
   const harga = parseInt(document.getElementById("hargaTotal").value);
 
-  if (!supplierId || !bahanId || !gram || !harga) {
+  if (!bahanId || !gram || !harga) {
     alert("Semua field harus diisi.");
     return;
   }
 
-  const bahan = getBahanBakuData().find(b => b.id === bahanId);
+  const bahan = getBahanBakuData().find(b => b.id == bahanId);
 
   if (!bahan) {
     alert("Bahan tidak ditemukan.");
     return;
   }
 
-  if (cart.find(c => c.bahanId === bahanId)) {
+  if (cart.find(c => c.bahanId == bahanId)) {
     alert("Bahan sudah ada di keranjang.");
     return;
   }
@@ -138,7 +154,6 @@ document.getElementById("pembelianForm").addEventListener("submit", function (e)
     harga
   });
 
-  // reset input
   document.getElementById("jumlahGram").value = "";
   document.getElementById("hargaTotal").value = "";
 
@@ -155,91 +170,34 @@ document.getElementById("btnSubmitPembelian").addEventListener("click", function
   }
 
   const supplierId = document.getElementById("selectSupplier").value;
-  const supplier = getSupplierData().find(s => s.id === supplierId);
+  const supplier = supplierList.find(s => s.id == supplierId);
 
   if (!supplier) {
     alert("Supplier tidak valid.");
     return;
   }
 
-  const pembelianData = getPembelianData();
-
   const pembelian = {
     id: "PO-" + Date.now(),
     supplierId: supplier.id,
-    supplierNama: supplier.nama,
+    supplierNama: supplier.nama_supplier,
     tanggal: new Date().toLocaleString("id-ID"),
     status: "Pending",
     total: calculateTotal(),
     items: cart,
-    createdBy: sessionUser.username,
-    approvedBy: null,
-    receivedAt: null
+    createdBy: sessionUser.username
   };
 
-  pembelianData.push(pembelian);
-  savePembelianData(pembelianData);
+  console.log("DATA PEMBELIAN:", pembelian);
+
+  alert("Pembelian berhasil dibuat (simulasi, belum masuk DB)");
 
   cart = [];
   renderCart();
-  renderHistory();
-
-  alert("Pembelian berhasil (Pending approval Owner).");
 });
-
-// ==========================
-// RESET CART
-// ==========================
-document.getElementById("btnResetCart").addEventListener("click", function () {
-  cart = [];
-  renderCart();
-});
-
-// ==========================
-// STATUS BADGE (CSS SYNC)
-// ==========================
-function getStatusBadge(status) {
-  let cls = "pending";
-
-  if (status === "Approved") cls = "approved";
-  if (status === "Rejected") cls = "rejected";
-  if (status === "Received") cls = "received";
-
-  return `
-    <span class="cs-status-pill ${cls}">
-      <span class="cs-pulse"></span>
-      ${status}
-    </span>
-  `;
-}
-
-// ==========================
-// HISTORY TABLE
-// ==========================
-function renderHistory() {
-  const tbody = document.getElementById("historyTable");
-  tbody.innerHTML = "";
-
-  const data = getPembelianData();
-
-  data.slice().reverse().forEach(po => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>${po.id}</td>
-      <td>${po.supplierNama}</td>
-      <td>${po.tanggal}</td>
-      <td>${getStatusBadge(po.status)}</td>
-      <td>Rp ${po.total.toLocaleString("id-ID")}</td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-}
 
 // ==========================
 // INIT
 // ==========================
 loadDropdowns();
 renderCart();
-renderHistory();
