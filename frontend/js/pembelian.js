@@ -23,6 +23,7 @@ if (sessionUser.role !== "MANAGER") {
 // GLOBAL DATA
 // ==========================
 let supplierList = [];
+let bahanList = [];
 let cart = [];
 
 // ==========================
@@ -48,7 +49,7 @@ async function loadSuppliers() {
     data.forEach(s => {
       const opt = document.createElement("option");
       opt.value = s.id;
-      opt.textContent = s.nama_supplier; // field dari DB
+      opt.textContent = s.nama_supplier;
       supplierSelect.appendChild(opt);
     });
 
@@ -59,10 +60,25 @@ async function loadSuppliers() {
 }
 
 // ==========================
-// BAHAN (MASIH LOCAL)
+// BAHAN DARI API
 // ==========================
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
+async function loadBahanBaku() {
+  try {
+    const res = await fetch("http://localhost:5000/api/bahanbaku", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) throw new Error("Gagal ambil bahan baku");
+
+    return await res.json();
+
+  } catch (err) {
+    console.error(err);
+    alert("Gagal load bahan baku dari server");
+    return [];
+  }
 }
 
 // ==========================
@@ -73,11 +89,11 @@ async function loadDropdowns() {
 
   await loadSuppliers();
 
-  const bahan = getBahanBakuData();
+  bahanList = await loadBahanBaku();
 
   bahanSelect.innerHTML = `<option value="" disabled selected>-- Pilih bahan --</option>`;
 
-  bahan.forEach(b => {
+  bahanList.forEach(b => {
     const opt = document.createElement("option");
     opt.value = b.id;
     opt.textContent = b.nama;
@@ -135,7 +151,7 @@ document.getElementById("pembelianForm").addEventListener("submit", function (e)
     return;
   }
 
-  const bahan = getBahanBakuData().find(b => b.id == bahanId);
+  const bahan = bahanList.find(b => b.id == bahanId);
 
   if (!bahan) {
     alert("Bahan tidak ditemukan.");
