@@ -2,6 +2,34 @@ const db = require("../config/db");
 const auditService = require("../utils/auditService");
 const ledgerService = require("../utils/inventoryLedgerService");
 
+// ==========================
+// GET ALL PEMBELIAN
+// ==========================
+exports.getAllPembelian = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT 
+        p.id,
+        p.tanggal,
+        p.total,
+        p.status,
+        s.nama_supplier
+      FROM pembelian p
+      LEFT JOIN supplier s ON p.supplier_id = s.id
+      ORDER BY p.id DESC
+    `);
+
+    res.json(rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Gagal ambil pembelian" });
+  }
+};
+
+// ==========================
+// CREATE PEMBELIAN
+// ==========================
 exports.createPembelian = async (req, res) => {
   const { supplierId, items, total } = req.body;
 
@@ -44,6 +72,10 @@ exports.createPembelian = async (req, res) => {
     res.status(500).json({ message: "Gagal simpan pembelian" });
   }
 };
+
+// ==========================
+// UPDATE STATUS
+// ==========================
 exports.updateStatusPembelian = async (req, res) => {
 
   const { id } = req.params;
@@ -151,3 +183,14 @@ exports.updateStatusPembelian = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+
+
+
+
+
+
+
+
+
+

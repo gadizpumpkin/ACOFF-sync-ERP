@@ -1,191 +1,112 @@
 // ==========================
-// AUTH CHECK
+// AUTH
 // ==========================
 const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
 
-document.getElementById("userRole").textContent = sessionUser.role;
-
-document.getElementById("logoutBtn").addEventListener("click", function() {
-  clearSession();
-  window.location.href = "index.html";
-});
+if (!sessionUser || !token) window.location.href = "index.html";
 
 if (sessionUser.role !== "OWNER") {
-  alert("Akses ditolak. Halaman ini hanya untuk Owner.");
+  alert("Akses hanya untuk OWNER");
   window.location.href = "dashboard.html";
 }
 
 // ==========================
-// RBAC MENU (optional jika ingin dinamis)
+// LOAD DATA
 // ==========================
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-// mapping route halaman
-const menuRoutes = {
-  "Dashboard": "dashboard.html",
-  "Approval Pembelian": "approval_pembelian.html",
-  "Approval Payroll": "approval_payroll.html",
-  "Approval Laporan": "approval_laporan.html",
-  "Export P&L": "laporan_view.html",
-  "Audit Keuangan": "audit_log.html"
-};
-
-menuList.innerHTML = "";
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-
-  const a = document.createElement("a");
-  a.href = menuRoutes[menu] || "#";
-  a.textContent = menu;
-
-  if (!menuRoutes[menu]) {
-    a.addEventListener("click", (e) => {
-      e.preventDefault();
-      alert("Menu belum dibuat: " + menu);
-    });
-  }
-
-  li.appendChild(a);
-  menuList.appendChild(li);
-});
-
-// ==========================
-// STORAGE
-// ==========================
-function getPembelianData() {
-  return JSON.parse(localStorage.getItem("pembelianData")) || [];
-}
-
-function savePembelianData(data) {
-  localStorage.setItem("pembelianData", JSON.stringify(data));
-}
-
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
-}
-
-function saveBahanBakuData(data) {
-  localStorage.setItem("bahanBakuData", JSON.stringify(data));
-}
-
-// ==========================
-// APPLY STOCK INCREASE (RECEIVED)
-// ==========================
-function applyStockIncrease(items) {
-  let bahanData = getBahanBakuData();
-
-  items.forEach(it => {
-    bahanData = bahanData.map(b => {
-      if (b.id === it.bahanId) {
-        return { ...b, stok: b.stok + it.gram };
+async function loadPembelian() {
+  try {
+    const res = await fetch("http://localhost:5000/api/pembelian", {
+      headers: {
+        Authorization: "Bearer " + localStorage.getItem("token")
       }
-      return b;
     });
-  });
 
-  saveBahanBakuData(bahanData);
-}
+    const data = await res.json();
 
-// ==========================
-// UPDATE STATUS
-// ==========================
-function approvePembelian(id) {
-  let pembelianData = getPembelianData();
-  const po = pembelianData.find(p => p.id === id);
+    if (!res.ok) {
+      console.error("ERROR API:", data);
+      throw new Error(data.message || "Gagal fetch");
+    }
 
-  if (!po) return alert("Data pembelian tidak ditemukan.");
-  if (po.status !== "Pending") return alert("Hanya pembelian Pending yang dapat di-approve.");
+    return data;
 
-  po.status = "Approved";
-  po.approvedBy = sessionUser.username;
-
-  savePembelianData(pembelianData);
-  renderTable();
-}
-
-function rejectPembelian(id) {
-  let pembelianData = getPembelianData();
-  const po = pembelianData.find(p => p.id === id);
-
-  if (!po) return alert("Data pembelian tidak ditemukan.");
-  if (po.status !== "Pending") return alert("Hanya pembelian Pending yang dapat di-reject.");
-
-  po.status = "Rejected";
-  po.approvedBy = sessionUser.username;
-
-  savePembelianData(pembelianData);
-  renderTable();
-}
-
-function receivePembelian(id) {
-  let pembelianData = getPembelianData();
-  const po = pembelianData.find(p => p.id === id);
-
-  if (!po) return alert("Data pembelian tidak ditemukan.");
-  if (po.status !== "Approved") return alert("Hanya pembelian Approved yang dapat diterima (Received).");
-
-  // tambah stok
-  applyStockIncrease(po.items);
-
-  po.status = "Received";
-  po.receivedAt = new Date().toLocaleString("id-ID");
-
-  savePembelianData(pembelianData);
-  renderTable();
-
-  alert("Pembelian diterima. Stok berhasil ditambahkan.");
+  } catch (err) {
+    console.error(err);
+    alert("Tidak bisa load pembelian");
+    return [];
+  }
 }
 
 // ==========================
 // RENDER TABLE
 // ==========================
-function renderTable() {
+async function renderTable() {
   const tbody = document.getElementById("approvalTable");
   tbody.innerHTML = "";
 
-  const pembelianData = getPembelianData();
+  const data = await loadPembelian();
 
-  pembelianData.slice().reverse().forEach(po => {
-    // Sesuaikan dengan class pill CSS
-    let statusClass = "cs-status-pill pending";
-    if (po.status === "Approved") statusClass = "cs-status-pill approved";
-    if (po.status === "Rejected") statusClass = "cs-status-pill rejected";
-    if (po.status === "Received") statusClass = "cs-status-pill received";
+  data.forEach(po => {
 
-    let actions = "";
+    let actions = "-";
 
-    if (po.status === "Pending") {
+    if (po.status === "DRAFT") {
       actions = `
-        <div class="cs-action-btn">
-          <button class="cs-btn-approve" onclick="approvePembelian('${po.id}')">Approve</button>
-          <button class="cs-btn-reject" onclick="rejectPembelian('${po.id}')">Reject</button>
-        </div>
+        <button onclick="approve(${po.id})">Approve</button>
+        <button onclick="reject(${po.id})">Reject</button>
       `;
-    } else if (po.status === "Approved") {
+    } else if (po.status === "APPROVED") {
       actions = `
-        <div class="cs-action-btn">
-          <button class="cs-btn-receive" onclick="receivePembelian('${po.id}')">Received</button>
-        </div>
+        <button onclick="receive(${po.id})">Received</button>
       `;
-    } else {
-      actions = "-";
     }
 
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td class="cs-td-id">${po.id}</td>
-      <td>${po.supplierNama}</td>
-      <td>${po.tanggal}</td>
-      <td><span class="${statusClass}"><span class="cs-pulse"></span>${po.status}</span></td>
-      <td class="cs-td-total">Rp ${po.total.toLocaleString("id-ID")}</td>
+      <td>${po.id}</td>
+      <td>${po.nama_supplier || "-"}</td>
+      <td>${new Date(po.tanggal).toLocaleString("id-ID")}</td>
+      <td>${po.status}</td>
+      <td>Rp ${Number(po.total).toLocaleString("id-ID")}</td>
       <td>${actions}</td>
     `;
 
     tbody.appendChild(tr);
   });
+}
+
+// ==========================
+// UPDATE STATUS
+// ==========================
+async function updateStatus(id, status) {
+  const res = await fetch(`http://localhost:5000/api/pembelian/${id}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ status })
+  });
+
+  const data = await res.json();
+  alert(data.message);
+  renderTable();
+}
+
+// ==========================
+// BUTTON ACTION
+// ==========================
+function approve(id) {
+  updateStatus(id, "APPROVED");
+}
+
+function reject(id) {
+  updateStatus(id, "REJECTED");
+}
+
+function receive(id) {
+  updateStatus(id, "RECEIVED");
 }
 
 // INIT

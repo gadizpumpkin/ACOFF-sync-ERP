@@ -2,10 +2,19 @@ const express = require("express");
 const router = express.Router();
 const { verifyToken } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/roleMiddleware");
+const { getAllPembelian } = require("../controllers/pembelianController");
 const {
   createPembelian,
   updateStatusPembelian
 } = require("../controllers/pembelianController");
+
+// GET ALL status pembelian
+router.get(
+  "/",
+  verifyToken,
+  allowRoles("OWNER", "MANAGER"),
+  getAllPembelian
+);
 
 // CREATE
 router.post(
@@ -19,8 +28,13 @@ router.post(
 router.put(
   "/:id/status",
   verifyToken,
-  allowRoles("MANAGER", "OWNER"),
+  allowRoles("OWNER"),
   updateStatusPembelian
 );
 
+
+
 module.exports = router;
+
+
+
