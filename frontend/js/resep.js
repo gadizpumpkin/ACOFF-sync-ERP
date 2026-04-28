@@ -1,209 +1,153 @@
-// ==========================
-// AUTH CHECK
-// ==========================
-const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
 
+// ==========================
+// AUTH
+// ==========================
+if (!token) window.location.href = "index.html";
+
+const sessionUser = getSession();
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function () {
-  clearSession();
+// ==========================
+// LOGOUT
+// ==========================
+document.getElementById("logoutBtn").addEventListener("click", () => {
+  localStorage.clear();
   window.location.href = "index.html";
 });
 
 // ==========================
-// RBAC MENU (TIDAK RUSAK SIDEBAR HTML)
+// DROPDOWN
 // ==========================
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-// OPTIONAL: kalau mau dynamic replace, aktifkan ini
-// menuList.innerHTML = "";
-
-menus.forEach(menu => {
-  const li = document.createElement("li");
-  const a = document.createElement("a");
-
-  a.textContent = menu;
-  a.href = "#";
-
-  a.addEventListener("click", function () {
-    if (menu === "Kelola Menu") window.location.href = "menu.html";
-    else if (menu === "Kelola Resep") window.location.href = "resep.html";
-    else if (menu === "Kelola Bahan Baku") window.location.href = "bahanbaku.html";
-    else alert("Menu belum dibuat: " + menu);
-  });
-
-  li.appendChild(a);
-  menuList.appendChild(li);
-});
-
-// ==========================
-// STORAGE
-// ==========================
-function getMenuData() {
-  return JSON.parse(localStorage.getItem("menuData")) || [];
-}
-
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
-}
-
-function getResepData() {
-  return JSON.parse(localStorage.getItem("resepData")) || [];
-}
-
-function saveResepData(data) {
-  localStorage.setItem("resepData", JSON.stringify(data));
-}
-
-// ==========================
-// LOAD DROPDOWN
-// ==========================
-function loadDropdowns() {
+async function loadDropdowns() {
   const menuSelect = document.getElementById("selectMenu");
   const bahanSelect = document.getElementById("selectBahan");
 
-  menuSelect.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
-  bahanSelect.innerHTML = `<option value="" disabled selected>-- Pilih bahan --</option>`;
+  menuSelect.innerHTML = `<option disabled selected>-- Pilih menu --</option>`;
+  bahanSelect.innerHTML = `<option disabled selected>-- Pilih bahan --</option>`;
 
-  const menus = getMenuData();
-  const bahan = getBahanBakuData();
+  try {
+    const [menuRes, bahanRes] = await Promise.all([
+      fetch("http://localhost:5000/api/menu"),
+      fetch("http://localhost:5000/api/bahanbaku", {
+        headers: { Authorization: "Bearer " + token }
+      })
+    ]);
 
-  if (menus.length === 0) {
-    menuSelect.innerHTML += `<option value="">Menu kosong</option>`;
-  } else {
+    const menus = await menuRes.json();
+    const bahan = await bahanRes.json();
+
     menus.forEach(m => {
-      const opt = document.createElement("option");
-      opt.value = m.id;
-      opt.textContent = m.nama;
-      menuSelect.appendChild(opt);
+      menuSelect.innerHTML += `<option value="${m.id}">${m.nama_menu}</option>`;
     });
-  }
 
-  if (bahan.length === 0) {
-    bahanSelect.innerHTML += `<option value="">Bahan kosong</option>`;
-  } else {
     bahan.forEach(b => {
-      const opt = document.createElement("option");
-      opt.value = b.id;
-      opt.textContent = b.nama;
-      bahanSelect.appendChild(opt);
+      bahanSelect.innerHTML += `<option value="${b.id}">${b.nama}</option>`;
     });
+
+  } catch (err) {
+    console.error("Dropdown error:", err);
   }
 }
 
 // ==========================
-// RENDER TABLE
+// TABLE
 // ==========================
-function renderTable() {
+async function renderTable() {
   const tbody = document.getElementById("resepTable");
-  const countEl = document.getElementById("resepCount");
+  const count = document.getElementById("resepCount");
 
-  tbody.innerHTML = "";
+  try {
+    const res = await fetch("http://localhost:5000/api/resep", {
+      headers: { Authorization: "Bearer " + token }
+    });
 
-  const resepData = getResepData();
-  const menuData = getMenuData();
-  const bahanData = getBahanBakuData();
+    const text = await res.text();
 
-  if (resepData.length === 0) {
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="4" class="cs-empty">
-          Belum ada data resep
-        </td>
-      </tr>
-    `;
+    //DEBUG
+    console.log("RESPONSE RESEP:", text);
+
+    let data;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      throw new Error("Response bukan JSON");
+    }
+
+    tbody.innerHTML = "";
+    count.textContent = `${data.length} resep`;
+
+    if (data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="4">Belum ada resep</td></tr>`;
+      return;
+    }
+
+    data.forEach(item => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${item.nama_menu}</td>
+          <td>${item.nama_bahan}</td>
+          <td>${item.qty} gram</td>
+          <td>
+            <button onclick="deleteResep(${item.id})">Hapus</button>
+          </td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.error("Render error:", err);
   }
-
-  resepData.forEach(item => {
-    const menu = menuData.find(m => m.id === item.menuId);
-    const bahan = bahanData.find(b => b.id === item.bahanId);
-
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-      <td>
-        <div class="cs-menu-tag">
-          <span class="cs-menu-dot"></span>
-          ${menu ? menu.nama : "(Menu dihapus)"}
-        </div>
-      </td>
-      <td>${bahan ? bahan.nama : "(Bahan dihapus)"}</td>
-      <td>
-        <span class="cs-gram-badge">
-          ${item.gram}
-          <span class="cs-gram-unit">gram</span>
-        </span>
-      </td>
-      <td>
-        <button class="cs-btn-delete" onclick="deleteResep('${item.id}')">
-          Hapus
-        </button>
-      </td>
-    `;
-
-    tbody.appendChild(tr);
-  });
-
-  // UPDATE COUNT
-  countEl.textContent = `${resepData.length} resep`;
 }
 
 // ==========================
-// ADD RESEP
+// ADD
 // ==========================
-document.getElementById("resepForm").addEventListener("submit", function (e) {
+document.getElementById("resepForm").addEventListener("submit", async (e) => {
   e.preventDefault();
 
-  if (sessionUser.role !== "MANAGER") {
-    alert("Akses ditolak. Hanya Manajer.");
-    return;
+  const menu_id = document.getElementById("selectMenu").value;
+  const bahan_id = document.getElementById("selectBahan").value;
+  const qty = parseFloat(document.getElementById("jumlahGram").value);
+
+  try {
+    const res = await fetch("http://localhost:5000/api/resep", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + token
+      },
+      body: JSON.stringify({ menu_id, bahan_id, qty })
+    });
+
+    const result = await res.json();
+
+    if (result.error) {
+      alert(result.error);
+      return;
+    }
+
+    document.getElementById("jumlahGram").value = "";
+    renderTable();
+
+  } catch (err) {
+    console.error("Submit error:", err);
   }
-
-  const menuId = document.getElementById("selectMenu").value;
-  const bahanId = document.getElementById("selectBahan").value;
-  const gram = parseFloat(document.getElementById("jumlahGram").value);
-
-  if (!menuId || !bahanId) {
-    alert("Menu atau bahan belum dipilih.");
-    return;
-  }
-
-  let resepData = getResepData();
-
-  const exists = resepData.find(r => r.menuId === menuId && r.bahanId === bahanId);
-
-  if (exists) {
-    alert("Resep sudah ada.");
-    return;
-  }
-
-  resepData.push({
-    id: Date.now().toString(),
-    menuId,
-    bahanId,
-    gram
-  });
-
-  saveResepData(resepData);
-
-  document.getElementById("jumlahGram").value = "";
-  renderTable();
 });
 
 // ==========================
 // DELETE
 // ==========================
-function deleteResep(id) {
-  if (!confirm("Yakin hapus resep ini?")) return;
+window.deleteResep = async function (id) {
+  if (!confirm("Hapus resep?")) return;
 
-  let resepData = getResepData();
-  resepData = resepData.filter(r => r.id !== id);
+  await fetch(`http://localhost:5000/api/resep/${id}`, {
+    method: "DELETE",
+    headers: { Authorization: "Bearer " + token }
+  });
 
-  saveResepData(resepData);
   renderTable();
-}
+};
 
 // ==========================
 // INIT
