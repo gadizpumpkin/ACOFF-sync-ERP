@@ -102,6 +102,45 @@ async function loadDropdowns() {
 }
 
 // ==========================
+// LOAD RIWAYAT PEMBELIAN
+// ==========================
+async function loadRiwayatPembelian() {
+  const tbody = document.getElementById("historyTable");
+
+  try {
+    const res = await fetch("http://localhost:5000/api/pembelian", {
+      headers: {
+        Authorization: "Bearer " + token
+      }
+    });
+
+    if (!res.ok) throw new Error("Gagal ambil riwayat");
+
+    const data = await res.json();
+
+    tbody.innerHTML = "";
+
+    data.forEach(p => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${p.id}</td>
+        <td>${p.nama_supplier || '-'}</td>
+        <td>${new Date(p.tanggal).toLocaleDateString("id-ID")}</td>
+        <td>${p.status}</td>
+        <td>Rp ${Number(p.total).toLocaleString("id-ID")}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("Gagal load riwayat pembelian");
+  }
+}
+
+// ==========================
 // CART
 // ==========================
 function renderCart() {
@@ -213,6 +252,7 @@ document.getElementById("btnSubmitPembelian").addEventListener("click", async fu
 
     cart = [];
     renderCart();
+    loadRiwayatPembelian(); 
 
   } catch (err) {
     console.error(err);
@@ -225,3 +265,4 @@ document.getElementById("btnSubmitPembelian").addEventListener("click", async fu
 // ==========================
 loadDropdowns();
 renderCart();
+loadRiwayatPembelian();
