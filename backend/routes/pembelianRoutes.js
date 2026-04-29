@@ -1,40 +1,34 @@
 const express = require("express");
 const router = express.Router();
-const { verifyToken } = require("../middleware/authMiddleware");
-const { allowRoles } = require("../middleware/roleMiddleware");
-const { getAllPembelian } = require("../controllers/pembelianController");
-const {
-  createPembelian,
-  updateStatusPembelian
-} = require("../controllers/pembelianController");
 
-// GET ALL status pembelian
+const pembelianController = require("../controllers/pembelianController");
+const { verifyToken } = require("../middleware/authMiddleware");
+
+// ==========================
+// GET ALL PEMBELIAN
+// ==========================
 router.get(
   "/",
   verifyToken,
-  allowRoles("OWNER", "MANAGER"),
-  getAllPembelian
+  pembelianController.getAllPembelian
 );
 
-// CREATE
+// ==========================
+// CREATE PEMBELIAN
+// ==========================
 router.post(
   "/",
   verifyToken,
-  allowRoles("MANAGER"),
-  createPembelian
+  pembelianController.createPembelian
 );
 
-// UPDATE STATUS
+// ==========================
+// UPDATE STATUS PEMBELIAN
+// ==========================
 router.put(
   "/:id/status",
   verifyToken,
-  allowRoles("OWNER"),
-  updateStatusPembelian
+  pembelianController.updateStatusPembelian
 );
 
-
-
 module.exports = router;
-
-
-

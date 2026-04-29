@@ -38,7 +38,6 @@ exports.createPembelian = async (req, res) => {
   try {
     await connection.beginTransaction();
 
-    // 1. INSERT ke tabel pembelian
     const [result] = await connection.query(
       `INSERT INTO pembelian (supplier_id, total, status, created_by)
        VALUES (?, ?, 'DRAFT', ?)`,
@@ -47,11 +46,12 @@ exports.createPembelian = async (req, res) => {
 
     const pembelianId = result.insertId;
 
-    // 2. INSERT detail
     for (let item of items) {
       const subtotal = item.gram * item.harga;
+
       await connection.query(
-        `INSERT INTO pembelian_detail (pembelian_id, bahan_id, qty, harga, subtotal)
+        `INSERT INTO pembelian_detail 
+        (pembelian_id, bahan_id, qty, harga, subtotal)
         VALUES (?, ?, ?, ?, ?)`,
         [pembelianId, item.bahanId, item.gram, item.harga, subtotal]
       );
@@ -68,22 +68,27 @@ exports.createPembelian = async (req, res) => {
   } catch (err) {
     await connection.rollback();
     connection.release();
+
     console.error(err);
     res.status(500).json({ message: "Gagal simpan pembelian" });
   }
 };
 
 // ==========================
-// UNTUK UPDATE STATUS
+// UPDATE STATUS
 // ==========================
 exports.updateStatusPembelian = async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
+  let { status } = req.body;
 
   const connection = await db.getConnection();
 
   try {
     await connection.beginTransaction();
+
+    // normalisasi
+    if (!status) throw new Error("Status kosong");
+    status = status.trim().toUpperCase();
 
     const [rows] = await connection.query(
       "SELECT status FROM pembelian WHERE id = ?",
@@ -96,9 +101,7 @@ exports.updateStatusPembelian = async (req, res) => {
 
     const oldStatus = rows[0].status;
 
-    // ==========================
-    // VALIDASI STATUS (FIXED)
-    // ==========================
+    // validasi
     if (oldStatus === "DRAFT" && !["APPROVED", "REJECTED"].includes(status)) {
       throw new Error("Status tidak valid");
     }
@@ -108,12 +111,10 @@ exports.updateStatusPembelian = async (req, res) => {
     }
 
     if (oldStatus === "RECEIVED") {
-      throw new Error("Pembelian sudah diterima");
+      throw new Error("Sudah selesai");
     }
 
-    // ==========================
-    // JIKA RECEIVED → UPDATE STOK
-    // ==========================
+    // jika received → tambah stok
     if (status === "RECEIVED") {
 
       const [details] = await connection.query(
@@ -122,11 +123,8 @@ exports.updateStatusPembelian = async (req, res) => {
       );
 
       for (let item of details) {
-
         await connection.query(
-          `UPDATE bahan_baku
-           SET stok = stok + ?
-           WHERE id = ?`,
+          `UPDATE bahan_baku SET stok = stok + ? WHERE id = ?`,
           [item.qty, item.bahan_id]
         );
 
@@ -146,31 +144,21 @@ exports.updateStatusPembelian = async (req, res) => {
         connection,
         req.user.id,
         "STOK_MASUK",
-        `Stok bertambah dari pembelian ID ${id}`
+        `Stok masuk dari pembelian ${id}`
       );
     }
 
-    // ==========================
-    // UPDATE STATUS
-    // ==========================
     await connection.query(
-      `UPDATE pembelian
+      `UPDATE pembelian 
        SET status = ?, approved_by = ?
        WHERE id = ?`,
       [status, req.user.id, id]
     );
 
-    await auditService.log(
-      connection,
-      req.user.id,
-      "UPDATE_STATUS_PEMBELIAN",
-      `Pembelian ID ${id} dari ${oldStatus} ke ${status}`
-    );
-
     await connection.commit();
     connection.release();
 
-    res.json({ message: "Status pembelian berhasil diupdate" });
+    res.json({ message: "Status berhasil diupdate" });
 
   } catch (err) {
     await connection.rollback();

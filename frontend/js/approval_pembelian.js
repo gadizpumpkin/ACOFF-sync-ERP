@@ -109,5 +109,33 @@ function receive(id) {
   updateStatus(id, "RECEIVED");
 }
 
+// ==========================
+// LOAD INIT
+// ==========================
+async function updateStatus(id, status) {
+  console.log("KIRIM STATUS:", status);
+
+  const res = await fetch(`http://localhost:5000/api/pembelian/${id}/status`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: "Bearer " + token
+    },
+    body: JSON.stringify({ status })
+  });
+
+  const data = await res.json();
+
+  console.log("RESPONSE:", data);
+
+  if (!res.ok) {
+    alert(data.error || "Gagal update status");
+    return;
+  }
+
+  alert(data.message);
+  renderTable();
+}
+
 // INIT
 renderTable();
