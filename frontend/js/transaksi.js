@@ -20,7 +20,7 @@ const BASE_URL = "http://localhost:5000/api";
 // GLOBAL DATA
 // ==========================
 let cart = [];
-let menuGlobal = []; // 🔥 ambil dari DB
+let menuGlobal = []; // ambil dari DB
 
 // ==========================
 // LOAD MENU DROPDOWN (API)
@@ -62,7 +62,7 @@ async function loadMenuDropdown() {
 }
 
 // ==========================
-// CART LOGIC (PAKAI DB)
+// CART LOGIC (LOCAL)
 // ==========================
 function addToCart(menuId, qty) {
   const menu = menuGlobal.find(m => String(m.id) === String(menuId));
