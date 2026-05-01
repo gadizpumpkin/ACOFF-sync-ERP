@@ -1,81 +1,66 @@
 // ==========================
-// AUTH CHECK + ROLE
+// AUTH CHECK
 // ==========================
 const sessionUser = getSession();
 if (!sessionUser) window.location.href = "index.html";
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function () {
+document.getElementById("logoutBtn").onclick = () => {
   clearSession();
   window.location.href = "index.html";
-});
+};
 
 // ==========================
-// BASE URL API
+// BASE API
 // ==========================
 const BASE_URL = "http://localhost:5000/api";
 
 // ==========================
-// GLOBAL DATA
+// GLOBAL
 // ==========================
 let cart = [];
-let menuGlobal = []; // ambil dari DB
+let menuGlobal = [];
 
 // ==========================
-// LOAD MENU DROPDOWN (API)
+// LOAD MENU
 // ==========================
 async function loadMenuDropdown() {
-  const selectMenu = document.getElementById("selectMenu");
-
-  selectMenu.innerHTML = `<option value="" disabled selected>-- Pilih menu --</option>`;
+  const select = document.getElementById("selectMenu");
+  select.innerHTML = `<option disabled selected>-- Pilih menu --</option>`;
 
   try {
     const res = await fetch(`${BASE_URL}/menu`);
     const menus = await res.json();
 
-    console.log("MENU API:", menus);
-
-    // simpan ke global
     menuGlobal = menus;
 
-    if (!menus.length) {
-      selectMenu.innerHTML = `<option value="">Menu kosong</option>`;
-      return;
-    }
-
     menus.forEach(m => {
-      // hanya tampilkan menu ACTIVE
       if (m.status !== "ACTIVE") return;
 
       const opt = document.createElement("option");
       opt.value = m.id;
       opt.textContent = `${m.nama_menu} (Rp ${Number(m.harga_jual).toLocaleString("id-ID")})`;
 
-      selectMenu.appendChild(opt);
+      select.appendChild(opt);
     });
 
   } catch (err) {
-    console.error("ERROR FETCH MENU:", err);
-    selectMenu.innerHTML = `<option value="">Gagal load menu</option>`;
+    console.error("LOAD MENU ERROR:", err);
   }
 }
 
 // ==========================
-// CART LOGIC (LOCAL)
+// CART
 // ==========================
 function addToCart(menuId, qty) {
   const menu = menuGlobal.find(m => String(m.id) === String(menuId));
+  if (!menu) return alert("Menu tidak ditemukan");
 
-  if (!menu) {
-    alert("Menu tidak ditemukan.");
-    return;
-  }
+  const exist = cart.find(i => i.menuId == menuId);
 
-  const existing = cart.find(item => item.menuId === menuId);
-
-  if (existing) {
-    existing.qty += qty;
+  if (exist) {
+    exist.qty += qty;
   } else {
     cart.push({
       menuId: menu.id,
@@ -89,12 +74,12 @@ function addToCart(menuId, qty) {
 }
 
 function removeFromCart(menuId) {
-  cart = cart.filter(item => item.menuId !== menuId);
+  cart = cart.filter(i => i.menuId !== menuId);
   renderCart();
 }
 
 function calculateTotal() {
-  return cart.reduce((sum, item) => sum + item.harga * item.qty, 0);
+  return cart.reduce((sum, i) => sum + i.harga * i.qty, 0);
 }
 
 function renderCart() {
@@ -110,14 +95,10 @@ function renderCart() {
       <td>Rp ${item.harga.toLocaleString("id-ID")}</td>
       <td>${item.qty}</td>
       <td>Rp ${subtotal.toLocaleString("id-ID")}</td>
-      <td>
-        <button class="cs-btn-delete">Hapus</button>
-      </td>
+      <td><button class="cs-btn-delete">Hapus</button></td>
     `;
 
-    tr.querySelector(".cs-btn-delete").addEventListener("click", () => {
-      removeFromCart(item.menuId);
-    });
+    tr.querySelector(".cs-btn-delete").onclick = () => removeFromCart(item.menuId);
 
     tbody.appendChild(tr);
   });
@@ -127,67 +108,100 @@ function renderCart() {
 }
 
 // ==========================
-// TRANSAKSI (Sementara masih local)
+// CREATE TRANSACTION (DB)
 // ==========================
-function getTransaksiData() {
-  return JSON.parse(localStorage.getItem("transaksiData")) || [];
+async function createTransaction() {
+  if (cart.length === 0) {
+    return alert("Keranjang kosong");
+  }
+
+  try {
+    const token = localStorage.getItem("token");
+
+    console.log("TOKEN:", token);
+
+    const payload = {
+      items: cart.map(item => ({
+        menu_id: item.menuId,
+        qty: item.qty,
+        harga: item.harga
+      }))
+    };
+
+    console.log("PAYLOAD:", payload);
+
+    const res = await fetch(`${BASE_URL}/transaksi`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + token
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json();
+
+    console.log("RESPONSE:", data);
+
+    if (!res.ok) {
+      throw new Error(data.error || data.message || "Gagal transaksi");
+    }
+
+    alert("Transaksi berhasil! ID: " + data.transaksi_id);
+
+    cart = [];
+    renderCart();
+
+    loadHistory();
+
+  } catch (err) {
+    console.error("TRANSAKSI ERROR:", err);
+    alert(err.message);
+  }
 }
 
-function saveTransaksiData(data) {
-  localStorage.setItem("transaksiData", JSON.stringify(data));
-}
-
-function createTransaction(status) {
-  if (cart.length === 0) return alert("Keranjang kosong.");
-
-  const transaksiData = getTransaksiData();
-  const total = calculateTotal();
-
-  const trx = {
-    id: "TRX-" + Date.now(),
-    tanggal: new Date().toLocaleString("id-ID"),
-    status,
-    total,
-    items: cart,
-    createdBy: sessionUser.username
-  };
-
-  transaksiData.push(trx);
-  saveTransaksiData(transaksiData);
-
-  cart = [];
-  renderCart();
-  renderHistory();
-
-  alert("Transaksi berhasil: " + status);
-}
-
 // ==========================
-// HISTORY
+// 🔥 HISTORY FROM DB
 // ==========================
-function renderHistory() {
+async function loadHistory() {
   const tbody = document.getElementById("historyTable");
   tbody.innerHTML = "";
 
-  const data = getTransaksiData();
+  try {
+    const token = localStorage.getItem("token");
 
-  data.slice().reverse().forEach(trx => {
-    let statusClass = "cs-status-pill draft";
-    if (trx.status === "Paid") statusClass = "cs-status-pill paid";
-    if (trx.status === "Canceled") statusClass = "cs-status-pill canceled";
+    const res = await fetch(`${BASE_URL}/transaksi`, {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
-    const tr = document.createElement("tr");
+    const data = await res.json();
 
-    tr.innerHTML = `
-      <td>${trx.id}</td>
-      <td>${trx.tanggal}</td>
-      <td><span class="${statusClass}">${trx.status}</span></td>
-      <td>Rp ${trx.total.toLocaleString("id-ID")}</td>
-      <td>-</td>
-    `;
+    console.log("HISTORY:", data);
 
-    tbody.appendChild(tr);
-  });
+    // VALIDASI
+    if (!Array.isArray(data)) {
+      throw new Error(data.message || "Data bukan array");
+    }
+
+    data.forEach(trx => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${trx.id}</td>
+        <td>${new Date(trx.tanggal).toLocaleString("id-ID")}</td>
+        <td>${trx.status}</td>
+        <td>Rp ${Number(trx.total).toLocaleString("id-ID")}</td>
+        <td>-</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error("LOAD HISTORY ERROR:", err);
+  }
 }
 
 // ==========================
@@ -197,19 +211,18 @@ document.getElementById("transaksiForm").addEventListener("submit", function (e)
   e.preventDefault();
 
   if (sessionUser.role !== "KARYAWAN") {
-    return alert("Hanya Karyawan.");
+    return alert("Hanya Karyawan");
   }
 
   const menuId = document.getElementById("selectMenu").value;
   const qty = parseInt(document.getElementById("qtyMenu").value);
 
-  if (!menuId) return alert("Pilih menu.");
+  if (!menuId) return alert("Pilih menu");
 
   addToCart(menuId, qty);
 });
 
-document.getElementById("btnSaveDraft").onclick = () => createTransaction("Draft");
-document.getElementById("btnPaid").onclick = () => createTransaction("Paid");
+document.getElementById("btnPaid").onclick = createTransaction;
 
 document.getElementById("btnCancel").onclick = () => {
   cart = [];
@@ -221,4 +234,4 @@ document.getElementById("btnCancel").onclick = () => {
 // ==========================
 loadMenuDropdown();
 renderCart();
-renderHistory();
+loadHistory();

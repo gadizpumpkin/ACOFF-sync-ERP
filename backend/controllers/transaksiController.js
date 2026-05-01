@@ -1,151 +1,100 @@
 const db = require("../config/db");
-const auditService = require("../utils/auditService");
-
 
 exports.createTransaksi = async (req, res) => {
-
   const { items } = req.body;
   const connection = await db.getConnection();
 
   try {
-
     await connection.beginTransaction();
 
-    let lowStockWarnings = [];
-
-    // Insert transaksi awal
+    // ==========================
+    // INSERT TRANSAKSI
+    // ==========================
     const [result] = await connection.query(`
-      INSERT INTO transaksi (tanggal, total, status)
-      VALUES (NOW(), 0, 'Paid')
-    `);
+      INSERT INTO transaksi (tanggal, total, status, created_by)
+      VALUES (NOW(), 0, 'OPEN', ?)
+    `, [req.user.id]);
 
     const transaksiId = result.insertId;
-    let totalTransaksi = 0;
+    let total = 0;
 
-    // Loop setiap menu
+    // ==========================
+    // INSERT DETAIL (FIXED)
+    // ==========================
     for (let item of items) {
 
-      const [resep] = await connection.query(`
-        SELECT rd.bahan_id, rd.qty, bb.harga, bb.stok, bb.minimal_stok, bb.nama
-        FROM resep_detail rd
-        JOIN bahan_baku bb ON bb.id = rd.bahan_id
-        WHERE rd.menu_id = ?
-        FOR UPDATE
-      `, [item.menu_id]);
+      const subtotal = item.qty * item.harga;
+      total += subtotal;
 
-      if (resep.length === 0) {
-        throw new Error("Resep tidak ditemukan");
-      }
-
-      let modalPerMenu = 0;
-
-      // VALIDASI STOK DULU
-      for (let bahan of resep) {
-
-        const totalKebutuhan = bahan.qty * item.qty;
-
-        if (bahan.stok < totalKebutuhan) {
-          throw new Error(
-            `Stok ${bahan.nama} tidak cukup`
-          );
-        }
-
-        modalPerMenu += bahan.qty * bahan.harga;
-      }
-
-      // Kurangi stok + cek threshold
-      for (let bahan of resep) {
-
-        const totalKebutuhan = bahan.qty * item.qty;
-
-        await connection.query(`
-          UPDATE bahan_baku
-          SET stok = stok - ?
-          WHERE id = ?
-        `, [totalKebutuhan, bahan.bahan_id]);
-
-        // Ambil stok terbaru
-        const [stokBaru] = await connection.query(`
-          SELECT stok, minimal_stok, nama
-          FROM bahan_baku
-          WHERE id = ?
-        `, [bahan.bahan_id]);
-
-        const dataBahan = stokBaru[0];
-
-        if (dataBahan.stok <= dataBahan.minimal_stok) {
-
-          lowStockWarnings.push({
-            bahan: dataBahan.nama,
-            stok: dataBahan.stok,
-            minimal: dataBahan.minimal_stok
-          });
-
-          await auditService.log(
-            connection,
-            req.user?.id || null,
-            "LOW_STOCK_WARNING",
-            `Stok bahan ${dataBahan.nama} rendah (${dataBahan.stok})`
-          );
-        }
-      }
-
-      const subtotalJual = item.qty * item.harga;
-      const subtotalModal = modalPerMenu * item.qty;
-
-      totalTransaksi += subtotalJual;
-
-      // Snapshot COGS
       await connection.query(`
         INSERT INTO transaksi_detail
-        (transaksi_id, menu_id, qty, harga_jual, subtotal, harga_modal, subtotal_modal)
-        VALUES (?, ?, ?, ?, ?, ?, ?)
+        (transaksi_id, menu_id, qty, harga, subtotal)
+        VALUES (?, ?, ?, ?, ?)
       `, [
         transaksiId,
         item.menu_id,
         item.qty,
         item.harga,
-        subtotalJual,
-        modalPerMenu,
-        subtotalModal
+        subtotal
       ]);
     }
 
-    // Update total transaksi
+    // ==========================
+    // UPDATE TOTAL
+    // ==========================
     await connection.query(`
-      UPDATE transaksi
-      SET total = ?
-      WHERE id = ?
-    `, [totalTransaksi, transaksiId]);
+      UPDATE transaksi SET total = ? WHERE id = ?
+    `, [total, transaksiId]);
 
     await connection.commit();
     connection.release();
 
     res.json({
       message: "Transaksi berhasil",
-      transaksi_id: transaksiId,
-      warning_stok: lowStockWarnings
+      transaksi_id: transaksiId
     });
 
   } catch (err) {
-
     await connection.rollback();
     connection.release();
 
-    res.status(400).json({ error: err.message });
+    console.error("TRANSAKSI ERROR:", err);
+
+    res.status(400).json({
+      error: err.message
+    });
   }
 };
+
+// ==========================
+// GET HISTORY
+// ==========================
+exports.getAllTransaksi = async (req, res) => {
+  try {
+    const [rows] = await db.query(`
+      SELECT * FROM transaksi ORDER BY id DESC
+    `);
+
+    res.json(rows);
+
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// ==========================
+// UPDATE STATUS
+// ==========================
 exports.updateStatus = async (req, res) => {
   const { id } = req.params;
 
   try {
-    // contoh sederhana
-    await db.query(
-      "UPDATE transaksi SET status = 'Canceled' WHERE id = ?",
-      [id]
-    );
+    await db.query(`
+      UPDATE transaksi SET status = 'CLOSED' WHERE id = ?
+    `, [id]);
 
-    res.json({ message: "Status berhasil diupdate" });
+    res.json({ message: "Status updated" });
+
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

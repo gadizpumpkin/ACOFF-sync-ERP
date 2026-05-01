@@ -5,47 +5,34 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/roleMiddleware");
 const { checkClosing } = require("../middleware/closingMiddleware");
 
-const { 
-  createTransaksi, 
-  updateStatus 
+const {
+  createTransaksi,
+  updateStatus,
+  getAllTransaksi
 } = require("../controllers/transaksiController");
 
 // ==========================
-// TEST ROUTE
+// GET ALL
 // ==========================
 router.get(
-  "/test",
+  "/",
   verifyToken,
-  (req, res) => {
-    res.json({
-      message: "Akses berhasil",
-      user: req.user
-    });
-  }
+  getAllTransaksi
 );
 
-
 // ==========================
-// CREATE TRANSAKSI
-// Manajer & Karyawan boleh
+// CREATE
 // ==========================
 router.post(
   "/",
   verifyToken,
-  allowRoles("MANAGER", "OWNER", "KARYAWAN"),
-  createTransaksi
-);
-router.post(
-  "/",
-  verifyToken,
-  allowRoles("OWNER", "KARYAWAN"),
+  allowRoles("OWNER", "MANAGER", "KARYAWAN"),
   checkClosing,
   createTransaksi
 );
+
 // ==========================
 // UPDATE STATUS
-// (Paid → Canceled)
-// Owner & Manajer boleh
 // ==========================
 router.put(
   "/:id/status",
@@ -54,4 +41,5 @@ router.put(
   checkClosing,
   updateStatus
 );
+
 module.exports = router;
