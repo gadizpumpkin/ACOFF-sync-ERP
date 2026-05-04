@@ -1,274 +1,148 @@
 // ==========================
 // AUTH CHECK
 // ==========================
-const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
+const role = localStorage.getItem("role");
 
-document.getElementById("userRole").textContent = sessionUser.role;
+if (!token) {
+  window.location.href = "index.html";
+}
+
+document.getElementById("userRole").textContent = role;
 
 document.getElementById("logoutBtn").addEventListener("click", function () {
-  clearSession();
+  localStorage.clear();
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "OWNER") {
-  alert("Akses ditolak. Approval hanya untuk Owner.");
+if (role !== "OWNER") {
+  alert("Akses ditolak!");
   window.location.href = "dashboard.html";
 }
 
 // ==========================
-// RBAC MENU
-// ==========================
-const menuList = document.getElementById("menuList");
-const menus = getMenuByRole(sessionUser.role);
-
-menuList.innerHTML = "";
-
-menus.forEach(menu => {
-
-  const li = document.createElement("li");
-
-  const a = document.createElement("a");
-  a.textContent = menu;
-
-  switch (menu) {
-
-    case "Dashboard":
-      a.href = "dashboard.html";
-      break;
-
-    case "Approval Pembelian":
-      a.href = "approval_pembelian.html";
-      break;
-
-    case "Approval Payroll":
-      a.href = "approval_payroll.html";
-      break;
-
-    case "Approval Laporan":
-      a.href = "approval_laporan.html";
-      li.classList.add("active");
-      break;
-
-    case "Audit Log":
-      a.href = "audit_log.html";
-      break;
-
-    default:
-      a.href = "#";
-  }
-
-  li.appendChild(a);
-  menuList.appendChild(li);
-
-});
-
-// ==========================
-// STORAGE
-// ==========================
-function getLaporanData() {
-  return JSON.parse(localStorage.getItem("laporanData")) || [];
-}
-
-function saveLaporanData(data) {
-  localStorage.setItem("laporanData", JSON.stringify(data));
-}
-
-// ==========================
-// UTIL FORMAT
+// FORMAT
 // ==========================
 function formatRupiah(value) {
   return "Rp " + Number(value).toLocaleString("id-ID");
 }
 
 // ==========================
-// RENDER TABLE
+// FETCH DATA
 // ==========================
-function renderPendingLaporan() {
+async function getPendingPayroll() {
+  try {
+    const res = await fetch("http://localhost:5000/api/payroll/pending", {
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
 
-  const tbody = document.getElementById("pendingTable");
+    return await res.json();
 
-  tbody.innerHTML = "";
-
-  const laporan = getLaporanData();
-
-  const pending = laporan.filter(l => l.status === "Pending");
-
-  if (pending.length === 0) {
-
-    tbody.innerHTML = `
-      <tr>
-        <td colspan="5" style="text-align:center;color:#888780;">
-          Tidak ada laporan pending
-        </td>
-      </tr>
-    `;
-
-    return;
+  } catch (err) {
+    console.error(err);
+    return [];
   }
-
-  pending.forEach(l => {
-
-    const tr = document.createElement("tr");
-
-    const jenisClass =
-      l.jenis === "Weekly"
-        ? "cs-jenis-badge weekly"
-        : "cs-jenis-badge monthly";
-
-    tr.innerHTML = `
-
-      <td>
-        <span class="${jenisClass}">
-          ${l.jenis}
-        </span>
-      </td>
-
-      <td>
-        ${l.periode}
-      </td>
-
-      <td class="cs-td-omzet">
-        ${formatRupiah(l.totalOmzet)}
-      </td>
-
-      <td>
-        ${l.totalTransaksi}
-      </td>
-
-      <td>
-
-        <div class="cs-action-btn">
-
-          <button
-            class="cs-btn-view"
-            onclick="viewDetail('${l.id}')"
-          >
-            Detail
-          </button>
-
-          <button
-            class="cs-btn-approve"
-            onclick="approveLaporan('${l.id}')"
-          >
-            Approve
-          </button>
-
-          <button
-            class="cs-btn-reject"
-            onclick="rejectLaporan('${l.id}')"
-          >
-            Reject
-          </button>
-
-        </div>
-
-      </td>
-
-    `;
-
-    tbody.appendChild(tr);
-
-  });
-
 }
 
 // ==========================
-// VIEW DETAIL
+// RENDER TABLE
 // ==========================
-function viewDetail(id) {
+async function renderPendingPayroll() {
 
-  const laporan = getLaporanData();
+  const tbody = document.getElementById("pendingTable");
+  tbody.innerHTML = "";
 
-  const item = laporan.find(l => l.id === id);
+  const data = await getPendingPayroll();
 
-  if (!item) {
-    alert("Laporan tidak ditemukan");
+  if (data.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="5" style="text-align:center;color:#888;">
+          Tidak ada payroll pending
+        </td>
+      </tr>
+    `;
     return;
   }
 
-  alert(
+  data.forEach(p => {
 
-`
-Jenis      : ${item.jenis}
+    const tr = document.createElement("tr");
 
-Periode    : ${item.periode}
+    tr.innerHTML = `
+      <td>${p.id}</td>
+      <td>${p.periode_awal} s/d ${p.periode_akhir}</td>
+      <td>${formatRupiah(p.total_gaji)}</td>
+      <td>${p.processed_by || "-"}</td>
+      <td>
+        <button onclick="approvePayroll(${p.id})">Approve</button>
+        <button onclick="rejectPayroll(${p.id})">Reject</button>
+      </td>
+    `;
 
-Total Omzet:
-${formatRupiah(item.totalOmzet)}
-
-Total Transaksi:
-${item.totalTransaksi}
-
-Catatan:
-${item.catatan || "-"}
-
-`
-  );
-
+    tbody.appendChild(tr);
+  });
 }
 
 // ==========================
 // APPROVE
 // ==========================
-function approveLaporan(id) {
+async function approvePayroll(id) {
 
-  let laporan = getLaporanData();
+  if (!confirm("Approve payroll ini?")) return;
 
-  const item = laporan.find(l => l.id === id);
+  try {
 
-  if (!item) {
-    alert("Laporan tidak ditemukan");
-    return;
+    const res = await fetch(`http://localhost:5000/api/payroll/approve/${id}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    renderPendingPayroll();
+
+  } catch (err) {
+    console.error(err);
+    alert("Terjadi error");
   }
-
-  const confirmApprove = confirm(
-    "Approve laporan ini?"
-  );
-
-  if (!confirmApprove) return;
-
-  item.status = "Approved";
-
-  saveLaporanData(laporan);
-
-  alert("Laporan disetujui");
-
-  renderPendingLaporan();
-
 }
 
 // ==========================
 // REJECT
 // ==========================
-function rejectLaporan(id) {
+async function rejectPayroll(id) {
 
-  let laporan = getLaporanData();
+  if (!confirm("Reject payroll ini?")) return;
 
-  const item = laporan.find(l => l.id === id);
+  try {
 
-  if (!item) {
-    alert("Laporan tidak ditemukan");
-    return;
+    const res = await fetch(`http://localhost:5000/api/payroll/reject/${id}`, {
+      method: "PUT",
+      headers: {
+        "Authorization": "Bearer " + token
+      }
+    });
+
+    const data = await res.json();
+
+    alert(data.message);
+
+    renderPendingPayroll();
+
+  } catch (err) {
+    console.error(err);
+    alert("Terjadi error");
   }
-
-  const confirmReject = confirm(
-    "Reject laporan ini?"
-  );
-
-  if (!confirmReject) return;
-
-  item.status = "Rejected";
-
-  saveLaporanData(laporan);
-
-  alert("Laporan ditolak");
-
-  renderPendingLaporan();
-
 }
 
 // ==========================
 // INIT
 // ==========================
-renderPendingLaporan();
+renderPendingPayroll();
