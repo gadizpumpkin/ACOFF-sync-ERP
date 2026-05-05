@@ -50,19 +50,19 @@ exports.getOwnerSummary = async (req, res) => {
   }
 };
 exports.getLowStockAlert = async (req, res) => {
-
   try {
 
     const [rows] = await db.query(`
-      SELECT id, nama, stok, minimum_stok
+      SELECT id, nama_bahan, stok, min_stok
       FROM bahan_baku
-      WHERE stok <= minimum_stok
+      WHERE stok <= min_stok
       ORDER BY stok ASC
     `);
 
     res.json(rows);
 
   } catch (err) {
+    console.error("LOW STOCK ALERT ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
