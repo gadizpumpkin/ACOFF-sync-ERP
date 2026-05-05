@@ -33,7 +33,7 @@ document.getElementById("loginForm").addEventListener("submit", async function (
       // ==========================
       const userSession = {
         username: data.username,
-        role: data.role
+        role: data.role.toUpperCase()
       };
 
       setSession(userSession);

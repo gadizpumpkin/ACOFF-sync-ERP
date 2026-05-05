@@ -1,24 +1,22 @@
 // ==========================
 // AUTH CHECK
 // ==========================
-const token = localStorage.getItem("token");
-const role = localStorage.getItem("role");
+const sessionUser = getSession();
+if (!sessionUser) window.location.href = "index.html";
 
-if (!token) {
-  window.location.href = "index.html";
-}
-
-document.getElementById("userRole").textContent = role;
+document.getElementById("userRole").textContent = sessionUser.role;
 
 document.getElementById("logoutBtn").addEventListener("click", function () {
-  localStorage.clear();
+  clearSession();
   window.location.href = "index.html";
 });
 
-if (role !== "OWNER") {
-  alert("Akses ditolak!");
+// hanya Owner boleh approve payroll
+if (sessionUser.role !== "OWNER") {
+  alert("Akses ditolak. Approval Payroll hanya untuk Owner.");
   window.location.href = "dashboard.html";
 }
+
 
 // ==========================
 // FORMAT
