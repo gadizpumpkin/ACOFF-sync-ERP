@@ -67,13 +67,12 @@ exports.getLowStockAlert = async (req, res) => {
   }
 };
 exports.getLowStock = async (req, res) => {
-
   try {
 
     const [rows] = await db.query(`
-      SELECT id, nama, stok, minimal_stok
+      SELECT id, nama_bahan, stok, min_stok
       FROM bahan_baku
-      WHERE stok <= minimal_stok
+      WHERE stok <= min_stok
       ORDER BY stok ASC
     `);
 
@@ -83,6 +82,7 @@ exports.getLowStock = async (req, res) => {
     });
 
   } catch (err) {
+    console.error("LOW STOCK ERROR:", err);
     res.status(500).json({ error: err.message });
   }
 };
