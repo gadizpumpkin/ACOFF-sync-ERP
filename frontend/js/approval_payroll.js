@@ -1,23 +1,42 @@
 // ==========================
 // AUTH CHECK
 // ==========================
-const token = localStorage.getItem("token");
 const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
 
+console.log("SESSION USER:", sessionUser);
+console.log("ROLE:", sessionUser?.role);
+
+// cek login
+if (!sessionUser) {
+  window.location.href = "index.html";
+}
+
+// tampilkan role
 document.getElementById("userRole").textContent = sessionUser.role;
 
+// logout
 document.getElementById("logoutBtn").addEventListener("click", function () {
   clearSession();
   window.location.href = "index.html";
 });
+
+//debugging: pastikan role sudah benar sebelum cek akses
+console.log("SEBELUM ROLE CHECK");
+
+if (sessionUser.role !== "OWNER") {
+  console.log("MASUK IF ROLE");
+  alert("Akses ditolak. Approval Payroll hanya untuk Owner.");
+  window.location.href = "dashboard.html";
+}
+
+console.log("LOLOS ROLE CHECK");
 
 // hanya Owner boleh approve payroll
 if (sessionUser.role !== "OWNER") {
   alert("Akses ditolak. Approval Payroll hanya untuk Owner.");
   window.location.href = "dashboard.html";
 }
-
 
 // ==========================
 // FORMAT
