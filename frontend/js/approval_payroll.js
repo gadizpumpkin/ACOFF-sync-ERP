@@ -1,6 +1,7 @@
 // ==========================
 // AUTH CHECK
 // ==========================
+const token = localStorage.getItem("token");
 const sessionUser = getSession();
 if (!sessionUser) window.location.href = "index.html";
 
