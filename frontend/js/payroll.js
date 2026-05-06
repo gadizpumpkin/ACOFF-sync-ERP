@@ -4,6 +4,8 @@
 const sessionUser = getSession();
 if (!sessionUser) window.location.href = "index.html";
 
+const token = localStorage.getItem("token");
+
 document.getElementById("userRole").textContent = sessionUser.role;
 
 document.getElementById("logoutBtn").addEventListener("click", () => {
@@ -17,149 +19,101 @@ if (sessionUser.role !== "MANAGER") {
 }
 
 // ==========================
-// STORAGE
-// ==========================
-const getData = (key, defaultVal = []) =>
-  JSON.parse(localStorage.getItem(key)) || defaultVal;
-
-const saveData = (key, value) =>
-  localStorage.setItem(key, JSON.stringify(value));
-
-// ==========================
-// RULE
-// ==========================
-function getPayrollRule() {
-  return getData("payrollRule", {
-    payrollPercent: 30,
-    method: "equal"
-  });
-}
-
-function savePayrollRule(rule) {
-  saveData("payrollRule", rule);
-}
-
-// ==========================
 // UTIL
 // ==========================
-function getTodayDate() {
-  return new Date().toISOString().split("T")[0];
-}
-
 function formatRupiah(num) {
   return "Rp " + (num || 0).toLocaleString("id-ID");
 }
 
-// ==========================
-// HITUNG PROFIT
-// ==========================
-function calculateDailyProfit(tanggal) {
-  const transaksi = getData("transaksiData");
-
-  const filtered = transaksi.filter(t =>
-    t.tanggal === tanggal && t.status === "Paid"
-  );
-
-  let revenue = 0;
-  let hpp = 0;
-
-  filtered.forEach(t => {
-    revenue += t.totalBayar || 0;
-    hpp += t.totalHPP || 0;
-  });
-
-  return {
-    revenue,
-    hpp,
-    profit: revenue - hpp
-  };
+function getTodayDate() {
+  return new Date().toISOString().split("T")[0];
 }
 
 // ==========================
-// ABSENSI
+// HITUNG PROFIT (AMBIL DARI API)
 // ==========================
-function getHadirEmployees(tanggal) {
-  const absensi = getData("absensiData");
+async function calculateDailyProfit(tanggal) {
+  try {
+    const res = await fetch(`http://localhost:5000/api/transaksi/profit?tanggal=${tanggal}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
 
-  return absensi
-    .filter(a => a.tanggal === tanggal && a.status === "Hadir")
-    .map(a => a.user);
+    const data = await res.json();
+
+    return data.profit || 0;
+
+  } catch (err) {
+    console.error("Error ambil profit:", err);
+    return 0;
+  }
 }
 
 // ==========================
-// GENERATE PAYROLL
+// GENERATE PAYROLL (API)
 // ==========================
-function generatePayroll() {
+async function generatePayroll() {
   const tanggal = getTodayDate();
-  let payrollData = getData("payrollData");
 
-  // cek duplikasi
-  if (payrollData.some(p => p.tanggal === tanggal)) {
-    alert("Payroll hari ini sudah dibuat.");
+  const profit = await calculateDailyProfit(tanggal);
+
+  if (profit <= 0) {
+    alert("Profit hari ini 0, tidak bisa generate payroll.");
     return;
   }
 
-  const rule = getPayrollRule();
-  const { profit } = calculateDailyProfit(tanggal);
+  const payrollPercent = parseInt(document.getElementById("payrollPercent").value) || 30;
 
-  const payrollPool = Math.max(
-    0,
-    Math.floor(profit * (rule.payrollPercent / 100))
-  );
+  const total_gaji = Math.floor(profit * (payrollPercent / 100));
 
-  const hadirUsers = getHadirEmployees(tanggal);
-  const jumlah = hadirUsers.length;
+  try {
+    const res = await fetch("http://localhost:5000/api/payroll/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        periode_awal: tanggal,
+        periode_akhir: tanggal,
+        total_gaji
+      })
+    });
 
-  let detail = [];
+    const data = await res.json();
 
-  if (jumlah > 0) {
-    const gaji = Math.floor(payrollPool / jumlah);
+    if (!res.ok) {
+      alert(data.error || "Gagal generate payroll");
+      return;
+    }
 
-    detail = hadirUsers.map(u => ({
-      user: u,
-      gaji,
-      hadir: true
-    }));
+    alert("Payroll berhasil dibuat!");
+    loadPayroll();
+
+  } catch (err) {
+    console.error(err);
+    alert("Terjadi error saat generate payroll");
   }
-
-  const newPayroll = {
-    id: "PR-" + Date.now(),
-    tanggal,
-    totalProfit: profit,
-    payrollPool,
-    status: "Pending",
-    detail
-  };
-
-  payrollData.push(newPayroll);
-  saveData("payrollData", payrollData);
-
-  renderTable();
-  alert("Payroll berhasil dibuat!");
 }
 
 // ==========================
-// RULE FORM
+// LOAD PAYROLL DARI DATABASE
 // ==========================
-function loadRuleForm() {
-  const rule = getPayrollRule();
+async function loadPayroll() {
+  try {
+    const res = await fetch("http://localhost:5000/api/payroll/pending", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-  document.getElementById("payrollPercent").value = rule.payrollPercent;
-  document.getElementById("payrollMethod").value = rule.method;
-}
+    const data = await res.json();
 
-document.getElementById("btnSaveRule").addEventListener("click", () => {
-  const percent = parseInt(document.getElementById("payrollPercent").value);
-  const method = document.getElementById("payrollMethod").value;
+    renderTable(data);
 
-  if (isNaN(percent) || percent < 0 || percent > 100) {
-    alert("Persentase tidak valid (0 - 100)");
-    return;
+  } catch (err) {
+    console.error("Error load payroll:", err);
   }
-
-  savePayrollRule({ payrollPercent: percent, method });
-  alert("Aturan payroll disimpan.");
-});
+}
 
 // ==========================
 // STATUS UI
@@ -167,7 +121,7 @@ document.getElementById("btnSaveRule").addEventListener("click", () => {
 function getStatusHTML(status) {
   let className = "pending";
 
-  if (status === "Approved") className = "approved";
+  if (status === "Published") className = "approved";
   if (status === "Rejected") className = "rejected";
 
   return `
@@ -179,22 +133,20 @@ function getStatusHTML(status) {
 }
 
 // ==========================
-// RENDER TABLE
+// RENDER TABLE (DATABASE)
 // ==========================
-function renderTable() {
+function renderTable(payroll) {
   const tbody = document.getElementById("payrollTable");
   tbody.innerHTML = "";
-
-  const payroll = getData("payrollData").slice().reverse();
 
   payroll.forEach(p => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${p.tanggal}</td>
-      <td>${formatRupiah(p.totalProfit)}</td>
-      <td>${formatRupiah(p.payrollPool)}</td>
+      <td>${p.periode_awal} - ${p.periode_akhir}</td>
+      <td>${formatRupiah(p.total_gaji)}</td>
       <td>${getStatusHTML(p.status)}</td>
+      <td>${p.processed_by || "-"}</td>
     `;
 
     tbody.appendChild(tr);
@@ -211,5 +163,4 @@ document
 // ==========================
 // INIT
 // ==========================
-loadRuleForm();
-renderTable();
+loadPayroll();
