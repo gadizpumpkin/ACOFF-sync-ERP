@@ -1,227 +1,105 @@
 // ==========================
-// AUTH CHECK
+// AUTH
 // ==========================
 const sessionUser = getSession();
-if (!sessionUser) window.location.href = "index.html";
+const token = localStorage.getItem("token");
+
+if (!sessionUser || !token) {
+  window.location.href = "index.html";
+}
 
 document.getElementById("userRole").textContent = sessionUser.role;
 
-document.getElementById("logoutBtn").addEventListener("click", function () {
+// logout
+document.getElementById("logoutBtn").addEventListener("click", () => {
   clearSession();
+  localStorage.removeItem("token");
   window.location.href = "index.html";
 });
 
-if (sessionUser.role !== "MANAGER", "OWNER") {
-  alert("Akses ditolak. Generate laporan hanya untuk Manajer.");
+// ==========================
+// ROLE VALIDATION
+// ==========================
+if (!["MANAGER", "OWNER"].includes(sessionUser.role)) {
+  alert("Akses ditolak");
   window.location.href = "dashboard.html";
 }
 
 // ==========================
-// STORAGE
+// STATE
 // ==========================
-function getTransaksiData() {
-  return JSON.parse(localStorage.getItem("transaksiData")) || [];
-}
-
-function getMenuData() {
-  return JSON.parse(localStorage.getItem("menuData")) || [];
-}
-
-function getResepData() {
-  return JSON.parse(localStorage.getItem("resepData")) || [];
-}
-
-function getBahanBakuData() {
-  return JSON.parse(localStorage.getItem("bahanBakuData")) || [];
-}
-
-function getLaporanData() {
-  return JSON.parse(localStorage.getItem("laporanData")) || [];
-}
-
-function saveLaporanData(data) {
-  localStorage.setItem("laporanData", JSON.stringify(data));
-}
+let laporanData = [];
 
 // ==========================
-// HELPER
+// GENERATE LAPORAN (API)
 // ==========================
-function isDateInRange(dateStr, start, end) {
-  const d = new Date(dateStr);
-  return d >= new Date(start) && d <= new Date(end);
-}
-
-// ==========================
-// CALCULATE TOP MENU
-// ==========================
-function calculateTopMenu(transaksiList) {
-  const menuData = getMenuData();
-  let counter = {};
-
-  transaksiList.forEach(t => {
-    t.items.forEach(item => {
-      counter[item.menuId] = (counter[item.menuId] || 0) + item.qty;
-    });
-  });
-
-  return Object.entries(counter)
-    .map(([menuId, qty]) => {
-      const menu = menuData.find(m => m.id === menuId);
-      return { menu: menu ? menu.nama : "Unknown", qty };
-    })
-    .sort((a, b) => b.qty - a.qty)
-    .slice(0, 5);
-}
-
-// ==========================
-// CALCULATE BAHAN TERPAKAI
-// ==========================
-function calculateBahanTerpakai(transaksiList) {
-  const resep = getResepData();
-  const bahanData = getBahanBakuData();
-
-  let usage = {};
-
-  transaksiList.forEach(t => {
-    t.items.forEach(item => {
-      const resepMenu = resep.filter(r => r.menuId === item.menuId);
-
-      resepMenu.forEach(r => {
-        usage[r.bahanId] = (usage[r.bahanId] || 0) + (r.gram * item.qty);
-      });
-    });
-  });
-
-  return Object.entries(usage).map(([bahanId, gram]) => {
-    const bahan = bahanData.find(b => b.id === bahanId);
-    return {
-      bahan: bahan ? bahan.nama : "Unknown",
-      gram
-    };
-  });
-}
-
-// ==========================
-// GENERATE LAPORAN
-// ==========================
-function generateLaporan() {
+async function generateLaporan() {
   const jenis = document.getElementById("jenisLaporan").value;
   const mulai = document.getElementById("periodeMulai").value;
   const selesai = document.getElementById("periodeSelesai").value;
 
   if (!mulai || !selesai) {
-    alert("Periode harus diisi.");
+    alert("Periode harus diisi");
     return;
   }
 
   if (new Date(mulai) > new Date(selesai)) {
-    alert("Periode mulai tidak valid.");
+    alert("Tanggal tidak valid");
     return;
   }
 
-  const transaksi = getTransaksiData();
+  try {
+    const res = await fetch(
+      `http://localhost:5000/api/laporan/omzet?start=${mulai}&end=${selesai}`,
+      {
+        headers: {
+          Authorization: "Bearer " + token
+        }
+      }
+    );
 
-  const transaksiPeriode = transaksi.filter(t =>
-    t.status === "Paid" && isDateInRange(t.tanggal, mulai, selesai)
-  );
+    if (!res.ok) throw new Error("Gagal ambil data");
 
-  let totalOmzet = transaksiPeriode.reduce((sum, t) => sum + t.totalBayar, 0);
+    const data = await res.json();
 
-  const laporan = {
-    id: "LP-" + Date.now(),
-    type: jenis,
-    periodeMulai: mulai,
-    periodeSelesai: selesai,
-    totalOmzet,
-    totalTransaksi: transaksiPeriode.length,
-    topMenu: calculateTopMenu(transaksiPeriode),
-    bahanTerpakai: calculateBahanTerpakai(transaksiPeriode),
-    transaksiDetail: transaksiPeriode,
-    status: "Draft",
-    createdBy: sessionUser.username,
-    approvedBy: null
-  };
+    const laporan = {
+      id: "LP-" + Date.now(),
+      type: jenis,
+      periode: `${mulai} s/d ${selesai}`,
+      omzet: data.total_omzet,
+      transaksi: data.total_transaksi,
+      topMenu: data.top_menu,
+      bahan: data.bahan_terpakai,
+      status: "Draft"
+    };
 
-  const data = getLaporanData();
-  data.push(laporan);
-  saveLaporanData(data);
+    laporanData.push(laporan);
+    renderTable();
 
-  renderLaporanTable();
-  alert("Laporan berhasil dibuat (Draft)");
-}
-
-// ==========================
-// SUBMIT
-// ==========================
-function submitLaporan(id) {
-  let data = getLaporanData();
-  const laporan = data.find(l => l.id === id);
-
-  if (!laporan) return;
-
-  if (laporan.status !== "Draft") {
-    alert("Hanya Draft yang bisa dikirim.");
-    return;
+  } catch (err) {
+    console.error(err);
+    alert("Error ambil laporan");
   }
-
-  laporan.status = "Pending";
-
-  saveLaporanData(data);
-  renderLaporanTable();
 }
 
 // ==========================
-// VIEW
+// RENDER TABLE
 // ==========================
-function viewLaporan(id) {
-  localStorage.setItem("selectedLaporanId", id);
-  window.location.href = "laporan_view.html";
-}
-
-// ==========================
-// RENDER TABLE (FIX UI)
-// ==========================
-function renderLaporanTable() {
+function renderTable() {
   const tbody = document.getElementById("laporanTable");
   tbody.innerHTML = "";
 
-  const data = getLaporanData().slice().reverse();
-
-  data.forEach(l => {
-
-    // badge jenis
-    const jenisBadge = `
-      <span class="cs-jenis-badge ${l.type.toLowerCase()}">
-        ${l.type}
-      </span>
-    `;
-
-    // status pill
-    const statusClass = l.status.toLowerCase();
-    const statusBadge = `
-      <span class="cs-status-pill ${statusClass}">
-        <span class="cs-pulse"></span>
-        ${l.status}
-      </span>
-    `;
-
+  laporanData.slice().reverse().forEach(l => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${jenisBadge}</td>
-      <td>${l.periodeMulai} s/d ${l.periodeSelesai}</td>
-      <td class="cs-td-omzet">Rp ${l.totalOmzet.toLocaleString("id-ID")}</td>
-      <td>${l.totalTransaksi}</td>
-      <td>${statusBadge}</td>
+      <td>${l.type}</td>
+      <td>${l.periode}</td>
+      <td>Rp ${Number(l.omzet).toLocaleString("id-ID")}</td>
+      <td>${l.transaksi}</td>
+      <td>${l.status}</td>
       <td>
-        <div class="cs-action-btn">
-          <button class="cs-btn-view" onclick="viewLaporan('${l.id}')">View</button>
-          ${
-            l.status === "Draft"
-              ? `<button class="cs-btn-submit-laporan" onclick="submitLaporan('${l.id}')">Submit</button>`
-              : ""
-          }
-        </div>
+        <button onclick="viewDetail('${l.id}')">Detail</button>
       </td>
     `;
 
@@ -230,11 +108,25 @@ function renderLaporanTable() {
 }
 
 // ==========================
-// EVENT
+// VIEW DETAIL
 // ==========================
-document.getElementById("btnGenerate").addEventListener("click", generateLaporan);
+function viewDetail(id) {
+  const laporan = laporanData.find(l => l.id === id);
+
+  if (!laporan) return;
+
+  let detail = `
+OMZET: Rp ${laporan.omzet}
+
+TOP MENU:
+${laporan.topMenu.map(m => `- ${m.nama_menu} (${m.total_terjual})`).join("\n")}
+
+BAHAN TERPAKAI:
+${laporan.bahan.map(b => `- ${b.nama_bahan} (${b.total_pakai})`).join("\n")}
+  `;
+
+  alert(detail);
+}
 
 // ==========================
-// INIT
-// ==========================
-renderLaporanTable();
+document.getElementById("btnGenerate").addEventListener("click", generateLaporan);

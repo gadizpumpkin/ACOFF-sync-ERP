@@ -5,11 +5,11 @@ const { verifyToken } = require("../middleware/authMiddleware");
 const { allowRoles } = require("../middleware/roleMiddleware");
 const { laporanOmzet } = require("../controllers/laporanController");
 
-// Hanya Owner boleh akses laporan
+// MANAGER & OWNER boleh akses
 router.get(
   "/omzet",
   verifyToken,
-  allowRoles("OWNER", "MANAGER"),
+  allowRoles("MANAGER", "OWNER"),
   laporanOmzet
 );
 
