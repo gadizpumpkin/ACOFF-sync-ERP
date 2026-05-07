@@ -65,7 +65,6 @@ exports.createTransaksi = async (req, res) => {
     });
   }
 };
-
 // ==========================
 // GET DAILY PROFIT
 // ==========================
@@ -90,7 +89,7 @@ exports.getDailyProfit = async (req, res) => {
 
   } catch (err) {
 
-    console.error("PROFIT ERROR:", err);
+    console.error(err);
 
     res.status(500).json({
       error: err.message

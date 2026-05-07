@@ -52,32 +52,25 @@ async function calculateDailyProfit(tanggal) {
 // GENERATE PAYROLL (API)
 // ==========================
 async function generatePayroll() {
+
   const tanggal = getTodayDate();
 
-  const profit = await calculateDailyProfit(tanggal);
-
-  if (profit <= 0) {
-    alert("Profit hari ini 0, tidak bisa generate payroll.");
-    return;
-  }
-
-  const payrollPercent = parseInt(document.getElementById("payrollPercent").value) || 30;
-
-  const total_gaji = Math.floor(profit * (payrollPercent / 100));
-
   try {
-    const res = await fetch("http://localhost:5000/api/payroll/generate", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        periode_awal: tanggal,
-        periode_akhir: tanggal,
-        total_gaji
-      })
-    });
+
+    const res = await fetch(
+      "http://localhost:5000/api/payroll/generate",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          periode_awal: tanggal,
+          periode_akhir: tanggal
+        })
+      }
+    );
 
     const data = await res.json();
 
@@ -86,12 +79,15 @@ async function generatePayroll() {
       return;
     }
 
-    alert("Payroll berhasil dibuat!");
+    alert(data.message);
+
     loadPayroll();
 
   } catch (err) {
+
     console.error(err);
-    alert("Terjadi error saat generate payroll");
+
+    alert("Terjadi error");
   }
 }
 

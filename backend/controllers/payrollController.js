@@ -4,33 +4,158 @@ const db = require("../config/db");
 // GENERATE PAYROLL
 // ==========================
 exports.generatePayroll = async (req, res) => {
-  const { periode_awal, periode_akhir, total_gaji } = req.body;
+
+  const { periode_awal, periode_akhir } = req.body;
+
+  const connection = await db.getConnection();
 
   try {
-    const [result] = await db.query(
-      `INSERT INTO payroll 
-      (periode_awal, periode_akhir, total_gaji, processed_by, status)
-      VALUES (?, ?, ?, ?, 'Pending')`,
-      [periode_awal, periode_akhir, total_gaji, req.user.id]
-    );
+
+    await connection.beginTransaction();
+
+    // ==========================
+    // HITUNG PROFIT
+    // ==========================
+    const [profitRows] = await connection.query(`
+      SELECT 
+        COALESCE(SUM(total), 0) AS profit
+      FROM transaksi
+      WHERE DATE(tanggal) BETWEEN ? AND ?
+      AND status = 'CLOSED'
+    `, [periode_awal, periode_akhir]);
+
+    const profit = Number(profitRows[0].profit);
+
+    if (profit <= 0) {
+      throw new Error("Profit 0, payroll tidak dapat dibuat");
+    }
+
+    // ==========================
+    // AMBIL ABSENSI HADIR
+    // ==========================
+    const [employees] = await connection.query(`
+      SELECT 
+        a.user_id,
+        u.role,
+        SUM(a.total_jam) AS total_jam
+      FROM absensi a
+      JOIN users u ON a.user_id = u.id
+      WHERE a.tanggal BETWEEN ? AND ?
+      AND a.status = 'HADIR'
+      GROUP BY a.user_id
+    `, [periode_awal, periode_akhir]);
+
+    if (employees.length === 0) {
+      throw new Error("Tidak ada karyawan hadir");
+    }
+
+    // ==========================
+    // INSERT PAYROLL
+    // ==========================
+    const [payrollResult] = await connection.query(`
+      INSERT INTO payroll
+      (
+        periode_awal,
+        periode_akhir,
+        total_gaji,
+        processed_by,
+        status
+      )
+      VALUES (?, ?, ?, ?, 'Pending')
+    `, [
+      periode_awal,
+      periode_akhir,
+      profit,
+      req.user.id
+    ]);
+
+    const payrollId = payrollResult.insertId;
+
+    let totalPayroll = 0;
+
+    // ==========================
+    // DETAIL PAYROLL
+    // ==========================
+    for (const emp of employees) {
+
+      // ambil rate
+      const [rateRows] = await connection.query(`
+        SELECT rate_per_jam
+        FROM payroll_config
+        WHERE role = ?
+        LIMIT 1
+      `, [emp.role]);
+
+      const rate = Number(rateRows[0]?.rate_per_jam || 0);
+
+      const totalJam = Number(emp.total_jam || 0);
+
+      const totalGaji = totalJam * rate;
+
+      totalPayroll += totalGaji;
+
+      await connection.query(`
+        INSERT INTO payroll_detail
+        (
+          payroll_id,
+          user_id,
+          total_jam,
+          rate,
+          total_gaji
+        )
+        VALUES (?, ?, ?, ?, ?)
+      `, [
+        payrollId,
+        emp.user_id,
+        totalJam,
+        rate,
+        totalGaji
+      ]);
+    }
+
+    // ==========================
+    // UPDATE TOTAL GAJI
+    // ==========================
+    await connection.query(`
+      UPDATE payroll
+      SET total_gaji = ?
+      WHERE id = ?
+    `, [totalPayroll, payrollId]);
+
+    await connection.commit();
+
+    connection.release();
 
     res.json({
-      message: "Payroll dibuat, menunggu approval",
-      id: result.insertId
+      message: "Payroll berhasil dibuat",
+      payroll_id: payrollId,
+      total_profit: profit,
+      total_payroll: totalPayroll
     });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    await connection.rollback();
+
+    connection.release();
+
+    console.error(err);
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
 // ==========================
-// GET PENDING PAYROLL
+// GET PAYROLL
 // ==========================
 exports.getPendingPayroll = async (req, res) => {
+
   try {
+
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
         p.id,
         p.periode_awal,
         p.periode_akhir,
@@ -39,58 +164,73 @@ exports.getPendingPayroll = async (req, res) => {
         p.created_at,
         u.username AS processed_by
       FROM payroll p
-      LEFT JOIN users u ON p.processed_by = u.id
-      WHERE p.status = 'Pending'
+      LEFT JOIN users u
+      ON p.processed_by = u.id
       ORDER BY p.created_at DESC
     `);
 
     res.json(rows);
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
 // ==========================
-// APPROVE PAYROLL
+// APPROVE
 // ==========================
 exports.approvePayroll = async (req, res) => {
+
   const { id } = req.params;
 
   try {
-    await db.query(
-      `UPDATE payroll 
-       SET status = 'Published',
-           approved_by = ?
-       WHERE id = ?`,
-      [req.user.id, id]
-    );
 
-    res.json({ message: "Payroll berhasil di-approve" });
+    await db.query(`
+      UPDATE payroll
+      SET status = 'Published',
+          approved_by = ?
+      WHERE id = ?
+    `, [req.user.id, id]);
+
+    res.json({
+      message: "Payroll approved"
+    });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 };
 
 // ==========================
-// REJECT PAYROLL
+// REJECT
 // ==========================
 exports.rejectPayroll = async (req, res) => {
+
   const { id } = req.params;
 
   try {
-    await db.query(
-      `UPDATE payroll 
-       SET status = 'Rejected',
-           approved_by = ?
-       WHERE id = ?`,
-      [req.user.id, id]
-    );
 
-    res.json({ message: "Payroll ditolak" });
+    await db.query(`
+      UPDATE payroll
+      SET status = 'Rejected',
+          approved_by = ?
+      WHERE id = ?
+    `, [req.user.id, id]);
+
+    res.json({
+      message: "Payroll rejected"
+    });
 
   } catch (err) {
-    res.status(500).json({ error: err.message });
+
+    res.status(500).json({
+      error: err.message
+    });
   }
 };

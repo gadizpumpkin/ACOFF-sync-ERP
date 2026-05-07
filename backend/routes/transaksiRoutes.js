@@ -13,6 +13,15 @@ const {
 } = require("../controllers/transaksiController");
 
 // ==========================
+// GET DAILY PROFIT
+// ==========================
+router.get(
+  "/profit",
+  verifyToken,
+  getDailyProfit
+);
+
+// ==========================
 // GET ALL
 // ==========================
 router.get(

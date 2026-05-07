@@ -23,7 +23,7 @@ router.post(
 router.get(
   "/pending",
   verifyToken,
-  allowRoles("OWNER"),
+  allowRoles("OWNER", "MANAGER"),
   getPendingPayroll
 );
 
