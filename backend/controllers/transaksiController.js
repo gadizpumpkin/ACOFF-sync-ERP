@@ -1,34 +1,64 @@
 const db = require("../config/db");
 
+// ==========================
+// CREATE TRANSAKSI
+// ==========================
 exports.createTransaksi = async (req, res) => {
-  const { items } = req.body;
+  const { items, metode_bayar } = req.body;
+
   const connection = await db.getConnection();
 
   try {
+
     await connection.beginTransaction();
 
     // ==========================
     // INSERT TRANSAKSI
     // ==========================
     const [result] = await connection.query(`
-      INSERT INTO transaksi (tanggal, total, status, created_by)
-      VALUES (NOW(), 0, 'OPEN', ?)
-    `, [req.user.id]);
+      INSERT INTO transaksi
+      (
+        tanggal,
+        total,
+        metode_bayar,
+        status,
+        created_by
+      )
+      VALUES
+      (
+        NOW(),
+        0,
+        ?,
+        'OPEN',
+        ?
+      )
+    `, [
+      metode_bayar || "Cash",
+      req.user.id
+    ]);
 
     const transaksiId = result.insertId;
+
     let total = 0;
 
     // ==========================
-    // INSERT DETAIL (FIXED)
+    // DETAIL
     // ==========================
-    for (let item of items) {
+    for (const item of items) {
 
       const subtotal = item.qty * item.harga;
+
       total += subtotal;
 
       await connection.query(`
         INSERT INTO transaksi_detail
-        (transaksi_id, menu_id, qty, harga, subtotal)
+        (
+          transaksi_id,
+          menu_id,
+          qty,
+          harga,
+          subtotal
+        )
         VALUES (?, ?, ?, ?, ?)
       `, [
         transaksiId,
@@ -43,10 +73,13 @@ exports.createTransaksi = async (req, res) => {
     // UPDATE TOTAL
     // ==========================
     await connection.query(`
-      UPDATE transaksi SET total = ? WHERE id = ?
+      UPDATE transaksi
+      SET total = ?
+      WHERE id = ?
     `, [total, transaksiId]);
 
     await connection.commit();
+
     connection.release();
 
     res.json({
@@ -55,16 +88,69 @@ exports.createTransaksi = async (req, res) => {
     });
 
   } catch (err) {
+
     await connection.rollback();
+
     connection.release();
 
     console.error("TRANSAKSI ERROR:", err);
 
-    res.status(400).json({
+    res.status(500).json({
       error: err.message
     });
   }
 };
+
+// ==========================
+// GET ALL TRANSAKSI
+// ==========================
+exports.getAllTransaksi = async (req, res) => {
+
+  try {
+
+    const [rows] = await db.query(`
+      SELECT *
+      FROM transaksi
+      ORDER BY id DESC
+    `);
+
+    res.json(rows);
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
+
+// ==========================
+// UPDATE STATUS
+// ==========================
+exports.updateStatus = async (req, res) => {
+
+  const { id } = req.params;
+
+  try {
+
+    await db.query(`
+      UPDATE transaksi
+      SET status = 'CLOSED'
+      WHERE id = ?
+    `, [id]);
+
+    res.json({
+      message: "Status transaksi diupdate"
+    });
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
+
 // ==========================
 // GET DAILY PROFIT
 // ==========================
@@ -75,7 +161,7 @@ exports.getDailyProfit = async (req, res) => {
   try {
 
     const [rows] = await db.query(`
-      SELECT 
+      SELECT
         COALESCE(SUM(total), 0) AS profit
       FROM transaksi
       WHERE DATE(tanggal) = ?
@@ -89,44 +175,10 @@ exports.getDailyProfit = async (req, res) => {
 
   } catch (err) {
 
-    console.error(err);
+    console.error("PROFIT ERROR:", err);
 
     res.status(500).json({
       error: err.message
     });
-  }
-};
-
-// ==========================
-// GET HISTORY
-// ==========================
-exports.getAllTransaksi = async (req, res) => {
-  try {
-    const [rows] = await db.query(`
-      SELECT * FROM transaksi ORDER BY id DESC
-    `);
-
-    res.json(rows);
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
-// ==========================
-// UPDATE STATUS
-// ==========================
-exports.updateStatus = async (req, res) => {
-  const { id } = req.params;
-
-  try {
-    await db.query(`
-      UPDATE transaksi SET status = 'CLOSED' WHERE id = ?
-    `, [id]);
-
-    res.json({ message: "Status updated" });
-
-  } catch (err) {
-    res.status(500).json({ error: err.message });
   }
 };
