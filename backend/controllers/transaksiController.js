@@ -67,6 +67,38 @@ exports.createTransaksi = async (req, res) => {
 };
 
 // ==========================
+// GET DAILY PROFIT
+// ==========================
+exports.getDailyProfit = async (req, res) => {
+
+  const { tanggal } = req.query;
+
+  try {
+
+    const [rows] = await db.query(`
+      SELECT 
+        COALESCE(SUM(total), 0) AS profit
+      FROM transaksi
+      WHERE DATE(tanggal) = ?
+      AND status = 'CLOSED'
+    `, [tanggal]);
+
+    res.json({
+      tanggal,
+      profit: Number(rows[0].profit)
+    });
+
+  } catch (err) {
+
+    console.error("PROFIT ERROR:", err);
+
+    res.status(500).json({
+      error: err.message
+    });
+  }
+};
+
+// ==========================
 // GET HISTORY
 // ==========================
 exports.getAllTransaksi = async (req, res) => {
