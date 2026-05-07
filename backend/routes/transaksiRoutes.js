@@ -7,8 +7,9 @@ const { checkClosing } = require("../middleware/closingMiddleware");
 
 const {
   createTransaksi,
+  getAllTransaksi,
   updateStatus,
-  getAllTransaksi
+  getDailyProfit
 } = require("../controllers/transaksiController");
 
 // ==========================
