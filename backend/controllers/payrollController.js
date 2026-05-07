@@ -17,30 +17,33 @@ exports.generatePayroll = async (req, res) => {
     // HITUNG PROFIT
     // ==========================
     const [profitRows] = await connection.query(`
-      SELECT 
+      SELECT
         COALESCE(SUM(total), 0) AS profit
       FROM transaksi
-      WHERE DATE(tanggal) BETWEEN ? AND ?
+      WHERE DATE(tanggal) 
+      BETWEEN ? AND ?
       AND status = 'CLOSED'
     `, [periode_awal, periode_akhir]);
 
     const profit = Number(profitRows[0].profit);
 
     if (profit <= 0) {
-      throw new Error("Profit 0, payroll tidak dapat dibuat");
+      throw new Error("Profit hari ini 0");
     }
 
     // ==========================
-    // AMBIL ABSENSI HADIR
+    // ABSENSI HADIR
     // ==========================
     const [employees] = await connection.query(`
-      SELECT 
+      SELECT
         a.user_id,
         u.role,
         SUM(a.total_jam) AS total_jam
       FROM absensi a
-      JOIN users u ON a.user_id = u.id
-      WHERE a.tanggal BETWEEN ? AND ?
+      JOIN users u
+      ON a.user_id = u.id
+      WHERE a.tanggal
+      BETWEEN ? AND ?
       AND a.status = 'HADIR'
       GROUP BY a.user_id
     `, [periode_awal, periode_akhir]);
@@ -61,11 +64,10 @@ exports.generatePayroll = async (req, res) => {
         processed_by,
         status
       )
-      VALUES (?, ?, ?, ?, 'Pending')
+      VALUES (?, ?, 0, ?, 'Pending')
     `, [
       periode_awal,
       periode_akhir,
-      profit,
       req.user.id
     ]);
 
@@ -74,11 +76,10 @@ exports.generatePayroll = async (req, res) => {
     let totalPayroll = 0;
 
     // ==========================
-    // DETAIL PAYROLL
+    // INSERT DETAIL
     // ==========================
     for (const emp of employees) {
 
-      // ambil rate
       const [rateRows] = await connection.query(`
         SELECT rate_per_jam
         FROM payroll_config
@@ -86,9 +87,13 @@ exports.generatePayroll = async (req, res) => {
         LIMIT 1
       `, [emp.role]);
 
-      const rate = Number(rateRows[0]?.rate_per_jam || 0);
+      const rate = Number(
+        rateRows[0]?.rate_per_jam || 0
+      );
 
-      const totalJam = Number(emp.total_jam || 0);
+      const totalJam = Number(
+        emp.total_jam || 0
+      );
 
       const totalGaji = totalJam * rate;
 
@@ -114,23 +119,23 @@ exports.generatePayroll = async (req, res) => {
     }
 
     // ==========================
-    // UPDATE TOTAL GAJI
+    // UPDATE TOTAL
     // ==========================
     await connection.query(`
       UPDATE payroll
       SET total_gaji = ?
       WHERE id = ?
-    `, [totalPayroll, payrollId]);
+    `, [
+      totalPayroll,
+      payrollId
+    ]);
 
     await connection.commit();
 
     connection.release();
 
     res.json({
-      message: "Payroll berhasil dibuat",
-      payroll_id: payrollId,
-      total_profit: profit,
-      total_payroll: totalPayroll
+      message: "Payroll berhasil dibuat"
     });
 
   } catch (err) {
@@ -139,7 +144,7 @@ exports.generatePayroll = async (req, res) => {
 
     connection.release();
 
-    console.error(err);
+    console.error("PAYROLL ERROR:", err);
 
     res.status(500).json({
       error: err.message
