@@ -1,9 +1,6 @@
 const express = require("express");
-const router = express.Router();
 
-const { verifyToken } = require("../middleware/authMiddleware");
-const { allowRoles } = require("../middleware/roleMiddleware");
-const { checkClosing } = require("../middleware/closingMiddleware");
+const router = express.Router();
 
 const {
   createTransaksi,
@@ -12,17 +9,19 @@ const {
   getDailyProfit
 } = require("../controllers/transaksiController");
 
+const { verifyToken } = require("../middleware/authMiddleware");
+
 // ==========================
-// GET DAILY PROFIT
+// CREATE TRANSAKSI
 // ==========================
-router.get(
-  "/profit",
+router.post(
+  "/",
   verifyToken,
-  getDailyProfit
+  createTransaksi
 );
 
 // ==========================
-// GET ALL
+// GET HISTORY
 // ==========================
 router.get(
   "/",
@@ -31,25 +30,21 @@ router.get(
 );
 
 // ==========================
-// CREATE
-// ==========================
-router.post(
-  "/",
-  verifyToken,
-  allowRoles("OWNER", "MANAGER", "KARYAWAN"),
-  checkClosing,
-  createTransaksi
-);
-
-// ==========================
 // UPDATE STATUS
 // ==========================
 router.put(
   "/:id/status",
   verifyToken,
-  allowRoles("OWNER", "MANAGER"),
-  checkClosing,
   updateStatus
+);
+
+// ==========================
+// GET PROFIT
+// ==========================
+router.get(
+  "/profit",
+  verifyToken,
+  getDailyProfit
 );
 
 module.exports = router;
