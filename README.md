@@ -117,7 +117,10 @@ The primary objectives of this system are:
 
 ## Project Structure
 
-    ├── backend
+Project Tree
+├── |
+|   |
+|   ├── backend
 │   ├── config
 │   │   └── db.js
 │   ├── controllers
