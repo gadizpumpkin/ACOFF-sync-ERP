@@ -117,119 +117,103 @@ The primary objectives of this system are:
 
 ## Project Structure
 
-    project-root/
-    │
-    ├── backend/
-    │   ├── config/
-    │   │   └── db.js
-    │   │
-    │   ├── controllers/
-    │   │   ├── analyticsController.js
-    │   │   ├── authController.js
-    │   │   ├── closingController.js
-    │   │   ├── dashboardController.js
-    │   │   ├── inventoryController.js
-    │   │   ├── laporanController.js
-    │   │   ├── monthlyClosingController.js
-    │   │   ├── payrollController.js
-    │   │   ├── pembelianController.js
-    │   │   ├── reportExportController.js
-    │   │   └── transaksiController.js
-    │   │
-    │   ├── middleware/
-    │   │   ├── authMiddleware.js
-    │   │   ├── closingMiddleware.js
-    │   │   └── roleMiddleware.js
-    │   │
-    │   ├── routes/
-    │   │   ├── analyticsRoutes.js
-    │   │   ├── authRoutes.js
-    │   │   ├── closingRoutes.js
-    │   │   ├── dashboardRoutes.js
-    │   │   ├── inventoryRoutes.js
-    │   │   ├── laporanRoutes.js
-    │   │   ├── monthlyClosingRoutes.js
-    │   │   ├── payrollRoutes.js
-    │   │   ├── pembelianRoutes.js
-    │   │   ├── reportRoutes.js
-    │   │   └── transaksiRoutes.js
-    │   │
-    │   ├── utils/
-    │   │   ├── auditService.js
-    │   │   ├── hashPassword.js
-    │   │   ├── inventoryLedgerService.js
-    │   │   ├── payrollService.js
-    │   │   └── stockService.js
-    │   │
-    │   ├── .env
-    │   ├── hash.js
-    │   ├── package.json
-    │   ├── package-lock.json
-    │   ├── server.js
-    │   └── node_modules/
-    │
-    ├── frontend/
-    │   ├── css/
-    │   │   ├── absensi.css
-    │   │   ├── approval_laporan.css
-    │   │   ├── approval_payroll.css
-    │   │   ├── approval_pembelian.css
-    │   │   ├── audit_log.css
-    │   │   ├── bahanbaku.css
-    │   │   ├── dashboard.css
-    │   │   ├── laporan.css
-    │   │   ├── laporan_view.css
-    │   │   ├── menu.css
-    │   │   ├── paycheck.css
-    │   │   ├── payroll.css
-    │   │   ├── pembelian.css
-    │   │   ├── resep.css
-    │   │   ├── style.css
-    │   │   ├── supplier.css
-    │   │   └── transaksi.css
-    │   │
-    │   ├── js/
-    │   │   ├── absensi.js
-    │   │   ├── approval_laporan.js
-    │   │   ├── approval_payroll.js
-    │   │   ├── approval_pembelian.js
-    │   │   ├── audit_log.js
-    │   │   ├── auth.js
-    │   │   ├── bahanbaku.js
-    │   │   ├── dashboard.js
-    │   │   ├── export.js
-    │   │   ├── laporan.js
-    │   │   ├── laporan_view.js
-    │   │   ├── login.js
-    │   │   ├── menu.js
-    │   │   ├── paycheck.js
-    │   │   ├── payroll.js
-    │   │   ├── pembelian.js
-    │   │   ├── resep.js
-    │   │   ├── supplier.js
-    │   │   └── transaksi.js
-    │   │
-    │   └── pages/
-    │       ├── absensi.html
-    │       ├── approval_laporan.html
-    │       ├── approval_payroll.html
-    │       ├── approval_pembelian.html
-    │       ├── audit_log.html
-    │       ├── bahanbaku.html
-    │       ├── dashboard.html
-    │       ├── export.html
-    │       ├── index.html
-    │       ├── laporan.html
-    │       ├── laporan_view.html
-    │       ├── menu.html
-    │       ├── paycheck.html
-    │       ├── payroll.html
-    │       ├── pembelian.html
-    │       ├── resep.html
-    │       ├── supplier.html
-    │       └── transaksi.html
-    │
-    └── README.md
+    ├── backend
+│   ├── config
+│   │   └── db.js
+│   ├── controllers
+│   │   ├── absensiController.js
+│   │   ├── analyticsController.js
+│   │   ├── authController.js
+│   │   ├── bahanbakuController.js
+│   │   ├── closingController.js
+│   │   ├── dashboardController.js
+│   │   ├── inventoryController.js
+│   │   ├── laporanController.js
+│   │   ├── menuController.js
+│   │   ├── monthlyClosingController.js
+│   │   ├── payrollController.js
+│   │   ├── pembelianController.js
+│   │   ├── reportExportController.js
+│   │   ├── supplierController.js
+│   │   └── transaksiController.js
+│   ├── middleware
+│   │   ├── authMiddleware.js
+│   │   ├── closingMiddleware.js
+│   │   └── roleMiddleware.js
+│   ├── utils
+│   │   ├── auditService.js
+│   │   ├── hashPassword.js
+│   │   ├── inventoryLedgerService.js
+│   │   ├── payrollService.js
+│   │   └── stockService.js
+│   ├── hash.js
+│   ├── package-lock.json
+│   ├── package.json
+│   └── server.js
+├── frontend
+│   ├── css
+│   │   ├── absensi.css
+│   │   ├── approval_laporan.css
+│   │   ├── approval_payroll.css
+│   │   ├── approval_pembelian.css
+│   │   ├── audit_log.css
+│   │   ├── bahanbaku.css
+│   │   ├── dashboard-fixed.css
+│   │   ├── dashboard.css
+│   │   ├── laporan_view.css
+│   │   ├── laporan.css
+│   │   ├── menu.css
+│   │   ├── paycheck.css
+│   │   ├── payroll.css
+│   │   ├── pembelian.css
+│   │   ├── register.css
+│   │   ├── resep.css
+│   │   ├── style.css
+│   │   ├── supplier.css
+│   │   └── transaksi.css
+│   ├── js
+│   │   ├── absensi.js
+│   │   ├── approval_laporan.js
+│   │   ├── approval_payroll.js
+│   │   ├── approval_pembelian.js
+│   │   ├── audit_log.js
+│   │   ├── auth.js
+│   │   ├── bahanbaku.js
+│   │   ├── dashboard.js
+│   │   ├── export.js
+│   │   ├── laporan_view.js
+│   │   ├── laporan.js
+│   │   ├── login.js
+│   │   ├── menu.js
+│   │   ├── paycheck.js
+│   │   ├── payroll.js
+│   │   ├── pembelian.js
+│   │   ├── register.js
+│   │   ├── resep.js
+│   │   ├── supplier.js
+│   │   └── transaksi.js
+│   └── pages
+│       ├── absensi.html
+│       ├── approval_laporan.html
+│       ├── approval_payroll.html
+│       ├── approval_pembelian.html
+│       ├── audit_log.html
+│       ├── bahanbaku.html
+│       ├── dashboard.html
+│       ├── export.html
+│       ├── index.html
+│       ├── laporan_view.html
+│       ├── laporan.html
+│       ├── menu.html
+│       ├── paycheck.html
+│       ├── payroll.html
+│       ├── pembelian.html
+│       ├── register.html
+│       ├── resep.html
+│       ├── supplier.html
+│       └── transaksi.html
+└── README.md
+
 
 ------------------------------------------------------------------------
 
