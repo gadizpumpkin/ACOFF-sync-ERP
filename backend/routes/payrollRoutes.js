@@ -1,7 +1,9 @@
 const express = require("express");
+
 const router = express.Router();
 
 const { verifyToken } = require("../middleware/authMiddleware");
+
 const { allowRoles } = require("../middleware/roleMiddleware");
 
 const {
@@ -11,7 +13,9 @@ const {
   rejectPayroll
 } = require("../controllers/payrollController");
 
-// generate payroll
+// ==========================
+// GENERATE
+// ==========================
 router.post(
   "/generate",
   verifyToken,
@@ -19,7 +23,9 @@ router.post(
   generatePayroll
 );
 
-// ambil pending payroll
+// ==========================
+// GET PAYROLL
+// ==========================
 router.get(
   "/pending",
   verifyToken,
@@ -27,7 +33,9 @@ router.get(
   getPendingPayroll
 );
 
-// approve
+// ==========================
+// APPROVE
+// ==========================
 router.put(
   "/approve/:id",
   verifyToken,
@@ -35,7 +43,9 @@ router.put(
   approvePayroll
 );
 
-// reject
+// ==========================
+// REJECT
+// ==========================
 router.put(
   "/reject/:id",
   verifyToken,
