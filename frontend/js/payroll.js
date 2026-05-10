@@ -58,7 +58,7 @@ async function generatePayroll() {
 
   try {
 
-    const res = await fetch( //meengirim request ke backend untuk generate payroll dengan periode awal dan akhir sama dengan tanggal hari ini
+    const res = await fetch( 
       "http://localhost:5000/api/payroll/generate",
       {
         method: "POST",
