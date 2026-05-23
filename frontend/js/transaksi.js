@@ -161,7 +161,7 @@ async function createTransaction() {
 }
 
 // ==========================
-// 🔥 HISTORY FROM DB
+// HISTORY FROM DB
 // ==========================
 async function loadHistory() {
   const tbody = document.getElementById("historyTable");
